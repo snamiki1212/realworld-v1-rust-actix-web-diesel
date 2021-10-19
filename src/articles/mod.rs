@@ -1,4 +1,5 @@
 use actix_web::{delete, get, post, put, HttpResponse, Responder};
+pub mod comments;
 
 #[get("")]
 pub async fn index() -> impl Responder {

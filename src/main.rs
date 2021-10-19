@@ -26,6 +26,12 @@ async fn main() -> std::io::Result<()> {
                         .service(profiles::unfollow),
                 )
                 .service(
+                    web::scope("/articles/{id}/comments")
+                        .service(articles::comments::index)
+                        .service(articles::comments::create)
+                        .service(articles::comments::delete),
+                )
+                .service(
                     web::scope("/articles")
                         .service(articles::index)
                         .service(articles::feed)

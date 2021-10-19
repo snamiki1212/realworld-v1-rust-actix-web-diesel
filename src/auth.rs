@@ -1,4 +1,4 @@
-use actix_web::{delete, get, post, put, HttpResponse, Responder};
+use actix_web::{post, HttpResponse, Responder};
 
 #[post("/login")]
 pub async fn signin() -> impl Responder {
