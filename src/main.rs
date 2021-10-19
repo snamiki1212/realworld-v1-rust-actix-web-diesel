@@ -2,6 +2,7 @@ use actix_web::{web, App, HttpServer};
 mod articles;
 mod auth;
 mod profiles;
+mod tags;
 mod users;
 
 #[actix_web::main]
@@ -9,6 +10,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new().service(
             web::scope("/api")
+                .service(web::scope("/tags").service(tags::index))
                 .service(
                     web::scope("/users")
                         .service(auth::signin)
