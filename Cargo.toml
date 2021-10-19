@@ -7,3 +7,6 @@ edition = "2018"
 
 [dependencies]
 actix-web = "3"
+
+diesel = { version = "1.4", features = ["postgres"] }
+dotenv = "0.15"
