@@ -1,6 +1,7 @@
 use actix_web::{web, App, HttpServer};
 mod articles;
 mod auth;
+mod profiles;
 mod users;
 
 #[actix_web::main]
@@ -17,6 +18,12 @@ async fn main() -> std::io::Result<()> {
                     web::scope("/user")
                         .service(users::me)
                         .service(users::update),
+                )
+                .service(
+                    web::scope("/profiles")
+                        .service(profiles::show)
+                        .service(profiles::follow)
+                        .service(profiles::unfollow),
                 )
                 .service(
                     web::scope("/articles")
