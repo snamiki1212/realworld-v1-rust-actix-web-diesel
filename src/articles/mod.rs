@@ -6,6 +6,12 @@ pub async fn index() -> impl Responder {
     HttpResponse::Ok().body("show_articles")
 }
 
+#[get("/feed")]
+pub async fn feed() -> impl Responder {
+    // TODO:
+    HttpResponse::Ok().body("feed of articles")
+}
+
 #[get("/{id}")]
 pub async fn show() -> impl Responder {
     // TODO:

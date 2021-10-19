@@ -28,6 +28,7 @@ async fn main() -> std::io::Result<()> {
                 .service(
                     web::scope("/articles")
                         .service(articles::index)
+                        .service(articles::feed)
                         .service(articles::show)
                         .service(articles::create)
                         .service(articles::update)
