@@ -1,34 +1,5 @@
-use actix_web::{delete, get, post, put, web, App, HttpResponse, HttpServer, Responder};
-
-#[get("")]
-async fn show_articles() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("show_articles")
-}
-
-#[get("/{id}")]
-async fn detail_article() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("detail_article")
-}
-
-#[post("")]
-async fn create_article() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("create_article")
-}
-
-#[put("/{id}")]
-async fn update_article() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("update_article")
-}
-
-#[delete("")]
-async fn delete_article() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("delete_article")
-}
+use actix_web::{web, App, HttpServer};
+mod articles;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -36,11 +7,11 @@ async fn main() -> std::io::Result<()> {
         App::new().service(
             web::scope("/api").service(
                 web::scope("/articles")
-                    .service(show_articles)
-                    .service(detail_article)
-                    .service(create_article)
-                    .service(update_article)
-                    .service(delete_article),
+                    .service(articles::index)
+                    .service(articles::show)
+                    .service(articles::create)
+                    .service(articles::update)
+                    .service(articles::delete),
             ),
         )
     })
