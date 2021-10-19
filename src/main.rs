@@ -32,6 +32,11 @@ async fn main() -> std::io::Result<()> {
                         .service(articles::comments::delete),
                 )
                 .service(
+                    web::scope("/articles/{id}/favorites")
+                        .service(articles::favorites::favorite)
+                        .service(articles::favorites::unfavorite),
+                )
+                .service(
                     web::scope("/articles")
                         .service(articles::index)
                         .service(articles::feed)
