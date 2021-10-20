@@ -10,7 +10,6 @@ fn main() {
     use conduit::schema::tags::dsl::*;
 
     let connection = establish_connection();
-    // let results = tags.load::<Tag>(&connection).expect("Error loading tags");
     let list = tags
         // .filter(name.eq("react"))
         .limit(5)
