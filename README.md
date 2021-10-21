@@ -6,6 +6,7 @@ Realworld App using Rust/actix-web.
 
 ```zsh
 cargo install diesel_cli --no-default-features --features postgres
+cargo run --bin conduit
 ```
 
 ## LICENSE
