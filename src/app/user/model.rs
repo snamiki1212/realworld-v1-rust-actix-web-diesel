@@ -30,11 +30,17 @@ impl User {
         // use schema::users::dsl::*;
 
         // let now = std::time::SystemTime::now();
+        let image = "1234";
+        let image = if image.len() % 2 == 0 {
+            Some(image)
+        } else {
+            None
+        };
 
         let action = SignupUser {
             email: "email",
             bio: "bio",
-            // image: Some("this is image"),
+            image: image,
             // updated_at: NaiveDateTime::new(now),
         };
         let result = diesel::insert_into(users::table)
@@ -50,6 +56,6 @@ impl User {
 pub struct SignupUser<'a> {
     pub email: &'a str,
     pub bio: &'a str,
-    // pub image: Option<&'a str>,
+    pub image: Option<&'a str>,
     // pub updated_at: NaiveDateTime,
 }
