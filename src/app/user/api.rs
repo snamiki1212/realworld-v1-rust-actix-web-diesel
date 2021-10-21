@@ -1,4 +1,6 @@
-use actix_web::{get, post, put, HttpResponse, Responder};
+use super::model::User;
+use crate::utils::db::DbPool;
+use actix_web::{get, post, put, web, HttpResponse, Responder};
 
 #[post("/login")]
 pub async fn signin() -> impl Responder {
@@ -7,9 +9,13 @@ pub async fn signin() -> impl Responder {
 }
 
 #[post("")]
-pub async fn signup() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("users signup")
+pub async fn signup(pool: web::Data<DbPool>) -> Result<HttpResponse, HttpResponse> {
+    let conn = pool.get().expect("couldn't get db connection from pool");
+    let user = web::block(move || User::signup(&conn)).await.map_err(|e| {
+        eprintln!("{}", e);
+        HttpResponse::InternalServerError().json(e.to_string())
+    })?;
+    Ok(HttpResponse::Ok().json(user))
 }
 
 #[get("")]
