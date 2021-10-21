@@ -16,13 +16,3 @@ pub fn create_tag<'a>(conn: &PgConnection, name: &'a str) -> Tag {
         .get_result(conn)
         .expect("Error saving new post")
 }
-
-pub fn list(conn: &PgConnection) -> Result<Vec<Tag>, Error> {
-    use schema::tags::dsl::*;
-
-    let list = tags
-        // .filter(name.eq("react"))
-        .limit(5)
-        .load::<Tag>(conn);
-    list
-}
