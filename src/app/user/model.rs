@@ -37,13 +37,15 @@ impl User {
             // image: Some("this is image"),
             // updated_at: NaiveDateTime::new(now),
         };
-        let val = diesel::insert_into(users::table).values(&action);
-        let result = val.get_result::<User>(conn).expect("Error saving user");
+        let result = diesel::insert_into(users::table)
+            .values(&action)
+            .get_result::<User>(conn)
+            .expect("Error saving user");
         Ok(result)
     }
 }
 
-#[derive(Insertable, Debug)]
+#[derive(Insertable, Debug, Deserialize)]
 #[table_name = "users"]
 pub struct SignupUser<'a> {
     pub email: &'a str,
