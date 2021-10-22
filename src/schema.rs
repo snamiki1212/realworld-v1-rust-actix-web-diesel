@@ -12,6 +12,7 @@ table! {
         id -> Uuid,
         username -> Text,
         email -> Text,
+        password -> Text,
         bio -> Nullable<Text>,
         image -> Nullable<Text>,
         created_at -> Timestamp,

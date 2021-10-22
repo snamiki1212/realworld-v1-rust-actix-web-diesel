@@ -12,6 +12,7 @@ pub struct User {
     pub id: Uuid,
     pub email: String,
     pub usernamme: String,
+    pub password: String,
     pub bio: Option<String>,
     pub image: Option<String>,
     pub created_at: NaiveDateTime,
@@ -23,28 +24,14 @@ impl User {
         conn: &PgConnection,
         email: &'a str,
         username: &'a str,
-        // bio: &'a str,
-        // image: &'a Option(&str),
+        password: &'a str,
     ) -> Result<User, Error> {
-        // use crate::schema;
         use diesel::prelude::*;
-        // use schema::users;
-        // use schema::users::dsl::*;
-
-        // let now = std::time::SystemTime::now();
-        // let image = "1234";
-        // let image = if image.len() % 2 == 0 {
-        //     Some(image)
-        // } else {
-        //     None
-        // };
 
         let record = SignupUser {
             email: email,
             username: username,
-            // bio: bio,
-            // image: image,
-            // updated_at: NaiveDateTime::new(now),
+            password: password,
         };
         let result = diesel::insert_into(users::table)
             .values(&record)
@@ -59,7 +46,5 @@ impl User {
 pub struct SignupUser<'a> {
     pub email: &'a str,
     pub username: &'a str,
-    // pub bio: &'a str,
-    // pub image: Option<&'a str>,
-    // pub updated_at: NaiveDateTime,
+    pub password: &'a str,
 }

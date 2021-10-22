@@ -8,8 +8,7 @@ use serde::{Deserialize, Serialize};
 pub struct SignupReq {
     pub username: String,
     pub email: String,
-    // pub password: String,
-    // pub bio: String,
+    pub password: String,
 }
 
 pub struct SignupRes {
