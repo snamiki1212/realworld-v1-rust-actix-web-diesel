@@ -22,8 +22,7 @@ pub async fn signup(
     // return Ok(HttpResponse::Ok().body("OK"));
     // -----------
     let conn = pool.get().expect("couldn't get db connection from pool");
-    let bio = "bio";
-    let user = web::block(move || User::signup(&conn, &form.email, bio))
+    let user = web::block(move || User::signup(&conn, &form.email, &form.bio))
         .await
         .map_err(|e| {
             eprintln!("{}", e);

@@ -7,4 +7,5 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct UserReq {
     pub email: String,
+    pub bio: String,
 }
