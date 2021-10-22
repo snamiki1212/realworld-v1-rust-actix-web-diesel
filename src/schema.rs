@@ -11,7 +11,7 @@ table! {
     users (id) {
         id -> Uuid,
         email -> Text,
-        bio -> Text,
+        bio -> Nullable<Text>,
         image -> Nullable<Text>,
         created_at -> Timestamp,
         updated_at -> Timestamp,

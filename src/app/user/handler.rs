@@ -5,7 +5,19 @@ use crate::schema::users;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct UserReq {
+pub struct SignupReq {
+    // pub username: String,
     pub email: String,
-    pub bio: String,
+    // pub password: String,
+    // pub bio: String,
+}
+
+pub struct SignupRes {
+    pub user: SignupResUser,
+}
+
+pub struct SignupResUser {
+    pub username: String,
+    pub email: String,
+    pub password: String,
 }

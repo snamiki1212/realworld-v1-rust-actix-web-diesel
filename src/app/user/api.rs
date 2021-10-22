@@ -15,14 +15,10 @@ pub async fn signin() -> impl Responder {
 #[post("")]
 pub async fn signup(
     pool: web::Data<DbPool>,
-    form: web::Json<handler::UserReq>,
+    form: web::Json<handler::SignupReq>,
 ) -> Result<HttpResponse, HttpResponse> {
-    // println!("[signup]----------{}", form.email);
-
-    // return Ok(HttpResponse::Ok().body("OK"));
-    // -----------
     let conn = pool.get().expect("couldn't get db connection from pool");
-    let user = web::block(move || User::signup(&conn, &form.email, &form.bio))
+    let user = web::block(move || User::signup(&conn, &form.email))
         .await
         .map_err(|e| {
             eprintln!("{}", e);
