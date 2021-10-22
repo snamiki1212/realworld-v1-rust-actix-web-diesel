@@ -18,12 +18,19 @@ pub async fn signup(
     form: web::Json<handler::SignupReq>,
 ) -> Result<HttpResponse, HttpResponse> {
     let conn = pool.get().expect("couldn't get db connection from pool");
-    let user = web::block(move || User::signup(&conn, &form.email, &form.username, &form.password))
-        .await
-        .map_err(|e| {
-            eprintln!("{}", e);
-            HttpResponse::InternalServerError().json(e.to_string())
-        })?;
+    let user = web::block(move || {
+        User::signup(
+            &conn,
+            &form.user.email,
+            &form.user.username,
+            &form.user.password,
+        )
+    })
+    .await
+    .map_err(|e| {
+        eprintln!("{}", e);
+        HttpResponse::InternalServerError().json(e.to_string())
+    })?;
     Ok(HttpResponse::Ok().json(user))
 }
 
