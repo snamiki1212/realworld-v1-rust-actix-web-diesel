@@ -11,6 +11,7 @@ use uuid::Uuid;
 pub struct User {
     pub id: Uuid,
     pub email: String,
+    pub usernamme: String,
     pub bio: Option<String>,
     pub image: Option<String>,
     pub created_at: NaiveDateTime,
@@ -21,6 +22,7 @@ impl User {
     pub fn signup<'a>(
         conn: &PgConnection,
         email: &'a str,
+        username: &'a str,
         // bio: &'a str,
         // image: &'a Option(&str),
     ) -> Result<User, Error> {
@@ -39,6 +41,7 @@ impl User {
 
         let record = SignupUser {
             email: email,
+            username: username,
             // bio: bio,
             // image: image,
             // updated_at: NaiveDateTime::new(now),
@@ -55,6 +58,7 @@ impl User {
 #[table_name = "users"]
 pub struct SignupUser<'a> {
     pub email: &'a str,
+    pub username: &'a str,
     // pub bio: &'a str,
     // pub image: Option<&'a str>,
     // pub updated_at: NaiveDateTime,

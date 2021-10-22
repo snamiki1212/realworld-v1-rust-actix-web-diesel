@@ -18,7 +18,7 @@ pub async fn signup(
     form: web::Json<handler::SignupReq>,
 ) -> Result<HttpResponse, HttpResponse> {
     let conn = pool.get().expect("couldn't get db connection from pool");
-    let user = web::block(move || User::signup(&conn, &form.email))
+    let user = web::block(move || User::signup(&conn, &form.email, &form.username))
         .await
         .map_err(|e| {
             eprintln!("{}", e);
