@@ -31,7 +31,9 @@ pub async fn signup(
         eprintln!("{}", e);
         HttpResponse::InternalServerError().json(e.to_string())
     })?;
-    Ok(HttpResponse::Ok().json(user))
+
+    let res = handler::SignupRes::from(user);
+    Ok(HttpResponse::Ok().json(res))
 }
 
 #[get("")]

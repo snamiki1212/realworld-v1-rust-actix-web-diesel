@@ -11,7 +11,7 @@ use uuid::Uuid;
 pub struct User {
     pub id: Uuid,
     pub email: String,
-    pub usernamme: String,
+    pub username: String,
     pub password: String,
     pub bio: Option<String>,
     pub image: Option<String>,
