@@ -6,6 +6,11 @@ use actix_web::{web, App, HttpServer};
 mod app;
 mod utils;
 
+// pub struct AppState {
+//     pool: utils::db::DbPool,
+//     // pub request: std::any,
+// }
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let pool = utils::db::establish_connection();
@@ -15,13 +20,13 @@ async fn main() -> std::io::Result<()> {
                 .service(web::scope("/tags").service(app::tag::api::index))
                 .service(
                     web::scope("/users")
-                        .service(app::auth::signin)
-                        .service(app::auth::signup),
+                        .service(app::user::api::signin)
+                        .service(app::user::api::signup),
                 )
                 .service(
                     web::scope("/user")
-                        .service(app::users::me)
-                        .service(app::users::update),
+                        .service(app::user::api::me)
+                        .service(app::user::api::update),
                 )
                 .service(
                     web::scope("/profiles")
