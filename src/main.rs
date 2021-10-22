@@ -6,6 +6,11 @@ use actix_web::{web, App, HttpServer};
 mod app;
 mod utils;
 
+// pub struct AppState {
+//     pool: utils::db::DbPool,
+//     // pub request: std::any,
+// }
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let pool = utils::db::establish_connection();

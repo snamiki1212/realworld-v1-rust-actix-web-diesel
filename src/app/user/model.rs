@@ -20,8 +20,8 @@ pub struct User {
 impl User {
     pub fn signup<'a>(
         conn: &PgConnection,
-        // email: &'a str,
-        // bio: &'a str,
+        email: &'a str,
+        bio: &'a str,
         // image: &'a Option(&str),
     ) -> Result<User, Error> {
         // use crate::schema;
@@ -37,14 +37,14 @@ impl User {
             None
         };
 
-        let action = SignupUser {
-            email: "email",
-            bio: "bio",
+        let record = SignupUser {
+            email: email,
+            bio: bio,
             image: image,
             // updated_at: NaiveDateTime::new(now),
         };
         let result = diesel::insert_into(users::table)
-            .values(&action)
+            .values(&record)
             .get_result::<User>(conn)
             .expect("Error saving user");
         Ok(result)
