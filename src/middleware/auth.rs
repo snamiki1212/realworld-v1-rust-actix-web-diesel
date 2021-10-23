@@ -62,58 +62,16 @@ where
     }
 
     fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
-        println!("Hi from start. You requested: {}", req.path());
-
-        let mut authenticate_pass: bool = false;
-
-        // let fut = self.service.call(req);
-
-        // Bypass some account routes
-        let headers = req.headers_mut();
-        headers.append(
-            HeaderName::from_static("content-length"),
-            HeaderValue::from_static("true"),
-        );
-        if Method::OPTIONS == *req.method() {
-            authenticate_pass = true;
-        } else {
-            for ignore_route in constants::IGNORE_AUTH_ROUTES.iter() {
-                if req.path().starts_with(ignore_route) {
-                    authenticate_pass = true;
-                    break;
-                }
-            }
-            if !authenticate_pass {
-                if let Some(pool) = req.app_data::<Data<DbPool>>() {
-                    info!("Connecting to database...");
-                    if let Some(authen_header) = req.headers().get(constants::AUTHORIZATION) {
-                        info!("Parsing authorization header...");
-                        if let Ok(authen_str) = authen_header.to_str() {
-                            if authen_str.starts_with("bearer") || authen_str.starts_with("Bearer")
-                            {
-                                info!("Parsing token...");
-                                let token = authen_str[6..authen_str.len()].trim();
-                                if token::verify(&token) {
-                                    info!("Valid token");
-                                    authenticate_pass = true;
-                                } else {
-                                    error!("Invalid token");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if authenticate_pass {
-            println!("[middleware]auth passed");
+        // println!("Hi from start. You requested: {}", req.path());
+        if verify(&mut req) {
+            // println!("[middleware]auth passed");
             let fut = self.service.call(req);
             Box::pin(async move {
                 let res = fut.await?;
                 Ok(res)
             })
         } else {
-            println!("[middleware]auth not passed");
+            // println!("[middleware]auth not passed");
             Box::pin(async move {
                 Ok(req.into_response(
                     HttpResponse::Unauthorized()
@@ -127,4 +85,41 @@ where
             })
         }
     }
+}
+
+fn verify(req: &mut ServiceRequest) -> bool {
+    // Bypass some account routes
+    let headers = req.headers_mut();
+    headers.append(
+        HeaderName::from_static("content-length"),
+        HeaderValue::from_static("true"),
+    );
+
+    if Method::OPTIONS == *req.method() {
+        return true;
+    }
+
+    for ignore_route in constants::IGNORE_AUTH_ROUTES.iter() {
+        if req.path().starts_with(ignore_route) {
+            return true;
+        }
+    }
+
+    if let Some(authen_header) = req.headers().get(constants::AUTHORIZATION) {
+        info!("Parsing authorization header...");
+        if let Ok(authen_str) = authen_header.to_str() {
+            if authen_str.starts_with("bearer") || authen_str.starts_with("Bearer") {
+                info!("Parsing token...");
+                let token = authen_str[6..authen_str.len()].trim();
+                if token::verify(&token) {
+                    info!("Valid token");
+                    return true;
+                } else {
+                    error!("Invalid token");
+                    return false;
+                }
+            }
+        }
+    };
+    false
 }
