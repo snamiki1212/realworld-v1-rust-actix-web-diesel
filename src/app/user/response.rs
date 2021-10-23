@@ -26,3 +26,16 @@ pub struct AuthUser {
     pub token: String,
     pub username: String,
 }
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct ProfileResponse {
+    pub profile: ProfileResponseContent,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct ProfileResponseContent {
+    pub username: String,
+    pub bio: Option<String>,
+    pub image: Option<String>,
+    pub following: bool,
+}
