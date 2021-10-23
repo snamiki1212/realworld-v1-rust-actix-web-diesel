@@ -1,17 +1,20 @@
 use super::model::User;
 use super::network::{request, response};
 // use crate::schema::users;
-use crate::utils::db::DbPool;
 // use crate::AppState;
 use actix_web::{get, post, put, web, HttpResponse, Responder};
 // use serde::{Deserialize, Serialize};
+use crate::AppState;
 
 #[post("/login")]
 pub async fn signin(
-    pool: web::Data<DbPool>,
+    state: web::Data<AppState>,
     form: web::Json<request::Signin>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let conn = pool.get().expect("couldn't get db connection from pool");
+    let conn = state
+        .pool
+        .get()
+        .expect("couldn't get db connection from pool");
     let (user, token) =
         web::block(move || User::signin(&conn, &form.user.email, &form.user.password))
             .await
@@ -25,10 +28,13 @@ pub async fn signin(
 
 #[post("")]
 pub async fn signup(
-    pool: web::Data<DbPool>,
+    state: web::Data<AppState>,
     form: web::Json<request::Signup>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let conn = pool.get().expect("couldn't get db connection from pool");
+    let conn = state
+        .pool
+        .get()
+        .expect("couldn't get db connection from pool");
     let (user, token) = web::block(move || {
         User::signup(
             &conn,
@@ -48,7 +54,7 @@ pub async fn signup(
 }
 
 #[get("")]
-pub async fn me(pool: web::Data<DbPool>) -> impl Responder {
+pub async fn me(state: web::Data<AppState>) -> impl Responder {
     // TODO:
     println!("me");
     HttpResponse::Ok().body("users me")
