@@ -1,7 +1,9 @@
 extern crate serde_json;
 
-use super::model::Tag;
+use crate::app::tag::model::Tag;
+use crate::app::tag::response;
 use crate::AppState;
+
 use actix_web::{get, web, HttpResponse};
 
 #[get("")]
@@ -16,5 +18,6 @@ pub async fn index(state: web::Data<AppState>) -> Result<HttpResponse, HttpRespo
         HttpResponse::InternalServerError().json(e.to_string())
     })?;
 
-    Ok(HttpResponse::Ok().json(list))
+    let res = response::TagsResponse::from(list);
+    Ok(HttpResponse::Ok().json(res))
 }

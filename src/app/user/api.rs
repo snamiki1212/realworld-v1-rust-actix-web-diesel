@@ -1,10 +1,10 @@
-use super::model::User;
-use super::network::{request, response};
+use crate::app::user::{model::User, request, response};
+use crate::AppState;
+use actix_web::{get, post, put, web, HttpRequest, HttpResponse, Responder};
+
 // use crate::schema::users;
 // use crate::AppState;
-use actix_web::{get, post, put, web, HttpRequest, HttpResponse, Responder};
 // use serde::{Deserialize, Serialize};
-use crate::AppState;
 
 #[post("/login")]
 pub async fn signin(

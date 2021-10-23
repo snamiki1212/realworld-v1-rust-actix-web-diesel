@@ -3,7 +3,7 @@
 // extern crate dotenv;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use diesel::result::Error;
+// use diesel::result::Error;
 
 use crate::app::tag::model::{NewTag, Tag};
 use crate::schema;

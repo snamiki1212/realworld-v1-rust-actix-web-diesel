@@ -1,3 +1,4 @@
 pub mod api;
 pub mod model;
-pub mod network;
+pub mod request;
+pub mod response;
