@@ -3,11 +3,11 @@ pub mod response {
     use serde::{Deserialize, Serialize};
 
     #[derive(Deserialize, Serialize, Debug, Clone)]
-    pub struct SignupRes {
+    pub struct Signup {
         pub user: AuthUser,
     }
 
-    impl SignupRes {
+    impl Signup {
         pub fn from(user: User, token: String) -> Self {
             // REF: https://gothinkster.github.io/realworld/docs/specs/backend-specs/api-response-format/#users-for-authentication
             Self {
@@ -23,11 +23,11 @@ pub mod response {
     }
 
     #[derive(Deserialize, Serialize, Debug, Clone)]
-    pub struct SigninRes {
+    pub struct Signin {
         pub user: AuthUser,
     }
 
-    impl SigninRes {
+    impl Signin {
         pub fn from(user: User, token: String) -> Self {
             // REF: https://gothinkster.github.io/realworld/docs/specs/backend-specs/api-response-format/#users-for-authentication
             Self {
@@ -52,25 +52,27 @@ pub mod response {
 
 pub mod request {
     use serde::{Deserialize, Serialize};
+
     #[derive(Deserialize, Serialize, Debug, Clone)]
-    pub struct SignupReq {
-        pub user: SignupReqUser,
+    pub struct Signup {
+        // SPEC: https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#registration
+        pub user: SignupUser,
     }
 
     #[derive(Deserialize, Serialize, Debug, Clone)]
-    pub struct SignupReqUser {
+    pub struct SignupUser {
         pub username: String,
         pub email: String,
         pub password: String,
     }
     #[derive(Deserialize, Serialize, Debug, Clone)]
-    pub struct SigninReq {
+    pub struct Signin {
         // SPEC: https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#authentication
-        pub user: SigninReqUser,
+        pub user: SigninUser,
     }
 
     #[derive(Deserialize, Serialize, Debug, Clone)]
-    pub struct SigninReqUser {
+    pub struct SigninUser {
         pub email: String,
         pub password: String,
     }
