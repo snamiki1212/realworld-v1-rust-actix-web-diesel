@@ -68,11 +68,20 @@ impl User {
     fn hash_password(naive_pw: &str) -> String {
         hash(&naive_pw, DEFAULT_COST).expect("could not hash password.")
     }
+
     pub fn find_by_id(conn: &PgConnection, _id: Uuid) -> Self {
         users
             .find(_id)
             .first(conn)
             .expect("could not find user by id.")
+    }
+
+    pub fn update(conn: &PgConnection, user_id: Uuid, changeset: UpdatableUser) -> Result<Self> {
+        let target = users.filter(id.eq(user_id));
+        let user = diesel::update(target)
+            .set(changeset)
+            .get_result::<User>(conn)?;
+        Ok(user)
     }
 }
 
@@ -89,4 +98,14 @@ pub struct SignupUser<'a> {
     pub email: &'a str,
     pub username: &'a str,
     pub password: &'a str,
+}
+
+#[derive(AsChangeset, Debug, Deserialize, Clone)]
+#[table_name = "users"]
+pub struct UpdatableUser {
+    pub email: Option<String>,
+    pub username: Option<String>,
+    pub password: Option<String>,
+    pub image: Option<String>,
+    pub bio: Option<String>,
 }

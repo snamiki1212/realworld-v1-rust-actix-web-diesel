@@ -1,4 +1,5 @@
-use crate::app::user::{model::User, request, response};
+use crate::app::user::model::{UpdatableUser, User};
+use crate::app::user::{request, response};
 use crate::AppState;
 use actix_web::{get, post, put, web, HttpRequest, HttpResponse, Responder};
 
@@ -68,7 +69,38 @@ pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
 }
 
 #[put("")]
-pub async fn update() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("users update")
+pub async fn update(
+    state: web::Data<AppState>,
+    req: HttpRequest,
+    form: web::Json<request::Update>,
+) -> Result<HttpResponse, HttpResponse> {
+    let head = req.head();
+    let extensions = head.extensions();
+    let auth_user = extensions.get::<User>().expect("invalid auth user").clone();
+    // --
+    let conn = state
+        .pool
+        .get()
+        .expect("couldn't get db connection from pool");
+
+    let user = form.user.clone();
+
+    let user = UpdatableUser {
+        email: user.email,
+        username: user.username,
+        password: user.password,
+        image: user.image,
+        bio: user.bio,
+    };
+    let user = web::block(move || User::update(&conn, auth_user.id, user))
+        .await
+        .map_err(|e| {
+            eprintln!("{}", e);
+            HttpResponse::InternalServerError().json(e.to_string())
+        })?;
+
+    let token = &user.generate_token();
+    let res = response::UserResponse::from(user, token.to_string());
+
+    Ok(HttpResponse::Ok().json(res))
 }
