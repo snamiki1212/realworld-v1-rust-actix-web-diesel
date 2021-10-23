@@ -23,11 +23,15 @@ pub struct SignupRes {
 }
 
 impl SignupRes {
-    pub fn from(user: User) -> SignupRes {
+    pub fn from(user: User, token: String) -> SignupRes {
+        // REF: https://gothinkster.github.io/realworld/docs/specs/backend-specs/api-response-format/#users-for-authentication
         SignupRes {
             user: SignupResUser {
                 email: user.email,
+                token: token,
                 username: user.username,
+                // bio: user.bio,
+                // image: user.image,
             },
         }
     }
@@ -36,6 +40,6 @@ impl SignupRes {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct SignupResUser {
     pub email: String,
-    // pub token: String,
+    pub token: String,
     pub username: String,
 }

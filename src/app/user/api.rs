@@ -18,7 +18,7 @@ pub async fn signup(
     form: web::Json<handler::SignupReq>,
 ) -> Result<HttpResponse, HttpResponse> {
     let conn = pool.get().expect("couldn't get db connection from pool");
-    let user = web::block(move || {
+    let (user, token) = web::block(move || {
         User::signup(
             &conn,
             &form.user.email,
@@ -32,7 +32,7 @@ pub async fn signup(
         HttpResponse::InternalServerError().json(e.to_string())
     })?;
 
-    let res = handler::SignupRes::from(user);
+    let res = handler::SignupRes::from(user, token);
     Ok(HttpResponse::Ok().json(res))
 }
 
