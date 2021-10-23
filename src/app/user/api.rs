@@ -1,5 +1,5 @@
-use super::handler;
 use super::model::User;
+use super::transformer;
 // use crate::schema::users;
 use crate::utils::db::DbPool;
 // use crate::AppState;
@@ -15,7 +15,7 @@ pub async fn signin() -> impl Responder {
 #[post("")]
 pub async fn signup(
     pool: web::Data<DbPool>,
-    form: web::Json<handler::SignupReq>,
+    form: web::Json<transformer::SignupReq>,
 ) -> Result<HttpResponse, HttpResponse> {
     let conn = pool.get().expect("couldn't get db connection from pool");
     let (user, token) = web::block(move || {
@@ -32,7 +32,7 @@ pub async fn signup(
         HttpResponse::InternalServerError().json(e.to_string())
     })?;
 
-    let res = handler::SignupRes::from(user, token);
+    let res = transformer::SignupRes::from(user, token);
     Ok(HttpResponse::Ok().json(res))
 }
 
