@@ -11,7 +11,6 @@ pub async fn index(state: web::Data<AppState>) -> Result<HttpResponse, HttpRespo
         .get()
         .expect("couldn't get db connection from pool");
 
-    println!("THIS IS TAG");
     let list = web::block(move || Tag::list(&conn)).await.map_err(|e| {
         eprintln!("{}", e);
         HttpResponse::InternalServerError().json(e.to_string())

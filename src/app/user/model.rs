@@ -11,7 +11,7 @@ use jsonwebtoken::{EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[derive(Queryable, Serialize, Deserialize, Debug, Clone)]
 pub struct User {
     pub id: Uuid,
     pub email: String,
@@ -79,7 +79,6 @@ impl User {
 impl User {
     pub fn generate_token(&self) -> String {
         let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nanosecond -> second
-        println!("gene-token");
         token::generate(self.id, now).expect("could not encode jwt.")
     }
 }

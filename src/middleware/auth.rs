@@ -2,6 +2,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 use actix_service::{Service, Transform};
+use actix_web::HttpMessage;
 use actix_web::{
     dev::ServiceRequest,
     dev::ServiceResponse,
@@ -14,8 +15,8 @@ use futures::Future;
 
 use crate::app::user::model::User;
 use crate::constants;
-use crate::utils::db::DbPool;
 use crate::utils::token;
+use crate::AppState;
 
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
@@ -64,16 +65,16 @@ where
     }
 
     fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
-        println!("Hi from start. You requested: {}", req.path());
+        // println!("Hi from start. You requested: {}", req.path());
         if verify(&mut req) {
-            println!("[middleware]auth passed");
+            // println!("[middleware]auth passed");
             let fut = self.service.call(req);
             Box::pin(async move {
                 let res = fut.await?;
                 Ok(res)
             })
         } else {
-            println!("[middleware]auth not passed");
+            // println!("[middleware]auth not passed");
             Box::pin(async move {
                 Ok(req.into_response(
                     HttpResponse::Unauthorized()
@@ -90,9 +91,8 @@ where
 }
 
 fn verify(req: &mut ServiceRequest) -> bool {
-    // Bypass some account routes
-    let headers = req.headers_mut();
-    headers.append(
+    // TODO: Does it need?
+    req.headers_mut().append(
         HeaderName::from_static("content-length"),
         HeaderValue::from_static("true"),
     );
@@ -117,12 +117,14 @@ fn verify(req: &mut ServiceRequest) -> bool {
                     Ok(token_data) => {
                         let claims = token_data.claims;
                         let user_id = claims.user_id;
-                        if let Some(pool) = req.app_data::<Data<DbPool>>() {
-                            let conn = pool.get().expect("couldn't get db connection from pool");
+                        if let Some(state) = req.app_data::<Data<AppState>>() {
+                            let conn = state
+                                .pool
+                                .get()
+                                .expect("couldn't get db connection from pool");
                             let user = User::find_by_id(&conn, user_id);
-                            println!("[middleware] user is {:?}", user);
+                            req.head().extensions_mut().insert(user);
                         }
-                        println!("Valid token:| {:?}", claims);
                         return true;
                     }
                     _ => {

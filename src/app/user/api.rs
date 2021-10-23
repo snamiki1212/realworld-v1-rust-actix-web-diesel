@@ -2,7 +2,7 @@ use super::model::User;
 use super::network::{request, response};
 // use crate::schema::users;
 // use crate::AppState;
-use actix_web::{get, post, put, web, HttpResponse, Responder};
+use actix_web::{get, post, put, web, HttpRequest, HttpResponse, Responder};
 // use serde::{Deserialize, Serialize};
 use crate::AppState;
 
@@ -54,10 +54,17 @@ pub async fn signup(
 }
 
 #[get("")]
-pub async fn me(state: web::Data<AppState>) -> impl Responder {
-    // TODO:
-    println!("me");
-    HttpResponse::Ok().body("users me")
+pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
+    let head = req.head();
+    let extensions = head.extensions();
+    let user = extensions.get::<User>();
+
+    if let Some(user) = user {
+        let user = response::CommonUser::from(user.clone(), user.generate_token());
+        Ok(HttpResponse::Ok().json(user))
+    } else {
+        Ok(HttpResponse::Ok().json({}))
+    }
 }
 
 #[put("")]
