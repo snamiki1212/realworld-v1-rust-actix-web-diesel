@@ -1,5 +1,5 @@
 use super::model::User;
-use super::transformer;
+use super::network::{request, response};
 // use crate::schema::users;
 use crate::utils::db::DbPool;
 // use crate::AppState;
@@ -9,7 +9,7 @@ use actix_web::{get, post, put, web, HttpResponse, Responder};
 #[post("/login")]
 pub async fn signin(
     pool: web::Data<DbPool>,
-    form: web::Json<transformer::SigninReq>,
+    form: web::Json<request::SigninReq>,
 ) -> Result<HttpResponse, HttpResponse> {
     let conn = pool.get().expect("couldn't get db connection from pool");
     let (user, token) =
@@ -19,14 +19,14 @@ pub async fn signin(
                 eprintln!("{}", e);
                 HttpResponse::InternalServerError().json(e.to_string())
             })?;
-    let res = transformer::SigninRes::from(user, token);
+    let res = response::SigninRes::from(user, token);
     Ok(HttpResponse::Ok().json(res))
 }
 
 #[post("")]
 pub async fn signup(
     pool: web::Data<DbPool>,
-    form: web::Json<transformer::SignupReq>,
+    form: web::Json<request::SignupReq>,
 ) -> Result<HttpResponse, HttpResponse> {
     let conn = pool.get().expect("couldn't get db connection from pool");
     let (user, token) = web::block(move || {
@@ -43,7 +43,7 @@ pub async fn signup(
         HttpResponse::InternalServerError().json(e.to_string())
     })?;
 
-    let res = transformer::SignupRes::from(user, token);
+    let res = response::SignupRes::from(user, token);
     Ok(HttpResponse::Ok().json(res))
 }
 
