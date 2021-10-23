@@ -68,22 +68,19 @@ impl User {
     fn hash_password(naive_pw: &str) -> String {
         hash(&naive_pw, DEFAULT_COST).expect("could not hash password.")
     }
+    pub fn find_by_id(conn: &PgConnection, _id: Uuid) -> Self {
+        users
+            .find(_id)
+            .first(conn)
+            .expect("could not find user by id.")
+    }
+}
 
+impl User {
     pub fn generate_token(&self) -> String {
         let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nanosecond -> second
-        token::generate(now).expect("could not encode jwt.")
-        // let payload = TokenPayload {
-        //     iat: now,
-        //     exp: now + ONE_DAY,
-        // };
-
-        // // TODO: move /utils/token
-        // jsonwebtoken::encode(
-        //     &Header::default(),
-        //     &payload,
-        //     &EncodingKey::from_secret(&KEY),
-        // )
-        // .expect("could not encode jwt.")
+        println!("gene-token");
+        token::generate(self.id, now).expect("could not encode jwt.")
     }
 }
 

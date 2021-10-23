@@ -12,9 +12,11 @@ use actix_web::{
 use futures::future::{ok, Ready};
 use futures::Future;
 
+use crate::app::user::model::User;
 use crate::constants;
 use crate::utils::db::DbPool;
 use crate::utils::token;
+
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
 //    next service in chain as parameter.
@@ -62,16 +64,16 @@ where
     }
 
     fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
-        // println!("Hi from start. You requested: {}", req.path());
+        println!("Hi from start. You requested: {}", req.path());
         if verify(&mut req) {
-            // println!("[middleware]auth passed");
+            println!("[middleware]auth passed");
             let fut = self.service.call(req);
             Box::pin(async move {
                 let res = fut.await?;
                 Ok(res)
             })
         } else {
-            // println!("[middleware]auth not passed");
+            println!("[middleware]auth not passed");
             Box::pin(async move {
                 Ok(req.into_response(
                     HttpResponse::Unauthorized()
@@ -111,12 +113,22 @@ fn verify(req: &mut ServiceRequest) -> bool {
             if authen_str.starts_with("bearer") || authen_str.starts_with("Bearer") {
                 info!("Parsing token...");
                 let token = authen_str[6..authen_str.len()].trim();
-                if token::verify(&token) {
-                    info!("Valid token");
-                    return true;
-                } else {
-                    error!("Invalid token");
-                    return false;
+                match token::decode(&token) {
+                    Ok(token_data) => {
+                        let claims = token_data.claims;
+                        let user_id = claims.user_id;
+                        if let Some(pool) = req.app_data::<Data<DbPool>>() {
+                            let conn = pool.get().expect("couldn't get db connection from pool");
+                            let user = User::find_by_id(&conn, user_id);
+                            println!("[middleware] user is {:?}", user);
+                        }
+                        println!("Valid token:| {:?}", claims);
+                        return true;
+                    }
+                    _ => {
+                        error!("Invalid token");
+                        return false;
+                    }
                 }
             }
         }
