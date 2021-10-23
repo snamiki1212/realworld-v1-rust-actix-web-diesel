@@ -10,8 +10,8 @@ table! {
 table! {
     users (id) {
         id -> Uuid,
-        username -> Text,
         email -> Text,
+        username -> Text,
         password -> Text,
         bio -> Nullable<Text>,
         image -> Nullable<Text>,
