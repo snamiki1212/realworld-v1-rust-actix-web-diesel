@@ -1,11 +1,16 @@
 #[macro_use]
 extern crate diesel;
-mod schema;
+
+#[macro_use]
+extern crate log;
 
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 mod app;
+mod constants;
+mod middleware;
 mod routes;
+mod schema;
 mod utils;
 
 // pub struct AppState {
@@ -23,6 +28,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .data(pool.clone())
+            .wrap(middleware::auth::Authentication)
             .service(web::scope("").configure(routes::api)) // TODO: call configure without emptpy scope
     })
     .bind("127.0.0.1:8080")?

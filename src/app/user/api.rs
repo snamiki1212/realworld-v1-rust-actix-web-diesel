@@ -48,8 +48,9 @@ pub async fn signup(
 }
 
 #[get("")]
-pub async fn me() -> impl Responder {
+pub async fn me(pool: web::Data<DbPool>) -> impl Responder {
     // TODO:
+    println!("me");
     HttpResponse::Ok().body("users me")
 }
 
