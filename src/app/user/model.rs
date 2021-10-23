@@ -1,5 +1,6 @@
 use crate::schema::users;
-use bcrypt::{hash, DEFAULT_COST};
+use crate::schema::users::dsl::*;
+use bcrypt::{hash, verify, DEFAULT_COST};
 use chrono::prelude::*;
 use chrono::{DateTime, NaiveDateTime};
 use diesel::pg::PgConnection;
@@ -37,17 +38,16 @@ static ONE_DAY: i64 = 60 * 60 * 24; // in seconds
 impl User {
     pub fn signup<'a>(
         conn: &PgConnection,
-        email: &'a str,
-        username: &'a str,
-        password: &'a str,
+        _email: &'a str,
+        _username: &'a str,
+        naive_password: &'a str,
     ) -> Result<(User, Token), Error> {
         use diesel::prelude::*;
-
-        let hashed_password = hash(password, DEFAULT_COST).expect("could not hash password.");
+        let hashed_password = Self::hash_password(naive_password);
 
         let record = SignupUser {
-            email: email,
-            username: username,
+            email: _email,
+            username: _username,
             password: &hashed_password,
         };
         let user = diesel::insert_into(users::table)
@@ -58,6 +58,27 @@ impl User {
         let token = user.generate_token();
         let result = (user, token);
         Ok(result)
+    }
+
+    pub fn signin(
+        conn: &PgConnection,
+        _email: &str,
+        naive_password: &str,
+    ) -> Result<(User, Token), Error> {
+        let user = users
+            .filter(email.eq(_email))
+            .limit(1)
+            .first::<User>(conn)
+            .expect("could not signin");
+        verify(&naive_password, &user.password).expect("could not signin");
+
+        let token = user.generate_token();
+        let result = (user, token);
+        Ok(result)
+    }
+
+    fn hash_password(naive_pw: &str) -> String {
+        hash(&naive_pw, DEFAULT_COST).expect("could not hash password.")
     }
 
     pub fn generate_token(&self) -> String {

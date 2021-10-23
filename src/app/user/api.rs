@@ -7,9 +7,20 @@ use actix_web::{get, post, put, web, HttpResponse, Responder};
 // use serde::{Deserialize, Serialize};
 
 #[post("/login")]
-pub async fn signin() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("users signin")
+pub async fn signin(
+    pool: web::Data<DbPool>,
+    form: web::Json<transformer::SigninReq>,
+) -> Result<HttpResponse, HttpResponse> {
+    let conn = pool.get().expect("couldn't get db connection from pool");
+    let (user, token) =
+        web::block(move || User::signin(&conn, &form.user.email, &form.user.password))
+            .await
+            .map_err(|e| {
+                eprintln!("{}", e);
+                HttpResponse::InternalServerError().json(e.to_string())
+            })?;
+    let res = transformer::SigninRes::from(user, token);
+    Ok(HttpResponse::Ok().json(res))
 }
 
 #[post("")]
