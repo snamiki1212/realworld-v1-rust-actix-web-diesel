@@ -48,3 +48,9 @@ anyhow = { version = "1.0" }
 
 # derive(Error)
 thiserror = { version = "1.0" }
+
+# An implementation of futures and streams featuring zero allocations, composability, and itera…
+futures = { version = "0.3" }
+
+# Service trait and combinators for representing asynchronous request/response operati…
+actix-service = "1.0.6" # TODO: Update 2.x

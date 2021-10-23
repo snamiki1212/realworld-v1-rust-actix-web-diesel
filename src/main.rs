@@ -5,6 +5,7 @@ mod schema;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 mod app;
+mod middleware;
 mod routes;
 mod utils;
 
@@ -23,6 +24,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .data(pool.clone())
+            .wrap(middleware::auth::SayHi)
             .service(web::scope("").configure(routes::api)) // TODO: call configure without emptpy scope
     })
     .bind("127.0.0.1:8080")?
