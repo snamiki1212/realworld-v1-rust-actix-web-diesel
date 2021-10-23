@@ -1,5 +1,6 @@
 use crate::schema::users;
 use crate::schema::users::dsl::*;
+use crate::utils::token;
 use anyhow::Result;
 use bcrypt::{hash, verify, DEFAULT_COST};
 use chrono::prelude::*;
@@ -23,17 +24,6 @@ pub struct User {
 }
 
 type Token = String;
-
-#[derive(Deserialize, Serialize)]
-pub struct TokenPayload {
-    // issued at
-    pub iat: i64,
-    // expiration
-    pub exp: i64,
-}
-
-static KEY: [u8; 16] = *include_bytes!("../../../secret.key"); // TODO:
-static ONE_DAY: i64 = 60 * 60 * 24; // in seconds
 
 impl User {
     pub fn signup<'a>(
@@ -81,17 +71,19 @@ impl User {
 
     pub fn generate_token(&self) -> String {
         let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nanosecond -> second
-        let payload = TokenPayload {
-            iat: now,
-            exp: now + ONE_DAY,
-        };
+        token::generate(now).expect("could not encode jwt.")
+        // let payload = TokenPayload {
+        //     iat: now,
+        //     exp: now + ONE_DAY,
+        // };
 
-        jsonwebtoken::encode(
-            &Header::default(),
-            &payload,
-            &EncodingKey::from_secret(&KEY),
-        )
-        .expect("could not encode jwt.")
+        // // TODO: move /utils/token
+        // jsonwebtoken::encode(
+        //     &Header::default(),
+        //     &payload,
+        //     &EncodingKey::from_secret(&KEY),
+        // )
+        // .expect("could not encode jwt.")
     }
 }
 
