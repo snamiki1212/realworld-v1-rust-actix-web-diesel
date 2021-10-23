@@ -22,7 +22,7 @@ pub async fn signin(
                 eprintln!("{}", e);
                 HttpResponse::InternalServerError().json(e.to_string())
             })?;
-    let res = response::Signin::from(user, token);
+    let res = response::UserResponse::from(user, token);
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -49,7 +49,7 @@ pub async fn signup(
         HttpResponse::InternalServerError().json(e.to_string())
     })?;
 
-    let res = response::Signup::from(user, token);
+    let res = response::UserResponse::from(user, token);
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -60,7 +60,7 @@ pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
     let user = extensions.get::<User>();
 
     if let Some(user) = user {
-        let user = response::CommonUser::from(user.clone(), user.generate_token());
+        let user = response::UserResponse::from(user.clone(), user.generate_token());
         Ok(HttpResponse::Ok().json(user))
     } else {
         Ok(HttpResponse::Ok().json({}))
