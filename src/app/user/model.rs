@@ -1,11 +1,11 @@
 use crate::schema::users;
 use crate::schema::users::dsl::*;
+use anyhow::Result;
 use bcrypt::{hash, verify, DEFAULT_COST};
 use chrono::prelude::*;
 use chrono::{DateTime, NaiveDateTime};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use diesel::result::Error;
 use jsonwebtoken::{EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -41,7 +41,7 @@ impl User {
         _email: &'a str,
         _username: &'a str,
         naive_password: &'a str,
-    ) -> Result<(User, Token), Error> {
+    ) -> Result<(User, Token)> {
         use diesel::prelude::*;
         let hashed_password = Self::hash_password(naive_password);
 
@@ -52,8 +52,7 @@ impl User {
         };
         let user = diesel::insert_into(users::table)
             .values(&record)
-            .get_result::<User>(conn)
-            .expect("Error saving user");
+            .get_result::<User>(conn)?;
 
         let token = user.generate_token();
         let result = (user, token);
@@ -64,13 +63,12 @@ impl User {
         conn: &PgConnection,
         _email: &str,
         naive_password: &str,
-    ) -> Result<(User, Token), Error> {
+    ) -> Result<(User, Token)> {
         let user = users
             .filter(email.eq(_email))
             .limit(1)
-            .first::<User>(conn)
-            .expect("could not signin");
-        verify(&naive_password, &user.password).expect("could not signin");
+            .first::<User>(conn)?;
+        verify(&naive_password, &user.password)?;
 
         let token = user.generate_token();
         let result = (user, token);
@@ -93,7 +91,7 @@ impl User {
             &payload,
             &EncodingKey::from_secret(&KEY),
         )
-        .unwrap()
+        .expect("could not encode jwt.")
     }
 }
 

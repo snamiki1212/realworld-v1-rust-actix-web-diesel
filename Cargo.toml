@@ -41,4 +41,10 @@ bcrypt = { version = "0.10.1" }
 log = { version = "0.4.14" }
 
 # A logging implementation for `log` which is configured via an environment variable.
-env_logger = {version = "0.9.0" }
+env_logger = { version = "0.9.0" }
+
+# Flexible concrete Error type built on std::error::Error
+anyhow = { version = "1.0" }
+
+# derive(Error)
+thiserror = { version = "1.0" }
