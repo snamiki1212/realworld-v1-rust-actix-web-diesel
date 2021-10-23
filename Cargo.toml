@@ -10,19 +10,35 @@ description = "Realworld Application with Rust / actix-web."
 
 [dependencies]
 
-# Core
+# Actix Web is a powerful, pragmatic, and extremely fast web framework for Rust
 actix-web = { version = "3.3" }
+
+# A safe, extensible ORM and Query Builder for PostgreSQL, SQLite, and MySQL
 diesel = { version = "1.4", features = ["r2d2", "postgres", "chrono", "uuidv07", "serde_json"] }
 
-# Serialize
+# Create and decode JWTs in a strongly typed way.
+jsonwebtoken = { version = "7" }
+
+# A generic serialization/deserialization framework
 serde = { version = "1.0", features = ["derive"] }
+
+# A JSON serialization file format
 serde_json = { version = "1.0" }
 
-# Utils
+# A `dotenv` implementation for Rust
 dotenv = { version = "0.15" }
+
+# Date and time library for Rust
 chrono = { version = "0.4", features = ["serde"] }
+
+# A library to generate and parse UUIDs.
 uuid = { version = "0.8", features = ["serde", "v4"] }
 
-# Log
+# Easily hash and verify passwords using bcrypt
+bcrypt = { version = "0.10.1" }
+
+# A lightweight logging facade for Rust
 log = { version = "0.4.14" }
+
+# A logging implementation for `log` which is configured via an environment variable.
 env_logger = {version = "0.9.0" }
