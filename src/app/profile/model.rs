@@ -1,8 +1,13 @@
 use crate::app::user::model::User;
+use crate::schema::follows;
+use crate::schema::follows::dsl::*;
 use anyhow::Result;
 use diesel;
 use diesel::pg::PgConnection;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
+#[derive(Queryable, Serialize, Deserialize, Debug, Clone)]
 pub struct Profile {
     pub username: String,
     pub bio: Option<String>,
@@ -21,4 +26,11 @@ impl Profile {
         };
         Ok(profile)
     }
+}
+
+#[derive(Insertable)]
+#[table_name = "follows"]
+pub struct NewFollow {
+    pub follower_id: Uuid,
+    pub followee_id: Uuid,
 }

@@ -1,3 +1,4 @@
+use crate::app::profile::model::Profile;
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use crate::utils::token;
@@ -91,6 +92,31 @@ impl User {
             .first::<User>(conn)
             .expect("could not find user by username");
         Ok(user)
+    }
+
+    pub fn follow(&self, conn: &PgConnection, _username: &str) -> Result<Profile> {
+        let followee = users
+            .filter(username.eq(_username))
+            .first::<User>(conn)
+            .expect("could not find user by name.");
+
+        {
+            use crate::app::profile::model::NewFollow;
+            use crate::schema::follows::dsl::*;
+            let result = diesel::insert_into(follows)
+                .values(&NewFollow {
+                    follower_id: self.id,
+                    followee_id: followee.id,
+                })
+                .execute(conn);
+        };
+        let profile = Profile {
+            username: self.username.clone(),
+            bio: self.bio.clone(),
+            image: self.image.clone(),
+            following: true,
+        };
+        Ok(profile)
     }
 }
 
