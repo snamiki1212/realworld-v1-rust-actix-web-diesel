@@ -83,6 +83,15 @@ impl User {
             .get_result::<User>(conn)?;
         Ok(user)
     }
+
+    pub fn find_by_username(conn: &PgConnection, _username: &str) -> Result<Self> {
+        let user = users
+            .filter(username.eq(_username))
+            .limit(1)
+            .first::<User>(conn)
+            .expect("could not find user by username");
+        Ok(user)
+    }
 }
 
 impl User {
