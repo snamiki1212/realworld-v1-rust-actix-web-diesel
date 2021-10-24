@@ -15,8 +15,6 @@ mod utils;
 
 pub struct AppState {
     pub pool: utils::db::DbPool,
-    // pub request: std::any,
-    pub auth_user: Option<crate::app::user::model::User>,
 }
 
 #[actix_web::main]
@@ -28,10 +26,7 @@ async fn main() -> std::io::Result<()> {
         let pool = utils::db::establish_connection();
         App::new()
             .wrap(Logger::default())
-            .data(AppState {
-                pool: pool,
-                auth_user: None,
-            })
+            .data(AppState { pool: pool })
             .wrap(middleware::auth::Authentication)
             .service(web::scope("").configure(routes::api)) // TODO: call configure without emptpy scope
     })
