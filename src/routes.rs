@@ -17,9 +17,9 @@ pub fn api(cfg: &mut web::ServiceConfig) {
             )
             .service(
                 web::scope("/profiles")
-                    .service(app::profiles::show)
-                    .service(app::profiles::follow)
-                    .service(app::profiles::unfollow),
+                    .service(app::profile::api::show)
+                    .service(app::profile::api::follow)
+                    .service(app::profile::api::unfollow),
             )
             .service(
                 web::scope("/articles/{id}/comments")
