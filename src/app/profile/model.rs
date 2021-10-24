@@ -2,6 +2,7 @@ use crate::app::user::model::User;
 use crate::schema::follows;
 use crate::schema::follows::dsl::*;
 use anyhow::Result;
+use chrono::NaiveDateTime;
 use diesel;
 use diesel::pg::PgConnection;
 use serde::{Deserialize, Serialize};
@@ -26,6 +27,14 @@ impl Profile {
         };
         Ok(profile)
     }
+}
+
+#[derive(Queryable, Serialize, Deserialize, Debug, Clone)]
+pub struct Follow {
+    pub follower_id: Uuid,
+    pub followee_id: Uuid,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
 }
 
 #[derive(Insertable)]
