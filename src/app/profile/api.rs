@@ -1,4 +1,4 @@
-use crate::app::profile::response;
+use crate::app::profile;
 use crate::app::user::model::User;
 use crate::AppState;
 use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Responder};
@@ -6,13 +6,17 @@ use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Responder};
 type UsernameSlug = String;
 
 #[get("/{username}")]
-pub async fn show(path: web::Path<UsernameSlug>) -> impl Responder {
-    // TODO:
-    println!("___");
-    println!("---show / {:?}", path);
-    let path = path.into_inner();
-    let msg = format!("path is {}", path);
-    HttpResponse::Ok().body(msg)
+pub async fn show(state: web::Data<AppState>, path: web::Path<UsernameSlug>) -> impl Responder {
+    let conn = state
+        .pool
+        .get()
+        .expect("couldn't get db connection from pool");
+
+    let username = path.into_inner();
+    let profile = profile::model::Profile::find_by_name(&conn, &username)
+        .expect("couldn't find profile by name");
+    let res = profile::response::ProfileResponse::from(profile);
+    HttpResponse::Ok().json(res)
 }
 
 #[post("/{username}/follow")]

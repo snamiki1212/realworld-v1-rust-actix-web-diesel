@@ -22,7 +22,7 @@ impl Profile {
             username: user.username,
             bio: user.bio,
             image: user.image,
-            following: true,
+            following: true, // TODO:
         };
         Ok(profile)
     }
