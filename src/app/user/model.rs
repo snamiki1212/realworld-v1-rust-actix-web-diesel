@@ -103,18 +103,44 @@ impl User {
         {
             use crate::app::profile::model::NewFollow;
             use crate::schema::follows::dsl::*;
-            let result = diesel::insert_into(follows)
+            diesel::insert_into(follows)
                 .values(&NewFollow {
                     follower_id: self.id,
                     followee_id: followee.id,
                 })
-                .execute(conn);
+                .execute(conn)
+                .expect("couldn't insert follow.");
         };
         let profile = Profile {
             username: self.username.clone(),
             bio: self.bio.clone(),
             image: self.image.clone(),
             following: true,
+        };
+        Ok(profile)
+    }
+
+    pub fn unfollow(&self, conn: &PgConnection, _username: &str) -> Result<Profile> {
+        let followee = users
+            .filter(username.eq(_username))
+            .first::<User>(conn)
+            .expect("could not find user by name.");
+
+        {
+            use crate::schema::follows::dsl::*;
+            diesel::delete(
+                follows
+                    .filter(followee_id.eq(followee.id))
+                    .filter(follower_id.eq(self.id)),
+            )
+            .execute(conn)
+            .expect("couldn't delete follow.");
+        };
+        let profile = Profile {
+            username: self.username.clone(),
+            bio: self.bio.clone(),
+            image: self.image.clone(),
+            following: false,
         };
         Ok(profile)
     }

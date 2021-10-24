@@ -34,12 +34,31 @@ pub async fn follow(
 
     let username = path.into_inner();
 
-    let profile = user.follow(&conn, &username).expect("could'nt follow user");
+    let profile = user.follow(&conn, &username).expect("couldn't follow user");
     HttpResponse::Ok().json(profile)
 }
 
-#[delete("/{username}/unfollow")]
-pub async fn unfollow() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("profile unfollow")
+#[delete("/{username}/follow")]
+pub async fn unfollow(
+    state: web::Data<AppState>,
+    req: HttpRequest,
+    path: web::Path<UsernameSlug>,
+) -> impl Responder {
+    let head = req.head();
+    let extensions = head.extensions();
+    let user = extensions
+        .get::<User>()
+        .expect("couldn't get user on req extension.");
+
+    let conn = state
+        .pool
+        .get()
+        .expect("couldn't get db connection from pool");
+
+    let username = path.into_inner();
+
+    let profile = user
+        .unfollow(&conn, &username)
+        .expect("couldn't unfollow user");
+    HttpResponse::Ok().json(profile)
 }
