@@ -1,13 +1,12 @@
 use crate::app::user::model::{UpdatableUser, User};
 use crate::app::user::{request, response};
 use crate::AppState;
-use actix_web::{get, post, put, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{web, HttpRequest, HttpResponse};
 
 // use crate::schema::users;
 // use crate::AppState;
 // use serde::{Deserialize, Serialize};
 
-#[post("/login")]
 pub async fn signin(
     state: web::Data<AppState>,
     form: web::Json<request::Signin>,
@@ -27,7 +26,6 @@ pub async fn signin(
     Ok(HttpResponse::Ok().json(res))
 }
 
-#[post("")]
 pub async fn signup(
     state: web::Data<AppState>,
     form: web::Json<request::Signup>,
@@ -54,7 +52,6 @@ pub async fn signup(
     Ok(HttpResponse::Ok().json(res))
 }
 
-#[get("")]
 pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
     let head = req.head();
     let extensions = head.extensions();
@@ -68,7 +65,6 @@ pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
     }
 }
 
-#[put("")]
 pub async fn update(
     state: web::Data<AppState>,
     req: HttpRequest,

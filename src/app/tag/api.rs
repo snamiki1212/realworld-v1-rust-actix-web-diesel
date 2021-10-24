@@ -4,9 +4,8 @@ use crate::app::tag::model::Tag;
 use crate::app::tag::response;
 use crate::AppState;
 
-use actix_web::{get, web, HttpResponse};
+use actix_web::{web, HttpResponse};
 
-#[get("")]
 pub async fn index(state: web::Data<AppState>) -> Result<HttpResponse, HttpResponse> {
     let conn = state
         .pool

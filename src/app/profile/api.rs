@@ -1,11 +1,10 @@
 use crate::app::profile;
 use crate::app::user::model::User;
 use crate::AppState;
-use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{web, HttpRequest, HttpResponse, Responder};
 
 type UsernameSlug = String;
 
-#[get("/{username}")]
 pub async fn show(
     state: web::Data<AppState>,
     req: HttpRequest,
@@ -30,7 +29,6 @@ pub async fn show(
     HttpResponse::Ok().json(res)
 }
 
-#[post("/{username}/follow")]
 pub async fn follow(
     state: web::Data<AppState>,
     req: HttpRequest,
@@ -53,7 +51,6 @@ pub async fn follow(
     HttpResponse::Ok().json(profile)
 }
 
-#[delete("/{username}/follow")]
 pub async fn unfollow(
     state: web::Data<AppState>,
     req: HttpRequest,
