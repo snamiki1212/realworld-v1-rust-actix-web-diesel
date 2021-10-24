@@ -66,7 +66,7 @@ where
 
     fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
         // println!("Hi from start. You requested: {}", req.path());
-        if verify(&mut req) {
+        if should_skip_verify(&req) || verify(&mut req) {
             // println!("[middleware]auth passed");
             let fut = self.service.call(req);
             Box::pin(async move {
@@ -90,13 +90,7 @@ where
     }
 }
 
-fn verify(req: &mut ServiceRequest) -> bool {
-    // TODO: Does it need?
-    req.headers_mut().append(
-        HeaderName::from_static("content-length"),
-        HeaderValue::from_static("true"),
-    );
-
+fn should_skip_verify(req: &ServiceRequest) -> bool {
     if Method::OPTIONS == *req.method() {
         return true;
     }
@@ -106,6 +100,16 @@ fn verify(req: &mut ServiceRequest) -> bool {
             return true;
         }
     }
+
+    return false;
+}
+
+fn verify(req: &mut ServiceRequest) -> bool {
+    // TODO: Does it need?
+    req.headers_mut().append(
+        HeaderName::from_static("content-length"),
+        HeaderValue::from_static("true"),
+    );
 
     if let Some(authen_header) = req.headers().get(constants::AUTHORIZATION) {
         info!("Parsing authorization header...");
