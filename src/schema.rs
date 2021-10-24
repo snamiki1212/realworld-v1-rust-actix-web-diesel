@@ -1,4 +1,13 @@
 table! {
+    follows (follower_id, followee_id) {
+        followee_id -> Uuid,
+        follower_id -> Uuid,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     tags (id) {
         id -> Uuid,
         name -> Text,
@@ -21,6 +30,7 @@ table! {
 }
 
 allow_tables_to_appear_in_same_query!(
+    follows,
     tags,
     users,
 );

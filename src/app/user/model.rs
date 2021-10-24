@@ -1,3 +1,4 @@
+use crate::app::profile::model::{Follow, Profile};
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use crate::utils::token;
@@ -91,6 +92,76 @@ impl User {
             .first::<User>(conn)
             .expect("could not find user by username");
         Ok(user)
+    }
+
+    pub fn follow(&self, conn: &PgConnection, _username: &str) -> Result<Profile> {
+        let followee = users
+            .filter(username.eq(_username))
+            .first::<User>(conn)
+            .expect("could not find user by name.");
+
+        {
+            use crate::app::profile::model::NewFollow;
+            use crate::schema::follows::dsl::*;
+            diesel::insert_into(follows)
+                .values(&NewFollow {
+                    follower_id: self.id,
+                    followee_id: followee.id,
+                })
+                .execute(conn)
+                .expect("couldn't insert follow.");
+        };
+        let profile = Profile {
+            username: self.username.clone(),
+            bio: self.bio.clone(),
+            image: self.image.clone(),
+            following: true,
+        };
+        Ok(profile)
+    }
+
+    pub fn unfollow(&self, conn: &PgConnection, _username: &str) -> Result<Profile> {
+        let followee = users
+            .filter(username.eq(_username))
+            .first::<User>(conn)
+            .expect("could not find user by name.");
+
+        {
+            use crate::schema::follows::dsl::*;
+            diesel::delete(
+                follows
+                    .filter(followee_id.eq(followee.id))
+                    .filter(follower_id.eq(self.id)),
+            )
+            .execute(conn)
+            .expect("couldn't delete follow.");
+        };
+        let profile = Profile {
+            username: self.username.clone(),
+            bio: self.bio.clone(),
+            image: self.image.clone(),
+            following: false,
+        };
+        Ok(profile)
+    }
+
+    pub fn get_profile(&self, conn: &PgConnection, _username: &str) -> Result<Profile> {
+        let user = User::find_by_username(&conn, &_username).expect("couldn't find user.");
+        let following = {
+            use crate::schema::follows::dsl::*;
+            let follow = follows
+                .filter(followee_id.eq(user.id))
+                .filter(follower_id.eq(self.id))
+                .get_result::<Follow>(conn);
+            follow.is_ok()
+        };
+        let profile = Profile {
+            username: self.username.clone(),
+            bio: self.bio.clone(),
+            image: self.image.clone(),
+            following: following,
+        };
+        Ok(profile)
     }
 }
 
