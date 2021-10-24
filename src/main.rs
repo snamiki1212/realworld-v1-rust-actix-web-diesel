@@ -27,6 +27,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .data(AppState { pool: pool })
+            .wrap(middleware::cors::cors())
             .wrap(middleware::auth::Authentication)
             .service(web::scope("").configure(routes::api)) // TODO: call configure without emptpy scope
     })
