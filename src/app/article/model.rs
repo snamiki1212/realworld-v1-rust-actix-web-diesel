@@ -40,3 +40,12 @@ pub struct NewArticle {
     pub description: String,
     pub body: String,
 }
+
+#[derive(AsChangeset)]
+#[table_name = "articles"]
+pub struct UpdateArticle {
+    pub slug: Option<String>,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub body: Option<String>,
+}

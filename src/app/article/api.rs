@@ -1,12 +1,12 @@
-use super::model::{Article, NewArticle};
+use super::model::{Article, NewArticle, UpdateArticle};
 use super::service;
 use super::{request, response};
 use crate::app::article::tag::model::{NewTag, Tag};
 use crate::app::user::model::User;
+use crate::utils::converter;
 use crate::AppState;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
-use convert_case::{Case, Casing};
-use diesel::Insertable;
+// use diesel::Insertable;
 use uuid::Uuid;
 
 type ArticleIdSlug = Uuid;
@@ -40,12 +40,13 @@ pub async fn create(
         .get()
         .expect("couldn't get db connection from pool");
 
+    let new_slug = converter::to_kebab(&form.article.title);
     let (article, tag_list) = service::create(
         &conn,
         &NewArticle {
             author_id: auth_user.id,
             title: form.article.title.clone(),
-            slug: form.article.title.to_case(Case::Kebab),
+            slug: new_slug,
             description: form.article.description.clone(),
             body: form.article.body.clone(),
         },
@@ -55,8 +56,45 @@ pub async fn create(
     Ok(HttpResponse::Ok().json(res))
 }
 
-pub async fn update() -> impl Responder {
-    // TODO:
+pub async fn update(
+    state: web::Data<AppState>,
+    req: HttpRequest,
+    path: web::Path<ArticleIdSlug>,
+    form: web::Json<request::UpdateArticleRequest>,
+) -> impl Responder {
+    let head = req.head();
+    let extensions = head.extensions();
+    let auth_user = extensions.get::<User>().expect("invalid auth user").clone();
+    // --
+    let conn = state
+        .pool
+        .get()
+        .expect("couldn't get db connection from pool");
+    //
+    let article_id = path.into_inner();
+
+    {
+        // TODO: move this logic into service
+        use crate::schema::articles::dsl::*;
+        use diesel::prelude::*;
+        // TODO: validation deletable auth_user.id == article.author_id ?
+
+        let new_slug = &form
+            .article
+            .title
+            .as_ref()
+            .map(|_title| converter::to_kebab(_title)); // TODO: move to static method in model
+        diesel::update(articles.filter(id.eq(article_id)))
+            .set(&UpdateArticle {
+                // pub slug: Option<String>,
+                slug: new_slug.to_owned(),
+                title: form.article.title.clone(),
+                description: form.article.description.clone(),
+                body: form.article.body.clone(),
+            })
+            .get_result::<Article>(&conn)
+            .expect("couldn't update article.");
+    }
     HttpResponse::Ok().body("update_article")
 }
 
@@ -75,7 +113,9 @@ pub async fn delete(
         .expect("couldn't get db connection from pool");
     //
     let article_id = path.into_inner();
+
     {
+        // TODO: move this logic into service
         use crate::schema::articles::dsl::*;
         use diesel::prelude::*;
 

@@ -2,13 +2,25 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
 pub struct CreateArticleRequest {
-    pub article: ArticeContent,
+    pub article: CreateArticleInner,
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct ArticeContent {
+pub struct CreateArticleInner {
     pub title: String,
     pub description: String,
     pub body: String,
     pub tagList: Option<Vec<String>>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct UpdateArticleRequest {
+    pub article: UpdateArticleInner,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct UpdateArticleInner {
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub body: Option<String>,
 }
