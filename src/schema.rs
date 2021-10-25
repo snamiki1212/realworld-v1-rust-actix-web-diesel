@@ -23,6 +23,7 @@ table! {
 table! {
     tags (id) {
         id -> Uuid,
+        article_id -> Uuid,
         name -> Text,
         created_at -> Timestamp,
         updated_at -> Timestamp,
@@ -43,6 +44,7 @@ table! {
 }
 
 joinable!(articles -> users (author_id));
+joinable!(tags -> articles (article_id));
 
 allow_tables_to_appear_in_same_query!(
     articles,
