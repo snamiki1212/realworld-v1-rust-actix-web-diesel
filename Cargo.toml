@@ -57,3 +57,6 @@ actix-service = { version = "1.0.6" } # TODO: Update 2.x
 
 # Cross-Origin Resource Sharing (CORS) controls for Actix Web
 actix-cors = { version = "0.5.4" }
+
+# Convert strings into any case
+convert_case = { version = "0.4.0" }

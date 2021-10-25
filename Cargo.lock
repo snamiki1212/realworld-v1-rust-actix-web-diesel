@@ -509,6 +509,7 @@ dependencies = [
  "anyhow",
  "bcrypt",
  "chrono",
+ "convert_case",
  "diesel",
  "dotenv",
  "env_logger",
