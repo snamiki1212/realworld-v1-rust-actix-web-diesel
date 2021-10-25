@@ -18,6 +18,8 @@ pub struct Article {
 }
 
 use crate::schema::articles;
+use crate::schema::articles::dsl::*;
+use crate::utils::converter;
 use diesel::prelude::*;
 
 impl Article {
@@ -29,6 +31,18 @@ impl Article {
 
         article
     }
+
+    pub fn update(conn: &PgConnection, article_id: &Uuid, record: &UpdateArticle) -> Self {
+        let article = diesel::update(articles.filter(id.eq(article_id)))
+            .set(record)
+            .get_result::<Article>(conn)
+            .expect("couldn't update article.");
+        article
+    }
+
+    pub fn convert_title_to_slug(_title: &str) -> String {
+        converter::to_kebab(_title)
+    }
 }
 
 #[derive(Insertable, Clone)]
@@ -39,4 +53,13 @@ pub struct NewArticle {
     pub title: String,
     pub description: String,
     pub body: String,
+}
+
+#[derive(AsChangeset)]
+#[table_name = "articles"]
+pub struct UpdateArticle {
+    pub slug: Option<String>,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub body: Option<String>,
 }
