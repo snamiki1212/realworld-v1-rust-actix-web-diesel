@@ -1,4 +1,5 @@
-use super::model::Article;
+use crate::app::article::model::Article;
+use crate::app::article::tag::model::Tag;
 use crate::app::user::model::User;
 use serde::{Deserialize, Serialize};
 
@@ -8,14 +9,14 @@ pub struct SingleArticleResponse {
 }
 
 impl SingleArticleResponse {
-    pub fn from(article: Article, user: User, tag_list: Vec<String>) -> Self {
+    pub fn from(article: Article, user: User, tag_list: Vec<Tag>) -> Self {
         Self {
             article: ArticleContent {
                 slug: article.slug,
                 title: article.title,
                 description: article.description,
                 body: article.body,
-                tag_list: tag_list,
+                tag_list: tag_list.iter().map(move |tag| tag.name.clone()).collect(),
                 createdAt: article.created_at.to_string(),
                 updatedAt: article.updated_at.to_string(),
                 author: AuthorContent {

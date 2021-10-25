@@ -1,4 +1,4 @@
-use crate::schema::articles::dsl::*;
+// use crate::schema::articles::dsl::*;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
 use diesel::Insertable;
@@ -21,13 +21,12 @@ use crate::schema::articles;
 use diesel::prelude::*;
 
 impl Article {
-    pub fn create(conn: &PgConnection, record: &NewArticle, tag_list: Option<Vec<String>>) -> Self {
+    pub fn create(conn: &PgConnection, record: &NewArticle) -> Self {
         let article = diesel::insert_into(articles::table)
             .values(record)
             .get_result::<Article>(conn)
             .expect("couldn't insert article");
 
-        // TODO: insert tags
         article
     }
 }

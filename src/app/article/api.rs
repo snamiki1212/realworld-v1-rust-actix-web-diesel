@@ -1,9 +1,11 @@
 use super::model::{Article, NewArticle};
 use super::{request, response};
+use crate::app::article::tag::model::{NewTag, Tag};
 use crate::app::user::model::User;
 use crate::AppState;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use convert_case::{Case, Casing};
+use diesel::Insertable;
 
 pub async fn index() -> impl Responder {
     // TODO:
@@ -34,7 +36,7 @@ pub async fn create(
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-    let tag_list = form.article.tagList.clone();
+
     let article = Article::create(
         &conn,
         &NewArticle {
@@ -44,13 +46,22 @@ pub async fn create(
             description: form.article.description.clone(),
             body: form.article.body.clone(),
         },
-        tag_list.clone(),
     );
 
+    let tag_list = form.article.tagList.clone();
     let tag_list = match tag_list {
         Some(n) => n,
         None => vec![],
     };
+    let tag_list = tag_list
+        .iter()
+        .map(|tag| NewTag {
+            name: &tag,
+            article_id: &article.id,
+        })
+        .collect();
+    let tag_list = Tag::create(&conn, tag_list);
+
     let res = response::SingleArticleResponse::from(article, auth_user, tag_list);
     Ok(HttpResponse::Ok().json(res))
 }
