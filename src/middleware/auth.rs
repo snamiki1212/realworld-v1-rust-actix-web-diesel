@@ -8,7 +8,7 @@ use actix_web::{
     dev::ServiceResponse,
     http::{HeaderName, HeaderValue, Method},
     web::Data,
-    Error, HttpResponse,
+    Error, HttpRequest, HttpResponse,
 };
 use futures::future::{ok, Ready};
 use futures::Future;
@@ -140,4 +140,11 @@ fn verify(req: &mut ServiceRequest) -> bool {
         }
     };
     false
+}
+
+pub fn access_auth_user(req: &HttpRequest) -> Option<User> {
+    let head = req.head();
+    let extensions = head.extensions();
+    let auth_user = extensions.get::<User>().map(|user| user.to_owned());
+    auth_user
 }

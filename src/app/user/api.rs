@@ -1,5 +1,6 @@
 use crate::app::user::model::{UpdatableUser, User};
 use crate::app::user::{request, response};
+use crate::middleware::auth;
 use crate::AppState;
 use actix_web::{web, HttpRequest, HttpResponse};
 
@@ -53,9 +54,7 @@ pub async fn signup(
 }
 
 pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
-    let head = req.head();
-    let extensions = head.extensions();
-    let user = extensions.get::<User>();
+    let user = auth::access_auth_user(&req);
 
     if let Some(user) = user {
         let user = response::UserResponse::from(user.clone(), user.generate_token());
@@ -70,9 +69,7 @@ pub async fn update(
     req: HttpRequest,
     form: web::Json<request::Update>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let head = req.head();
-    let extensions = head.extensions();
-    let auth_user = extensions.get::<User>().expect("invalid auth user").clone();
+    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     // --
     let conn = state
         .pool
