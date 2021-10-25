@@ -1,4 +1,5 @@
 use super::model::{Article, NewArticle};
+use super::service;
 use super::{request, response};
 use crate::app::article::tag::model::{NewTag, Tag};
 use crate::app::user::model::User;
@@ -27,7 +28,6 @@ pub async fn create(
     req: HttpRequest,
     form: web::Json<request::CreateArticleRequest>,
 ) -> Result<HttpResponse, HttpResponse> {
-    println!("_----");
     let head = req.head();
     let extensions = head.extensions();
     let auth_user = extensions.get::<User>().expect("invalid auth user").clone();
@@ -37,7 +37,7 @@ pub async fn create(
         .get()
         .expect("couldn't get db connection from pool");
 
-    let article = Article::create(
+    let (article, tag_list) = service::create(
         &conn,
         &NewArticle {
             author_id: auth_user.id,
@@ -46,22 +46,8 @@ pub async fn create(
             description: form.article.description.clone(),
             body: form.article.body.clone(),
         },
+        &form.article.tagList,
     );
-
-    let tag_list = form.article.tagList.clone();
-    let tag_list = match tag_list {
-        Some(n) => n,
-        None => vec![],
-    };
-    let tag_list = tag_list
-        .iter()
-        .map(|tag| NewTag {
-            name: &tag,
-            article_id: &article.id,
-        })
-        .collect();
-    let tag_list = Tag::create(&conn, tag_list);
-
     let res = response::SingleArticleResponse::from(article, auth_user, tag_list);
     Ok(HttpResponse::Ok().json(res))
 }
