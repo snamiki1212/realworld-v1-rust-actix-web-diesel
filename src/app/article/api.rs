@@ -71,29 +71,27 @@ pub async fn update(
     //
     let article_id = path.into_inner();
 
-    {
-        // TODO: move this logic into service
-        use crate::schema::articles::dsl::*;
-        use diesel::prelude::*;
-        // TODO: validation deletable auth_user.id == article.author_id ?
+    // TODO: validation deletable auth_user.id == article.author_id ?
 
-        let new_slug = &form
-            .article
-            .title
-            .as_ref()
-            .map(|_title| Article::convert_title_to_slug(_title));
-        diesel::update(articles.filter(id.eq(article_id)))
-            .set(&UpdateArticle {
-                // pub slug: Option<String>,
-                slug: new_slug.to_owned(),
-                title: form.article.title.clone(),
-                description: form.article.description.clone(),
-                body: form.article.body.clone(),
-            })
-            .get_result::<Article>(&conn)
-            .expect("couldn't update article.");
-    }
-    HttpResponse::Ok().body("update_article")
+    let new_slug = &form
+        .article
+        .title
+        .as_ref()
+        .map(|_title| Article::convert_title_to_slug(_title));
+    let article = Article::update(
+        &conn,
+        &article_id,
+        &UpdateArticle {
+            // pub slug: Option<String>,
+            slug: new_slug.to_owned(),
+            title: form.article.title.clone(),
+            description: form.article.description.clone(),
+            body: form.article.body.clone(),
+        },
+    );
+    let tag_list = vec![]; // TODO: fetch tag list
+    let res = response::SingleArticleResponse::from(article, auth_user, tag_list);
+    HttpResponse::Ok().json(res)
 }
 
 pub async fn delete(
