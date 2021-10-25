@@ -5,7 +5,7 @@ use diesel::pg::PgConnection;
 use diesel::prelude::*;
 // use diesel::result::Error;
 
-use crate::app::tag::model::{NewTag, Tag};
+use super::model::{NewTag, Tag};
 use crate::schema;
 
 pub fn create_tag<'a>(conn: &PgConnection, name: &'a str) -> Tag {

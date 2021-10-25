@@ -5,7 +5,7 @@ use actix_web::web::{delete, get, post, put};
 pub fn api(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api")
-            .service(web::scope("/tags").route("", get().to(app::tag::api::index)))
+            .service(web::scope("/tags").route("", get().to(app::article::tag::api::index)))
             .service(
                 web::scope("/users")
                     .route("/login", post().to(app::user::api::signin))

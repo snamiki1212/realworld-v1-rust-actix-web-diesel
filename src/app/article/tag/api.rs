@@ -1,7 +1,7 @@
 extern crate serde_json;
 
-use crate::app::tag::model::Tag;
-use crate::app::tag::response;
+use super::model::Tag;
+use super::response;
 use crate::AppState;
 
 use actix_web::{web, HttpResponse};
