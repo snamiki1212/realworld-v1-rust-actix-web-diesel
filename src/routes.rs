@@ -43,7 +43,7 @@ pub fn api(cfg: &mut web::ServiceConfig) {
                     .route("/{id}", get().to(app::article::api::show))
                     .route("", post().to(app::article::api::create))
                     .route("/{id}", put().to(app::article::api::update))
-                    .route("", delete().to(app::article::api::delete)),
+                    .route("/{id}", delete().to(app::article::api::delete)),
             ),
     );
 }
