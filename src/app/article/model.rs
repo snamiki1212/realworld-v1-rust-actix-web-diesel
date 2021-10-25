@@ -18,6 +18,7 @@ pub struct Article {
 }
 
 use crate::schema::articles;
+use crate::utils::converter;
 use diesel::prelude::*;
 
 impl Article {
@@ -28,6 +29,10 @@ impl Article {
             .expect("couldn't insert article");
 
         article
+    }
+
+    pub fn convert_title_to_slug(title: &str) -> String {
+        converter::to_kebab(title)
     }
 }
 

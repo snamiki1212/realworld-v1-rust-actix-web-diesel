@@ -3,7 +3,6 @@ use super::service;
 use super::{request, response};
 use crate::app::article::tag::model::{NewTag, Tag};
 use crate::app::user::model::User;
-use crate::utils::converter;
 use crate::AppState;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
 // use diesel::Insertable;
@@ -40,13 +39,12 @@ pub async fn create(
         .get()
         .expect("couldn't get db connection from pool");
 
-    let new_slug = converter::to_kebab(&form.article.title);
     let (article, tag_list) = service::create(
         &conn,
         &NewArticle {
             author_id: auth_user.id,
             title: form.article.title.clone(),
-            slug: new_slug,
+            slug: Article::convert_title_to_slug(&form.article.title),
             description: form.article.description.clone(),
             body: form.article.body.clone(),
         },
@@ -83,7 +81,7 @@ pub async fn update(
             .article
             .title
             .as_ref()
-            .map(|_title| converter::to_kebab(_title)); // TODO: move to static method in model
+            .map(|_title| Article::convert_title_to_slug(_title));
         diesel::update(articles.filter(id.eq(article_id)))
             .set(&UpdateArticle {
                 // pub slug: Option<String>,
