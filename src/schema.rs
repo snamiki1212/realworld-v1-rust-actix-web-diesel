@@ -1,7 +1,7 @@
 table! {
     articles (id) {
         id -> Uuid,
-        auther_id -> Uuid,
+        author_id -> Uuid,
         slug -> Text,
         title -> Text,
         description -> Text,
@@ -42,7 +42,7 @@ table! {
     }
 }
 
-joinable!(articles -> users (auther_id));
+joinable!(articles -> users (author_id));
 
 allow_tables_to_appear_in_same_query!(
     articles,

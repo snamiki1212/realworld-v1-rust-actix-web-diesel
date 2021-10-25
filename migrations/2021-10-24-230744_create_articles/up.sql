@@ -1,6 +1,6 @@
 CREATE TABLE articles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  auther_id UUID NOT NULL REFERENCES users (id),
+  author_id UUID NOT NULL REFERENCES users (id),
   slug TEXT UNIQUE NOT NULL,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
@@ -9,5 +9,5 @@ CREATE TABLE articles (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE INDEX articles_auther_id_idx ON articles (auther_id);
+CREATE INDEX articles_author_id_idx ON articles (author_id);
 
