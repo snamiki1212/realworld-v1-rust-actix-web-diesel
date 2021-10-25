@@ -27,23 +27,23 @@ pub fn api(cfg: &mut web::ServiceConfig) {
             )
             .service(
                 web::scope("/articles/{id}/comments")
-                    .route("", get().to(app::articles::comments::index))
-                    .route("", post().to(app::articles::comments::create))
-                    .route("", delete().to(app::articles::comments::delete)),
+                    .route("", get().to(app::article::comment::api::index))
+                    .route("", post().to(app::article::comment::api::create))
+                    .route("", delete().to(app::article::comment::api::delete)),
             )
             .service(
                 web::scope("/articles/{id}/favorites")
-                    .route("", post().to(app::articles::favorites::favorite))
-                    .route("", delete().to(app::articles::favorites::unfavorite)),
+                    .route("", post().to(app::article::favorite::api::favorite))
+                    .route("", delete().to(app::article::favorite::api::unfavorite)),
             )
             .service(
                 web::scope("/articles")
-                    .route("", get().to(app::articles::index))
-                    .route("/feed", get().to(app::articles::feed))
-                    .route("/{id}", get().to(app::articles::show))
-                    .route("", post().to(app::articles::create))
-                    .route("/{id}", put().to(app::articles::update))
-                    .route("", delete().to(app::articles::delete)),
+                    .route("", get().to(app::article::api::index))
+                    .route("/feed", get().to(app::article::api::feed))
+                    .route("/{id}", get().to(app::article::api::show))
+                    .route("", post().to(app::article::api::create))
+                    .route("/{id}", put().to(app::article::api::update))
+                    .route("", delete().to(app::article::api::delete)),
             ),
     );
 }

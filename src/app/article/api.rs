@@ -1,6 +1,4 @@
 use actix_web::{HttpResponse, Responder};
-pub mod comments;
-pub mod favorites;
 
 pub async fn index() -> impl Responder {
     // TODO:

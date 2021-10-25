@@ -1,4 +1,17 @@
 table! {
+    articles (id) {
+        id -> Uuid,
+        auther_id -> Uuid,
+        slug -> Text,
+        title -> Text,
+        description -> Text,
+        body -> Text,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     follows (follower_id, followee_id) {
         followee_id -> Uuid,
         follower_id -> Uuid,
@@ -29,7 +42,10 @@ table! {
     }
 }
 
+joinable!(articles -> users (auther_id));
+
 allow_tables_to_appear_in_same_query!(
+    articles,
     follows,
     tags,
     users,
