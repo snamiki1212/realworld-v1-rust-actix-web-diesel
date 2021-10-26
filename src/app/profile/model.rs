@@ -1,6 +1,5 @@
 use crate::app::user::model::User;
 use crate::schema::follows;
-use crate::schema::follows::dsl::*;
 use anyhow::Result;
 use chrono::NaiveDateTime;
 use diesel;
@@ -29,7 +28,9 @@ impl Profile {
     }
 }
 
-#[derive(Queryable, Serialize, Deserialize, Debug, Clone)]
+#[derive(Queryable, Serialize, Deserialize, Debug, Clone, Associations)]
+#[belongs_to(User, foreign_key = "followee_id", foreign_key = "follower_id")]
+#[table_name = "follows"]
 pub struct Follow {
     pub follower_id: Uuid,
     pub followee_id: Uuid,

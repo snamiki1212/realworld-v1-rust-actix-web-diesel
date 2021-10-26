@@ -1,11 +1,17 @@
-// use crate::schema::articles::dsl::*;
+use crate::app::user::model::User;
+use crate::schema::articles;
+use crate::schema::articles::dsl::*;
+use crate::utils::converter;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
+use diesel::prelude::*;
 use diesel::Insertable;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Queryable, Debug, Serialize, Deserialize, Clone)]
+#[derive(Identifiable, Queryable, Debug, Serialize, Deserialize, Associations)]
+#[belongs_to(User, foreign_key = "author_id")]
+#[table_name = "articles"]
 pub struct Article {
     pub id: Uuid,
     pub author_id: Uuid,
@@ -16,11 +22,6 @@ pub struct Article {
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
-
-use crate::schema::articles;
-use crate::schema::articles::dsl::*;
-use crate::utils::converter;
-use diesel::prelude::*;
 
 impl Article {
     pub fn create(conn: &PgConnection, record: &NewArticle) -> Self {
