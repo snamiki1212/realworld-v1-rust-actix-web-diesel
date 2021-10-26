@@ -2,17 +2,48 @@ use super::model::{Article, NewArticle, UpdateArticle};
 use super::service;
 use super::{request, response};
 use crate::app::article::tag::model::{NewTag, Tag};
+use crate::app::user::model::User;
 use crate::middleware::auth;
+use crate::schema::{articles, tags, users};
 use crate::AppState;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
-// use diesel::Insertable;
 use uuid::Uuid;
 
 type ArticleIdSlug = Uuid;
 
-pub async fn index() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("show_articles")
+pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> impl Responder {
+    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let conn = state
+        .pool
+        .get()
+        .expect("couldn't get db connection from pool");
+
+    let offset = 0;
+    let limit = 20;
+
+    let (articles_list, articles_count) = {
+        use crate::schema::articles::dsl::*;
+        use diesel::prelude::*;
+        // TODO: move this logic to service / model
+
+        let articles_list = articles
+            .inner_join(users::table)
+            .inner_join(tags::table) // TODO: fix: fetch all references tags list. now, fetching only one.
+            .offset(offset)
+            .limit(limit)
+            .get_results::<(Article, User, Tag)>(&conn)
+            .expect("couldn't fetch articles list.");
+
+        let articles_count = articles
+            .select(diesel::dsl::count(id))
+            .first::<i64>(&conn)
+            .expect("couldn't fetch articles count.");
+
+        (articles_list, articles_count)
+    };
+    let res = response::MultipleArticlesResponse::from(articles_list, auth_user, articles_count);
+
+    HttpResponse::Ok().json(res)
 }
 
 pub async fn feed() -> impl Responder {

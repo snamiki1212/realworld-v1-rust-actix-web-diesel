@@ -1,5 +1,5 @@
 use crate::app::user::model::User;
-use crate::schema::follows;
+use crate::schema::{follows, users};
 use anyhow::Result;
 use chrono::NaiveDateTime;
 use diesel;
