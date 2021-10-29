@@ -15,6 +15,7 @@ use futures::Future;
 
 use crate::app::user::model::User;
 use crate::constants;
+use crate::middleware;
 use crate::utils::token;
 use crate::AppState;
 
@@ -82,7 +83,7 @@ where
                         //     constants::MESSAGE_INVALID_TOKEN,
                         //     constants::EMPTY,
                         // ))
-                        .json({})
+                        .json(middleware::error::ErrorResponse::from("Unauthrized user."))
                         .into_body(),
                 ))
             })

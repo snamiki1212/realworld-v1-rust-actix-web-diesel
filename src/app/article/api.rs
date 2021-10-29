@@ -1,18 +1,54 @@
 use super::model::{Article, NewArticle, UpdateArticle};
 use super::service;
 use super::{request, response};
-use crate::app::article::tag::model::{NewTag, Tag};
 use crate::middleware::auth;
 use crate::AppState;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
-// use diesel::Insertable;
+use serde::Deserialize;
 use uuid::Uuid;
 
 type ArticleIdSlug = Uuid;
 
-pub async fn index() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("show_articles")
+#[derive(Deserialize)]
+pub struct ArticlesListQueryParameter {
+    tag: Option<String>,
+    author: Option<String>,
+    favorited: Option<String>,
+    limit: Option<i64>,
+    offset: Option<i64>,
+}
+
+pub async fn index(
+    state: web::Data<AppState>,
+    req: HttpRequest,
+    params: web::Query<ArticlesListQueryParameter>,
+) -> impl Responder {
+    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let conn = state
+        .pool
+        .get()
+        .expect("couldn't get db connection from pool");
+
+    let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
+    let limit = params.limit.unwrap_or(20);
+
+    let (articles_list, articles_count) = {
+        let articles_list = service::fetch_articles_list(
+            &conn,
+            service::FetchArticlesList {
+                tag: params.tag.clone(),
+                author: params.author.clone(),
+                favorited: params.favorited.clone(),
+                offset: offset,
+                limit: limit,
+            },
+        );
+        let articles_count = service::fetch_articles_count(&conn);
+        (articles_list, articles_count)
+    };
+
+    let res = response::MultipleArticlesResponse::from(articles_list, articles_count);
+    HttpResponse::Ok().json(res)
 }
 
 pub async fn feed() -> impl Responder {

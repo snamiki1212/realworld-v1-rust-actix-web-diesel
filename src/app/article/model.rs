@@ -9,7 +9,7 @@ use diesel::Insertable;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Identifiable, Queryable, Debug, Serialize, Deserialize, Associations)]
+#[derive(Identifiable, Queryable, Debug, Serialize, Deserialize, Associations, Clone)]
 #[belongs_to(User, foreign_key = "author_id")]
 #[table_name = "articles"]
 pub struct Article {
