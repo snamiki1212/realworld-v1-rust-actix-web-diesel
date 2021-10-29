@@ -8,9 +8,22 @@ use uuid::Uuid;
 type ArticleIdSlug = String;
 type CommentIdSlug = String;
 
-pub async fn index() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("comments index")
+pub async fn index(
+    state: web::Data<AppState>,
+    req: HttpRequest,
+    path: web::Path<ArticleIdSlug>,
+) -> impl Responder {
+    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    // --
+    let conn = state
+        .pool
+        .get()
+        .expect("couldn't get db connection from pool");
+    //
+
+    let list = service::fetch_comments_list(&conn, &auth_user);
+    let res = response::MultipleCommentsResponse::from(list);
+    HttpResponse::Ok().json(res)
 }
 
 pub async fn create(

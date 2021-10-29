@@ -29,6 +29,36 @@ impl SingleCommentResponse {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct MultipleCommentsResponse {
+    pub comments: Vec<InnerComment>,
+}
+
+impl MultipleCommentsResponse {
+    pub fn from(list: Vec<(Comment, Profile)>) -> Self {
+        Self {
+            comments: list
+                .into_iter()
+                .map(|item| {
+                    let (comment, profile) = item;
+                    InnerComment {
+                        id: comment.id,
+                        createdAt: comment.created_at,
+                        updatedAt: comment.updated_at,
+                        body: comment.body,
+                        author: InnerAuthor {
+                            username: profile.username,
+                            bio: profile.bio,
+                            image: profile.image,
+                            following: profile.following,
+                        },
+                    }
+                })
+                .collect(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct InnerComment {
     pub id: Uuid,
     pub createdAt: NaiveDateTime,
