@@ -91,14 +91,7 @@ pub async fn index(
             .zip(tags_list)
             .collect::<Vec<_>>();
 
-        let articles_count = {
-            use crate::schema::articles;
-            use crate::schema::articles::dsl::*;
-            articles
-                .select(diesel::dsl::count(articles::id))
-                .first::<i64>(&conn)
-                .expect("couldn't fetch articles count.")
-        };
+        let articles_count = service::fetch_articles_count(&conn);
 
         (articles_list, articles_count)
     };

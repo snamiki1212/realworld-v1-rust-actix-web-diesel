@@ -31,3 +31,14 @@ fn create_tag_list(
         })
         .unwrap_or(vec![])
 }
+
+use crate::schema::articles;
+use crate::schema::articles::dsl::*;
+use diesel::prelude::*;
+pub fn fetch_articles_count(conn: &PgConnection) -> i64 {
+    let articles_count = articles
+        .select(diesel::dsl::count(articles::id))
+        .first::<i64>(conn)
+        .expect("couldn't fetch articles count.");
+    articles_count
+}
