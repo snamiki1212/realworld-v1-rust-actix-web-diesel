@@ -1,5 +1,5 @@
 use crate::app::article::model::Article;
-use crate::app::article::tag::model::Tag;
+use crate::app::tag::model::Tag;
 use crate::app::user::model::User;
 use serde::{Deserialize, Serialize};
 

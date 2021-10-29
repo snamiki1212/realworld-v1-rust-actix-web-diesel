@@ -5,7 +5,7 @@ use actix_web::web::{delete, get, post, put};
 pub fn api(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api")
-            .service(web::scope("/tags").route("", get().to(app::article::tag::api::index)))
+            .service(web::scope("/tags").route("", get().to(app::tag::api::index)))
             .service(
                 web::scope("/users")
                     .route("/login", post().to(app::user::api::signin))
@@ -27,14 +27,14 @@ pub fn api(cfg: &mut web::ServiceConfig) {
             )
             .service(
                 web::scope("/articles/{id}/comments")
-                    .route("", get().to(app::article::comment::api::index))
-                    .route("", post().to(app::article::comment::api::create))
-                    .route("", delete().to(app::article::comment::api::delete)),
+                    .route("", get().to(app::comment::api::index))
+                    .route("", post().to(app::comment::api::create))
+                    .route("", delete().to(app::comment::api::delete)),
             )
             .service(
                 web::scope("/articles/{id}/favorites")
-                    .route("", post().to(app::article::favorite::api::favorite))
-                    .route("", delete().to(app::article::favorite::api::unfavorite)),
+                    .route("", post().to(app::favorite::api::favorite))
+                    .route("", delete().to(app::favorite::api::unfavorite)),
             )
             .service(
                 web::scope("/articles")

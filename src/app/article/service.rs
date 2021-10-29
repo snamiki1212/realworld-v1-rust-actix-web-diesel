@@ -1,5 +1,5 @@
 use crate::app::article::model::{Article, NewArticle};
-use crate::app::article::tag::model::{NewTag, Tag};
+use crate::app::tag::model::{NewTag, Tag};
 use crate::app::user::model::User;
 use crate::schema::articles::dsl::*;
 use crate::schema::{articles, tags, users};
