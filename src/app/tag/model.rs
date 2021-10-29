@@ -39,6 +39,7 @@ impl Tag {
     pub fn create(conn: &PgConnection, records: Vec<NewTag>) -> Vec<Tag> {
         use crate::diesel::RunQueryDsl;
         use crate::schema::tags::dsl::*;
+        // TODO: validate record params are valid.
         let tags_list = diesel::insert_into(tags)
             .values(records)
             .get_results::<Tag>(conn)
