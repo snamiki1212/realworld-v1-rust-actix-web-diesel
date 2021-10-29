@@ -4,37 +4,75 @@ use super::{request, response};
 use crate::app::article::tag::model::Tag;
 use crate::app::user::model::User;
 use crate::middleware::auth;
-use crate::schema::users;
+use crate::schema::{articles, tags, users};
 use crate::AppState;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
-use diesel::associations::HasTable;
+use serde::Deserialize;
+// use diesel::associations::HasTable;
 use uuid::Uuid;
 
 type ArticleIdSlug = Uuid;
 
-pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> impl Responder {
+#[derive(Deserialize)]
+pub struct ArticlesListQueryParameter {
+    tag: Option<String>,
+    author: Option<String>,
+    favorited: Option<String>,
+    limit: Option<i64>,
+    offset: Option<i64>,
+}
+
+pub async fn index(
+    state: web::Data<AppState>,
+    req: HttpRequest,
+    params: web::Query<ArticlesListQueryParameter>,
+) -> impl Responder {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
 
-    let offset = 0;
-    let limit = 20;
+    let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
+    let limit = params.limit.unwrap_or(20);
 
     let (articles_list, articles_count) = {
-        use crate::schema::articles::dsl::*;
         use diesel::prelude::*;
         // TODO: move this logic to service / model
 
-        // TODO: get following param by auth_user
-        &auth_user;
-        let article_and_user_list = articles
-            .inner_join(users::table)
-            .offset(offset)
-            .limit(limit)
-            .get_results::<(Article, User)>(&conn)
-            .expect("couldn't fetch articles list.");
+        let article_and_user_list = {
+            let mut query = articles::table.inner_join(users::table).into_boxed();
+
+            if let Some(tag_name) = &params.tag {
+                let tagged_article_ids = tags::table
+                    .filter(tags::name.eq(tag_name))
+                    .select(tags::article_id)
+                    .load::<Uuid>(&conn)
+                    .expect("could not fetch tagged article ids.");
+                query = query.filter(articles::id.eq_any(tagged_article_ids));
+            }
+
+            if let Some(author_name) = &params.author {
+                let article_ids_by_author = users::table
+                    .inner_join(articles::table)
+                    .filter(users::username.eq(author_name))
+                    .select(articles::id)
+                    .load::<Uuid>(&conn)
+                    .expect("could not fetch authors id.");
+                query = query.filter(articles::id.eq_any(article_ids_by_author));
+            }
+
+            if let Some(favorited) = &params.favorited {
+                // TODO:
+                println!("==>favorited");
+            }
+
+            query
+                .offset(offset)
+                .limit(limit)
+                .load::<(Article, User)>(&conn)
+                .expect("couldn't fetch articles list.")
+        };
 
         let articles_list = article_and_user_list
             .clone() // TODO: avoid clone
@@ -53,15 +91,19 @@ pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> impl Respond
             .zip(tags_list)
             .collect::<Vec<_>>();
 
-        let articles_count = articles
-            .select(diesel::dsl::count(id))
-            .first::<i64>(&conn)
-            .expect("couldn't fetch articles count.");
+        let articles_count = {
+            use crate::schema::articles;
+            use crate::schema::articles::dsl::*;
+            articles
+                .select(diesel::dsl::count(articles::id))
+                .first::<i64>(&conn)
+                .expect("couldn't fetch articles count.")
+        };
 
         (articles_list, articles_count)
     };
-    let res = response::MultipleArticlesResponse::from(articles_list, articles_count);
 
+    let res = response::MultipleArticlesResponse::from(articles_list, articles_count);
     HttpResponse::Ok().json(res)
 }
 
