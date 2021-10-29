@@ -1,6 +1,7 @@
 use crate::app::profile::model::{Follow, Profile};
 use crate::schema::users;
 use crate::schema::users::dsl::*;
+use crate::schema::users::*;
 use crate::utils::token;
 use anyhow::Result;
 use bcrypt::{hash, verify, DEFAULT_COST};
@@ -12,7 +13,8 @@ use jsonwebtoken::{EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Queryable, Serialize, Deserialize, Debug, Clone)]
+#[derive(Identifiable, Queryable, Serialize, Deserialize, Debug, Clone, Associations)]
+#[table_name = "users"]
 pub struct User {
     pub id: Uuid,
     pub email: String,

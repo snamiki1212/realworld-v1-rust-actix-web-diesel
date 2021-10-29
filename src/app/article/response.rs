@@ -24,13 +24,17 @@ pub struct MultipleArticlesResponse {
     pub articlesCount: ArticleCount,
 }
 
-type Info = (Article, User, Tag);
+type Info = ((Article, User), Vec<Tag>);
 impl MultipleArticlesResponse {
-    pub fn from(info: Vec<Info>, user: User, articles_count: ArticleCount) -> Self {
+    pub fn from(info: Vec<Info>, articles_count: ArticleCount) -> Self {
         let articles = info
             .iter()
-            .map(|(article, user, tags_list)| {
-                ArticleContent::from(article.to_owned(), user.clone(), vec![tags_list.to_owned()])
+            .map(|((article, user), tags_list)| {
+                ArticleContent::from(
+                    article.to_owned(),   // TODO: avoid copy
+                    user.clone(),         // TODO: avoid copy
+                    tags_list.to_owned(), // TODO: avoid copy
+                )
             })
             .collect();
         Self {

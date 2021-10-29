@@ -1,12 +1,20 @@
+use crate::app::article::model::Article;
 use crate::schema::tags;
+// use crate::schema::tags::dsl::*;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
+// use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::Insertable;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Queryable, Debug, Serialize, Deserialize, Clone)]
+use crate::schema::*;
+use diesel::*;
+
+#[derive(Identifiable, Queryable, Debug, Serialize, Deserialize, Clone, Associations)]
+#[belongs_to(Article, foreign_key = "article_id")]
+#[table_name = "tags"]
 pub struct Tag {
     pub id: Uuid,
     pub article_id: Uuid,

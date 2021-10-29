@@ -1,12 +1,13 @@
 use super::model::{Article, NewArticle, UpdateArticle};
 use super::service;
 use super::{request, response};
-use crate::app::article::tag::model::{NewTag, Tag};
+use crate::app::article::tag::model::Tag;
 use crate::app::user::model::User;
 use crate::middleware::auth;
-use crate::schema::{articles, tags, users};
+use crate::schema::users;
 use crate::AppState;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
+use diesel::associations::HasTable;
 use uuid::Uuid;
 
 type ArticleIdSlug = Uuid;
@@ -26,13 +27,31 @@ pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> impl Respond
         use diesel::prelude::*;
         // TODO: move this logic to service / model
 
-        let articles_list = articles
+        // TODO: get following param by auth_user
+        &auth_user;
+        let article_and_user_list = articles
             .inner_join(users::table)
-            .inner_join(tags::table) // TODO: fix: fetch all references tags list. now, fetching only one.
             .offset(offset)
             .limit(limit)
-            .get_results::<(Article, User, Tag)>(&conn)
+            .get_results::<(Article, User)>(&conn)
             .expect("couldn't fetch articles list.");
+
+        let articles_list = article_and_user_list
+            .clone() // TODO: avoid clone
+            .into_iter()
+            .map(|(article, _)| article)
+            .collect::<Vec<_>>();
+
+        let tags_list = Tag::belonging_to(&articles_list)
+            .load::<Tag>(&conn)
+            .expect("could not fetch tags list.");
+
+        let tags_list: Vec<Vec<Tag>> = tags_list.grouped_by(&articles_list);
+
+        let articles_list = article_and_user_list
+            .into_iter()
+            .zip(tags_list)
+            .collect::<Vec<_>>();
 
         let articles_count = articles
             .select(diesel::dsl::count(id))
@@ -41,7 +60,7 @@ pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> impl Respond
 
         (articles_list, articles_count)
     };
-    let res = response::MultipleArticlesResponse::from(articles_list, auth_user, articles_count);
+    let res = response::MultipleArticlesResponse::from(articles_list, articles_count);
 
     HttpResponse::Ok().json(res)
 }

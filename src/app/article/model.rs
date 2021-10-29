@@ -1,6 +1,6 @@
 use crate::app::user::model::User;
+use crate::schema::articles;
 use crate::schema::articles::dsl::*;
-use crate::schema::{articles, users};
 use crate::utils::converter;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
