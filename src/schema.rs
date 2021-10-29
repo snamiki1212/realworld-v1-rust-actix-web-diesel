@@ -12,6 +12,17 @@ table! {
 }
 
 table! {
+    comments (id) {
+        id -> Uuid,
+        article_id -> Uuid,
+        author_id -> Uuid,
+        body -> Text,
+        create_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     follows (follower_id, followee_id) {
         followee_id -> Uuid,
         follower_id -> Uuid,
@@ -44,10 +55,13 @@ table! {
 }
 
 joinable!(articles -> users (author_id));
+joinable!(comments -> articles (article_id));
+joinable!(comments -> users (author_id));
 joinable!(tags -> articles (article_id));
 
 allow_tables_to_appear_in_same_query!(
     articles,
+    comments,
     follows,
     tags,
     users,
