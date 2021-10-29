@@ -10,7 +10,7 @@ pub struct FetchProfileByName {
 pub fn fetch_by_name(conn: &PgConnection, params: &FetchProfileByName) -> Profile {
     let FetchProfileByName { me, username } = params;
     let followee = User::find_by_username(&conn, username).expect("couldn't find user.");
-    let profile = fetch_by_id(
+    let profile = fetch_profile_by_id(
         &conn,
         &FetchProfileById {
             me: me.to_owned(),
@@ -24,7 +24,7 @@ pub struct FetchProfileById {
     pub me: User,
     pub id: Uuid,
 }
-pub fn fetch_by_id(conn: &PgConnection, params: &FetchProfileById) -> Profile {
+pub fn fetch_profile_by_id(conn: &PgConnection, params: &FetchProfileById) -> Profile {
     let FetchProfileById { me, id } = params;
     let is_following = me.is_following(&conn, id);
     let profile = Profile {

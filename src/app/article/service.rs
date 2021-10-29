@@ -1,4 +1,7 @@
 use crate::app::article::model::{Article, NewArticle};
+use crate::app::profile;
+use crate::app::profile::model::Profile;
+use crate::app::profile::service::FetchProfileById;
 use crate::app::tag::model::{NewTag, Tag};
 use crate::app::user::model::User;
 use crate::schema::articles::dsl::*;
@@ -110,4 +113,32 @@ pub fn fetch_articles_list(
         .collect::<Vec<_>>();
 
     articles_list
+}
+
+pub struct FetchArticle {
+    pub article_id: Uuid,
+    pub me: User,
+}
+pub fn fetch_article(conn: &PgConnection, params: &FetchArticle) -> (Article, Profile, Vec<Tag>) {
+    use diesel::prelude::*;
+    let FetchArticle { article_id, me } = params;
+    let (article, author) = articles
+        .inner_join(users::table)
+        .filter(articles::id.eq(article_id))
+        .get_result::<(Article, User)>(conn)
+        .expect("could not fetch article by id.");
+
+    let profile = profile::service::fetch_profile_by_id(
+        &conn,
+        &FetchProfileById {
+            me: me.to_owned(),
+            id: author.id,
+        },
+    );
+
+    let tags_list = Tag::belonging_to(&article)
+        .load::<Tag>(conn)
+        .expect("could not fetch tags list.");
+
+    (article, profile, tags_list)
 }

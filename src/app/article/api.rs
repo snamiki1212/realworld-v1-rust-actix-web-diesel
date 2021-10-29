@@ -56,9 +56,30 @@ pub async fn feed() -> impl Responder {
     HttpResponse::Ok().body("feed of articles")
 }
 
-pub async fn show() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("detail_article")
+pub async fn show(
+    state: web::Data<AppState>,
+    req: HttpRequest,
+    path: web::Path<ArticleIdSlug>,
+) -> impl Responder {
+    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    // --
+    let conn = state
+        .pool
+        .get()
+        .expect("couldn't get db connection from pool");
+    //
+    let article_id = path.into_inner();
+    let (article, profile, tags_list) = service::fetch_article(
+        &conn,
+        &service::FetchArticle {
+            article_id: article_id,
+            me: auth_user,
+        },
+    );
+
+    let res = response::SingleArticleResponse::from(article, profile, tags_list);
+
+    HttpResponse::Ok().json(res)
 }
 
 pub async fn create(
@@ -84,7 +105,8 @@ pub async fn create(
         },
         &form.article.tagList,
     );
-    let res = response::SingleArticleResponse::from(article, auth_user.clone(), tag_list);
+    let res =
+        response::SingleArticleResponse::DEPRECATED_from(article, auth_user.clone(), tag_list);
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -125,7 +147,7 @@ pub async fn update(
         (article, tag_list)
     };
 
-    let res = response::SingleArticleResponse::from(article, auth_user, tag_list);
+    let res = response::SingleArticleResponse::DEPRECATED_from(article, auth_user, tag_list);
     HttpResponse::Ok().json(res)
 }
 
