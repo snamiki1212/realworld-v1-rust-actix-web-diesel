@@ -33,3 +33,33 @@ pub fn create(conn: &PgConnection, params: &CreateCommentService) -> (Comment, P
     );
     (comment, profile)
 }
+
+pub fn fetch_comments_list(conn: &PgConnection, me: &User) -> Vec<(Comment, Profile)> {
+    use crate::schema::comments;
+    use crate::schema::comments::dsl::*;
+    use crate::schema::follows;
+    use crate::schema::users;
+    use diesel::prelude::*;
+    let _comments = comments
+        .inner_join(users::table)
+        .filter(comments::article_id.eq(article_id))
+        .get_results::<(Comment, User)>(conn)
+        .expect("could not fetch comments list.");
+
+    let _comments = _comments
+        .iter()
+        .map(|(_comment, _user)| {
+            // TODO: avoid N+1. Write one query to fetch all data somehow.
+            let profile = fetch_profile_by_id(
+                &conn,
+                &FetchProfileById {
+                    me: me.to_owned(),
+                    id: _user.id,
+                },
+            );
+            (_comment.to_owned(), profile)
+        })
+        .collect::<Vec<(Comment, Profile)>>();
+
+    _comments
+}
