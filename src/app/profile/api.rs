@@ -24,9 +24,9 @@ pub async fn show(
 
     let _username = path.into_inner();
 
-    let profile = service::fetch(
+    let profile = service::fetch_by_name(
         &conn,
-        &service::FetchProfile {
+        &service::FetchProfileByName {
             me: me.to_owned(),
             username: _username,
         },
