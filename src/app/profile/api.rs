@@ -1,3 +1,4 @@
+use super::service;
 use crate::app::profile;
 use crate::app::user::model::User;
 use crate::AppState;
@@ -12,7 +13,7 @@ pub async fn show(
 ) -> impl Responder {
     let head = req.head();
     let extensions = head.extensions();
-    let user = extensions
+    let me = extensions
         .get::<User>()
         .expect("couldn't get user on req extension.");
 
@@ -21,10 +22,16 @@ pub async fn show(
         .get()
         .expect("couldn't get db connection from pool");
 
-    let username = path.into_inner();
-    let profile = user
-        .get_profile(&conn, &username)
-        .expect("couldn't find profile by name");
+    let _username = path.into_inner();
+
+    let profile = service::fetch(
+        &conn,
+        &service::FetchProfile {
+            me: me.to_owned(),
+            username: _username,
+        },
+    );
+
     let res = profile::response::ProfileResponse::from(profile);
     HttpResponse::Ok().json(res)
 }

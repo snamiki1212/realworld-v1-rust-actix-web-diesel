@@ -57,7 +57,7 @@ pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
     let user = auth::access_auth_user(&req);
 
     if let Some(user) = user {
-        let user = response::UserResponse::from(user.clone(), user.generate_token());
+        let user = response::UserResponse::from(user.to_owned(), user.generate_token());
         Ok(HttpResponse::Ok().json(user))
     } else {
         Ok(HttpResponse::Ok().json({}))
