@@ -19,7 +19,7 @@ impl std::convert::From<(Article, Profile, Vec<Tag>)> for SingleArticleResponse 
                 title: article.title,
                 description: article.description,
                 body: article.body,
-                tag_list: tag_list
+                tagList: tag_list
                     .iter()
                     .map(move |tag| tag.name.to_owned())
                     .collect(),
@@ -76,9 +76,10 @@ pub struct ArticleContent {
     pub title: String,
     pub description: String,
     pub body: String,
-    pub tag_list: Vec<String>, // TODO: tagList
+    pub tagList: Vec<String>,
     pub createdAt: String,
     pub updatedAt: String,
+    // TODO: add favorited info
     // pub favorited,
     // pub favoritesCount,
     pub author: AuthorContent,
@@ -91,7 +92,7 @@ impl ArticleContent {
             title: article.title,
             description: article.description,
             body: article.body,
-            tag_list: tag_list.iter().map(move |tag| tag.name.clone()).collect(),
+            tagList: tag_list.iter().map(move |tag| tag.name.clone()).collect(),
             createdAt: article.created_at.to_string(),
             updatedAt: article.updated_at.to_string(),
             author: AuthorContent {
