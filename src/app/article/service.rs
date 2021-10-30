@@ -10,14 +10,35 @@ use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use uuid::Uuid;
 
-pub fn create(
-    conn: &PgConnection,
-    new_article: &NewArticle,
-    tag_list: &Option<Vec<String>>,
-) -> (Article, Vec<Tag>) {
-    let article = Article::create(&conn, &new_article);
-    let tag_list = create_tag_list(&conn, &tag_list, &article);
-    (article, tag_list)
+pub struct CreateArticleSerivce {
+    pub author_id: Uuid,
+    pub slug: String,
+    pub title: String,
+    pub description: String,
+    pub body: String,
+    pub tag_list: Option<Vec<String>>,
+    pub me: User,
+}
+pub fn create(conn: &PgConnection, params: &CreateArticleSerivce) -> (Article, Profile, Vec<Tag>) {
+    let article = Article::create(
+        &conn,
+        &NewArticle {
+            author_id: params.author_id,
+            slug: params.slug.to_owned(),
+            title: params.title.to_owned(),
+            description: params.description.to_owned(),
+            body: params.body.to_owned(),
+        },
+    );
+    let tag_list = create_tag_list(&conn, &params.tag_list, &article);
+    let profile = profile::service::fetch_profile_by_id(
+        &conn,
+        &FetchProfileById {
+            me: params.me.to_owned(),
+            id: article.author_id,
+        },
+    );
+    (article, profile, tag_list)
 }
 
 fn create_tag_list(

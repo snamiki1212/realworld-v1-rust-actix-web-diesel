@@ -116,19 +116,19 @@ pub async fn create(
         .get()
         .expect("couldn't get db connection from pool");
 
-    let (article, tag_list) = service::create(
+    let (article, profile, tag_list) = service::create(
         &conn,
-        &NewArticle {
+        &service::CreateArticleSerivce {
             author_id: auth_user.id,
             title: form.article.title.clone(),
             slug: Article::convert_title_to_slug(&form.article.title),
             description: form.article.description.clone(),
             body: form.article.body.clone(),
+            tag_list: form.article.tagList.to_owned(),
+            me: auth_user,
         },
-        &form.article.tagList,
     );
-    let res =
-        response::SingleArticleResponse::DEPRECATED_from(article, auth_user.clone(), tag_list);
+    let res = response::SingleArticleResponse::from((article, profile, tag_list));
     Ok(HttpResponse::Ok().json(res))
 }
 

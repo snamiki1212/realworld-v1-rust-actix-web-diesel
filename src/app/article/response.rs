@@ -36,14 +36,6 @@ impl std::convert::From<(Article, Profile, Vec<Tag>)> for SingleArticleResponse 
     }
 }
 
-impl SingleArticleResponse {
-    pub fn DEPRECATED_from(article: Article, user: User, tag_list: Vec<Tag>) -> Self {
-        Self {
-            article: ArticleContent::DEPRECATED_from(article, user, tag_list),
-        }
-    }
-}
-
 #[derive(Deserialize, Serialize)]
 pub struct MultipleArticlesResponse {
     pub articles: Vec<ArticleContent>,
