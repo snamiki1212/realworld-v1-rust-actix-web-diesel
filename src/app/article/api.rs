@@ -144,28 +144,25 @@ pub async fn update(
         .get()
         .expect("couldn't get db connection from pool");
     let article_id = path.into_inner();
+    // TODO: validation deletable auth_user.id == article.author_id ?
+    let article_slug = &form
+        .article
+        .title
+        .as_ref()
+        .map(|_title| Article::convert_title_to_slug(_title));
 
-    let (article, tag_list) = {
-        // TODO: move this logic to service
-        // TODO: validation deletable auth_user.id == article.author_id ?
-        let new_slug = &form
-            .article
-            .title
-            .as_ref()
-            .map(|_title| Article::convert_title_to_slug(_title));
-        let article = Article::update(
-            &conn,
-            &article_id,
-            &UpdateArticle {
-                slug: new_slug.to_owned(),
-                title: form.article.title.clone(),
-                description: form.article.description.clone(),
-                body: form.article.body.clone(),
-            },
-        );
-        let tag_list = vec![]; // TODO: fetch tag list
-        (article, tag_list)
-    };
+    // validation: slug is not empty
+
+    let (article, tag_list) = service::update_article(
+        &conn,
+        &service::UpdateArticleService {
+            article_id,
+            slug: article_slug.to_owned(),
+            title: form.article.title.clone(),
+            description: form.article.description.clone(),
+            body: form.article.body.clone(),
+        },
+    );
 
     let res = response::SingleArticleResponse::DEPRECATED_from(article, auth_user, tag_list);
     HttpResponse::Ok().json(res)

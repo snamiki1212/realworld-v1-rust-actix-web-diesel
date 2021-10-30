@@ -1,4 +1,4 @@
-use crate::app::article::model::{Article, NewArticle};
+use crate::app::article::model::{Article, NewArticle, UpdateArticle};
 use crate::app::profile;
 use crate::app::profile::model::Profile;
 use crate::app::profile::service::FetchProfileById;
@@ -201,4 +201,26 @@ pub fn fetch_following_articles(
         .expect("couldn't fetch articles count.");
 
     (articles_list, articles_count)
+}
+
+pub struct UpdateArticleService {
+    pub article_id: Uuid,
+    pub slug: Option<String>,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub body: Option<String>,
+}
+pub fn update_article(conn: &PgConnection, params: &UpdateArticleService) -> (Article, Vec<Tag>) {
+    let article = Article::update(
+        &conn,
+        &params.article_id,
+        &UpdateArticle {
+            slug: params.slug.to_owned(),
+            title: params.title.to_owned(),
+            description: params.description.to_owned(),
+            body: params.body.to_owned(),
+        },
+    );
+    let tag_list = Tag::fetch_list_by_article_id(&conn, params.article_id);
+    (article, tag_list)
 }
