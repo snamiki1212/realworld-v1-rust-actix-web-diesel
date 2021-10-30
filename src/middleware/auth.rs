@@ -1,6 +1,8 @@
-use std::pin::Pin;
-use std::task::{Context, Poll};
-
+use crate::app::user::model::User;
+use crate::constants;
+use crate::middleware;
+use crate::utils::token;
+use crate::AppState;
 use actix_service::{Service, Transform};
 use actix_web::HttpMessage;
 use actix_web::{
@@ -12,12 +14,8 @@ use actix_web::{
 };
 use futures::future::{ok, Ready};
 use futures::Future;
-
-use crate::app::user::model::User;
-use crate::constants;
-use crate::middleware;
-use crate::utils::token;
-use crate::AppState;
+use std::pin::Pin;
+use std::task::{Context, Poll};
 
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
@@ -66,23 +64,16 @@ where
     }
 
     fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
-        // println!("Hi from start. You requested: {}", req.path());
         if should_skip_verify(&req) || verify(&mut req) {
-            // println!("[middleware]auth passed");
             let fut = self.service.call(req);
             Box::pin(async move {
                 let res = fut.await?;
                 Ok(res)
             })
         } else {
-            // println!("[middleware]auth not passed");
             Box::pin(async move {
                 Ok(req.into_response(
                     HttpResponse::Unauthorized()
-                        // .json(ResponseBody::new(
-                        //     constants::MESSAGE_INVALID_TOKEN,
-                        //     constants::EMPTY,
-                        // ))
                         .json(middleware::error::ErrorResponse::from("Unauthrized user."))
                         .into_body(),
                 ))
@@ -146,6 +137,7 @@ fn verify(req: &mut ServiceRequest) -> bool {
 pub fn access_auth_user(req: &HttpRequest) -> Option<User> {
     let head = req.head();
     let extensions = head.extensions();
-    let auth_user = extensions.get::<User>().map(|user| user.to_owned());
+    let _user = extensions.get::<User>();
+    let auth_user = _user.map(|user| user.to_owned());
     auth_user
 }
