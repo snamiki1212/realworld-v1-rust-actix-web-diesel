@@ -28,7 +28,6 @@ pub async fn index(
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
 
@@ -88,12 +87,10 @@ pub async fn show(
     path: web::Path<ArticleIdSlug>,
 ) -> impl Responder {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    // --
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-    //
     let article_id = path.into_inner();
     let (article, profile, tags_list) = service::fetch_article(
         &conn,
@@ -114,7 +111,6 @@ pub async fn create(
     form: web::Json<request::CreateArticleRequest>,
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    // --
     let conn = state
         .pool
         .get()
@@ -143,12 +139,10 @@ pub async fn update(
     form: web::Json<request::UpdateArticleRequest>,
 ) -> impl Responder {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    // --
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-    //
     let article_id = path.into_inner();
 
     let (article, tag_list) = {
@@ -183,12 +177,10 @@ pub async fn delete(
     path: web::Path<ArticleIdSlug>,
 ) -> impl Responder {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    // --
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-    //
     let article_id = path.into_inner();
 
     {

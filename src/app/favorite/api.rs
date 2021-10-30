@@ -15,12 +15,10 @@ pub async fn favorite(
     path: web::Path<ArticleIdSlug>,
 ) -> impl Responder {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    // --
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-    //
     let article_id = path.into_inner();
     let article_id = Uuid::parse_str(&article_id).expect("invalid url:article id is invalid."); // TODO: validate
 
@@ -44,12 +42,10 @@ pub async fn unfavorite(
     path: web::Path<ArticleIdSlug>,
 ) -> impl Responder {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    // --
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-    //
     let article_id = path.into_inner();
     let article_id = Uuid::parse_str(&article_id).expect("invalid url:article id is invalid."); // TODO: validate
 

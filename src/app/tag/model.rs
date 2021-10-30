@@ -1,16 +1,13 @@
 use crate::app::article::model::Article;
 use crate::schema::tags;
-// use crate::schema::tags::dsl::*;
+use crate::schema::*;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
-// use diesel::prelude::*;
 use diesel::result::Error;
 use diesel::Insertable;
+use diesel::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
-use crate::schema::*;
-use diesel::*;
 
 #[derive(Identifiable, Queryable, Debug, Serialize, Deserialize, Clone, Associations)]
 #[belongs_to(Article, foreign_key = "article_id")]
@@ -28,11 +25,7 @@ impl Tag {
         use crate::schema;
         use diesel::prelude::*;
         use schema::tags::dsl::*;
-
-        let list = tags
-            // .filter(name.eq("react"))
-            .limit(5)
-            .load::<Tag>(conn);
+        let list = tags.load::<Tag>(conn);
         list
     }
 

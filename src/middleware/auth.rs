@@ -76,7 +76,9 @@ where
             Box::pin(async move {
                 Ok(req.into_response(
                     HttpResponse::Unauthorized()
-                        .json(middleware::error::ErrorResponse::from("Unauthrized user."))
+                        .json(middleware::error::ErrorResponse::from(
+                            constants::error_msg::UNAUTHRIZED,
+                        ))
                         .into_body(),
                 ))
             })
@@ -144,5 +146,6 @@ pub fn access_auth_user(req: &HttpRequest) -> Option<User> {
     let extensions = head.extensions();
     let _user = extensions.get::<User>();
     let auth_user = _user.map(|user| user.to_owned());
+    // auth_user.ok_or("ok")
     auth_user
 }

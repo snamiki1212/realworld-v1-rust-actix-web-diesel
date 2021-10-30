@@ -4,10 +4,6 @@ use crate::middleware::auth;
 use crate::AppState;
 use actix_web::{web, HttpRequest, HttpResponse};
 
-// use crate::schema::users;
-// use crate::AppState;
-// use serde::{Deserialize, Serialize};
-
 pub async fn signin(
     state: web::Data<AppState>,
     form: web::Json<request::Signin>,

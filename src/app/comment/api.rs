@@ -10,12 +10,10 @@ type CommentIdSlug = String;
 
 pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> impl Responder {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    // --
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-    //
 
     let list = service::fetch_comments_list(&conn, &auth_user);
     let res = response::MultipleCommentsResponse::from(list);
@@ -29,12 +27,10 @@ pub async fn create(
     form: web::Json<request::CreateCommentRequest>,
 ) -> impl Responder {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    // --
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-    //
     let article_id = path.into_inner();
     let article_id = Uuid::parse_str(&article_id).expect("invalid url:article id is invalid.");
 
@@ -59,12 +55,10 @@ pub async fn delete(
     path: web::Path<(ArticleIdSlug, CommentIdSlug)>,
 ) -> impl Responder {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    // --
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-    //
     let (article_id, comment_id) = path.into_inner();
     let article_id = Uuid::parse_str(&article_id).expect("invalid url:article id is invalid.");
     let comment_id = Uuid::parse_str(&comment_id).expect("invalid url:comment id is invalid.");

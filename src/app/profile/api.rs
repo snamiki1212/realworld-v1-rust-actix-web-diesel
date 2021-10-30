@@ -1,6 +1,6 @@
 use super::service;
 use crate::app::profile;
-use crate::app::user::model::User;
+use crate::middleware::auth::access_auth_user;
 use crate::AppState;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
 
@@ -11,17 +11,11 @@ pub async fn show(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> impl Responder {
-    let head = req.head();
-    let extensions = head.extensions();
-    let me = extensions
-        .get::<User>()
-        .expect("couldn't get user on req extension.");
-
+    let me = access_auth_user(&req).expect("couldn't get user on req extension.");
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-
     let _username = path.into_inner();
 
     let profile = service::fetch_by_name(
@@ -41,17 +35,11 @@ pub async fn follow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> impl Responder {
-    let head = req.head();
-    let extensions = head.extensions();
-    let user = extensions
-        .get::<User>()
-        .expect("couldn't get user on req extension.");
-
+    let user = access_auth_user(&req).expect("couldn't get user on req extension.");
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-
     let username = path.into_inner();
 
     let profile = user.follow(&conn, &username).expect("couldn't follow user");
@@ -63,17 +51,11 @@ pub async fn unfollow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> impl Responder {
-    let head = req.head();
-    let extensions = head.extensions();
-    let user = extensions
-        .get::<User>()
-        .expect("couldn't get user on req extension.");
-
+    let user = access_auth_user(&req).expect("couldn't get user on req extension.");
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-
     let username = path.into_inner();
 
     let profile = user
