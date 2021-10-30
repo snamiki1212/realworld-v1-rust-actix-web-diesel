@@ -1,4 +1,5 @@
-use crate::app::profile::model::{Follow, Profile};
+use crate::app::follow::model::{Follow, NewFollow};
+use crate::app::profile::model::Profile;
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use crate::schema::users::*;
@@ -103,7 +104,7 @@ impl User {
             .expect("could not find user by name.");
 
         {
-            use crate::app::profile::model::NewFollow;
+            // TODO: move to service or model
             use crate::schema::follows::dsl::*;
             diesel::insert_into(follows)
                 .values(&NewFollow {
