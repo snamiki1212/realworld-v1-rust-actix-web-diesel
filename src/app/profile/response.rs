@@ -1,6 +1,6 @@
 use crate::app::profile::model::Profile as ProfileModel;
 use serde::{Deserialize, Serialize};
-
+use std::convert::From;
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct ProfileResponse {
     pub profile: ProfileContent,
@@ -14,7 +14,7 @@ pub struct ProfileContent {
     pub following: bool,
 }
 
-impl std::convert::From<ProfileModel> for ProfileResponse {
+impl From<ProfileModel> for ProfileResponse {
     fn from(profile_model: ProfileModel) -> Self {
         let inner = ProfileContent {
             username: profile_model.username,

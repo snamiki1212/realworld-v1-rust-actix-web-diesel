@@ -3,7 +3,7 @@ use crate::app::profile::model::Profile;
 use crate::app::tag::model::Tag;
 use crate::app::user::model::User;
 use serde::{Deserialize, Serialize};
-
+use std::convert::From;
 type ArticleCount = i64;
 
 #[derive(Deserialize, Serialize)]
@@ -11,7 +11,7 @@ pub struct SingleArticleResponse {
     pub article: ArticleContent,
 }
 
-impl std::convert::From<(Article, Profile, Vec<Tag>)> for SingleArticleResponse {
+impl From<(Article, Profile, Vec<Tag>)> for SingleArticleResponse {
     fn from((article, profile, tag_list): (Article, Profile, Vec<Tag>)) -> Self {
         Self {
             article: ArticleContent {
@@ -43,7 +43,7 @@ pub struct MultipleArticlesResponse {
 }
 
 type Info = ((Article, User), Vec<Tag>);
-impl std::convert::From<(Vec<Info>, ArticleCount)> for MultipleArticlesResponse {
+impl From<(Vec<Info>, ArticleCount)> for MultipleArticlesResponse {
     fn from((info, articles_count): (Vec<Info>, ArticleCount)) -> Self {
         let articles = info
             .iter()

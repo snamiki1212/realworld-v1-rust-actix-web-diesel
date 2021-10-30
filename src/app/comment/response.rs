@@ -2,14 +2,14 @@ use crate::app::comment::model::Comment;
 use crate::app::profile::model::Profile;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use std::convert::From;
 use uuid::Uuid;
-
 #[derive(Serialize, Deserialize)]
 pub struct SingleCommentResponse {
     pub comment: InnerComment,
 }
 
-impl std::convert::From<(Comment, Profile)> for SingleCommentResponse {
+impl From<(Comment, Profile)> for SingleCommentResponse {
     fn from((comment, profile): (Comment, Profile)) -> Self {
         Self {
             comment: InnerComment {
@@ -33,7 +33,7 @@ pub struct MultipleCommentsResponse {
     pub comments: Vec<InnerComment>,
 }
 
-impl std::convert::From<Vec<(Comment, Profile)>> for MultipleCommentsResponse {
+impl From<Vec<(Comment, Profile)>> for MultipleCommentsResponse {
     fn from(list: Vec<(Comment, Profile)>) -> Self {
         Self {
             comments: list

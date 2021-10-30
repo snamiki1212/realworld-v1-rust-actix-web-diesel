@@ -1,11 +1,12 @@
 use crate::app::user::model::User;
 use serde::{Deserialize, Serialize};
+use std::convert::From;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct UserResponse {
     pub user: AuthUser,
 }
-impl std::convert::From<(User, String)> for UserResponse {
+impl From<(User, String)> for UserResponse {
     fn from((user, token): (User, String)) -> Self {
         // REF: https://gothinkster.github.io/realworld/docs/specs/backend-specs/api-response-format/#users-for-authentication
         Self {
