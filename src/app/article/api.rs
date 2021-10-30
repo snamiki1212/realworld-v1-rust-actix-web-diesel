@@ -40,6 +40,7 @@ pub async fn index(
                 favorited: params.favorited.clone(),
                 offset: offset,
                 limit: limit,
+                me: auth_user,
             },
         );
         let articles_count = service::fetch_articles_count(&conn);

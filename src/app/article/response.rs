@@ -42,9 +42,9 @@ pub struct MultipleArticlesResponse {
     pub articlesCount: ArticleCount,
 }
 
-type Info = ((Article, User), Vec<Tag>);
-impl From<(Vec<Info>, ArticleCount)> for MultipleArticlesResponse {
-    fn from((info, articles_count): (Vec<Info>, ArticleCount)) -> Self {
+type DEPRECATED_Info = ((Article, User), Vec<Tag>);
+impl From<(Vec<DEPRECATED_Info>, ArticleCount)> for MultipleArticlesResponse {
+    fn from((info, articles_count): (Vec<DEPRECATED_Info>, ArticleCount)) -> Self {
         let articles = info
             .iter()
             .map(|((article, user), tags_list)| {
@@ -53,6 +53,22 @@ impl From<(Vec<Info>, ArticleCount)> for MultipleArticlesResponse {
                     user.clone(),         // TODO: avoid copy
                     tags_list.to_owned(), // TODO: avoid copy
                 )
+            })
+            .collect();
+        Self {
+            articlesCount: articles_count,
+            articles: articles,
+        }
+    }
+}
+
+type Info = ((Article, Profile), Vec<Tag>);
+impl From<(Vec<Info>, ArticleCount)> for MultipleArticlesResponse {
+    fn from((info, articles_count): (Vec<Info>, ArticleCount)) -> Self {
+        let articles = info
+            .iter()
+            .map(|((article, profile), tags_list)| {
+                ArticleContent::from(article.to_owned(), profile.to_owned(), tags_list.to_owned())
             })
             .collect();
         Self {
@@ -78,6 +94,24 @@ pub struct ArticleContent {
 }
 
 impl ArticleContent {
+    pub fn from(article: Article, profile: Profile, tag_list: Vec<Tag>) -> Self {
+        Self {
+            slug: article.slug,
+            title: article.title,
+            description: article.description,
+            body: article.body,
+            tagList: tag_list.iter().map(move |tag| tag.name.clone()).collect(),
+            createdAt: article.created_at.to_string(),
+            updatedAt: article.updated_at.to_string(),
+            author: AuthorContent {
+                username: profile.username,
+                bio: profile.bio,
+                image: profile.image,
+                following: profile.following,
+            },
+        }
+    }
+
     pub fn DEPRECATED_from(article: Article, user: User, tag_list: Vec<Tag>) -> Self {
         Self {
             slug: article.slug,
