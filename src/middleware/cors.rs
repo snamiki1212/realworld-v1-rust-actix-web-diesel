@@ -1,9 +1,10 @@
+use crate::constants::env_key;
 use actix_cors::Cors;
 use actix_web::http;
 use std::env;
 
 pub fn cors() -> Cors {
-    let frontend_origin = env::var("FRONTEND_ORIGIN").ok();
+    let frontend_origin = env::var(env_key::FRONTEND_ORIGIN).ok();
     let frontend_origin = frontend_origin.ok_or("*").unwrap();
 
     let cors = Cors::default()
