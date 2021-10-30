@@ -23,6 +23,16 @@ table! {
 }
 
 table! {
+    favorites (id) {
+        id -> Uuid,
+        article_id -> Uuid,
+        user_id -> Uuid,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     follows (follower_id, followee_id) {
         followee_id -> Uuid,
         follower_id -> Uuid,
@@ -57,11 +67,14 @@ table! {
 joinable!(articles -> users (author_id));
 joinable!(comments -> articles (article_id));
 joinable!(comments -> users (author_id));
+joinable!(favorites -> articles (article_id));
+joinable!(favorites -> users (user_id));
 joinable!(tags -> articles (article_id));
 
 allow_tables_to_appear_in_same_query!(
     articles,
     comments,
+    favorites,
     follows,
     tags,
     users,
