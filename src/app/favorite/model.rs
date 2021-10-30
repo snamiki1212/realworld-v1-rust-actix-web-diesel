@@ -27,11 +27,27 @@ impl Favorite {
 
         item
     }
+
+    pub fn unfavorite(conn: &PgConnection, params: &UnfavoriteAction) -> usize {
+        use crate::schema::favorites;
+        use crate::schema::favorites::dsl::*;
+        let item = diesel::delete(favorites::table)
+            .filter(favorites::user_id.eq_all(params.user_id))
+            .filter(favorites::article_id.eq_all(params.article_id))
+            .execute(conn)
+            .expect("could not unfavorite.");
+        item
+    }
 }
 
 #[derive(Insertable)]
 #[table_name = "favorites"]
 pub struct FavorteAction {
+    pub user_id: Uuid,
+    pub article_id: Uuid,
+}
+
+pub struct UnfavoriteAction {
     pub user_id: Uuid,
     pub article_id: Uuid,
 }
