@@ -118,44 +118,51 @@ pub fn fetch_articles_list(
             .expect("couldn't fetch articles list.")
     };
 
-    let articles_list = article_and_user_list
-        .clone() // TODO: avoid clone
-        .into_iter()
-        .map(|(article, _)| article)
-        .collect::<Vec<_>>();
+    let tags_list = {
+        let articles_list = article_and_user_list
+            .clone() // TODO: avoid clone
+            .into_iter()
+            .map(|(article, _)| article)
+            .collect::<Vec<_>>();
 
-    let user_ids_list = article_and_user_list
-        .clone() // TODO: avoid clone
-        .into_iter()
-        .map(|(_, user)| user.id)
-        .collect::<Vec<_>>();
+        let tags_list = Tag::belonging_to(&articles_list)
+            .load::<Tag>(conn)
+            .expect("could not fetch tags list.");
 
-    let tags_list = Tag::belonging_to(&articles_list)
-        .load::<Tag>(conn)
-        .expect("could not fetch tags list.");
+        let tags_list: Vec<Vec<Tag>> = tags_list.grouped_by(&articles_list);
+        tags_list
+    };
 
-    let tags_list: Vec<Vec<Tag>> = tags_list.grouped_by(&articles_list);
+    let article_and_profile_list = {
+        let user_ids_list = article_and_user_list
+            .clone() // TODO: avoid clone
+            .into_iter()
+            .map(|(_, user)| user.id)
+            .collect::<Vec<_>>();
 
-    let follows_list = follows::table
-        .filter(follows::follower_id.eq(params.me.id))
-        .filter(follows::followee_id.eq_any(user_ids_list))
-        .get_results::<Follow>(conn)
-        .expect("could not fetch follow.");
+        let follows_list = follows::table
+            .filter(follows::follower_id.eq(params.me.id))
+            .filter(follows::followee_id.eq_any(user_ids_list))
+            .get_results::<Follow>(conn)
+            .expect("could not fetch follow.");
 
-    let follows_list = follows_list.into_iter();
-    let article_and_profile_list = article_and_user_list
-        .into_iter()
-        .map(|(article, user)| {
-            let following = follows_list.clone().any(|item| item.followee_id == user.id);
-            let profile = Profile {
-                username: user.username,
-                bio: user.bio,
-                image: user.image,
-                following: following.to_owned(),
-            };
-            (article, profile)
-        })
-        .collect::<Vec<_>>();
+        let follows_list = follows_list.into_iter();
+        let article_and_profile_list = article_and_user_list
+            .into_iter()
+            .map(|(article, user)| {
+                let following = follows_list.clone().any(|item| item.followee_id == user.id);
+                let profile = Profile {
+                    username: user.username,
+                    bio: user.bio,
+                    image: user.image,
+                    following: following.to_owned(),
+                };
+                (article, profile)
+            })
+            .collect::<Vec<_>>();
+
+        article_and_profile_list
+    };
 
     let articles_list = article_and_profile_list
         .into_iter()
