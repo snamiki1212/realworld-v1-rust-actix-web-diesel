@@ -1,6 +1,7 @@
 use crate::app::user::model::User;
 use crate::schema::follows;
 use chrono::NaiveDateTime;
+use diesel::pg::PgConnection;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -12,6 +13,16 @@ pub struct Follow {
     pub follower_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+}
+
+impl Follow {
+    pub fn create_follow(conn: &PgConnection, params: &NewFollow) {
+        use diesel::prelude::*;
+        diesel::insert_into(follows::table)
+            .values(params)
+            .execute(conn)
+            .expect("couldn't insert follow.");
+    }
 }
 
 #[derive(Insertable)]

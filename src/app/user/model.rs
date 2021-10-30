@@ -103,17 +103,14 @@ impl User {
             .first::<User>(conn)
             .expect("could not find user by name.");
 
-        {
-            // TODO: move to service or model
-            use crate::schema::follows::dsl::*;
-            diesel::insert_into(follows)
-                .values(&NewFollow {
-                    follower_id: self.id,
-                    followee_id: followee.id,
-                })
-                .execute(conn)
-                .expect("couldn't insert follow.");
-        };
+        Follow::create_follow(
+            &conn,
+            &NewFollow {
+                follower_id: self.id,
+                followee_id: followee.id,
+            },
+        );
+
         let profile = Profile {
             username: self.username.clone(),
             bio: self.bio.clone(),
