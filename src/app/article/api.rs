@@ -151,11 +151,12 @@ pub async fn update(
         .as_ref()
         .map(|_title| Article::convert_title_to_slug(_title));
 
-    // validation: slug is not empty
+    // TODO: validation: slug is not empty
 
-    let (article, tag_list) = service::update_article(
+    let (article, profile, tag_list) = service::update_article(
         &conn,
         &service::UpdateArticleService {
+            me: auth_user,
             article_id,
             slug: article_slug.to_owned(),
             title: form.article.title.clone(),
@@ -164,7 +165,7 @@ pub async fn update(
         },
     );
 
-    let res = response::SingleArticleResponse::DEPRECATED_from(article, auth_user, tag_list);
+    let res = response::SingleArticleResponse::from((article, profile, tag_list));
     HttpResponse::Ok().json(res)
 }
 

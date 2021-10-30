@@ -1,7 +1,7 @@
 use crate::app::article::model::{Article, NewArticle, UpdateArticle};
 use crate::app::profile;
 use crate::app::profile::model::Profile;
-use crate::app::profile::service::FetchProfileById;
+use crate::app::profile::service::{fetch_profile_by_id, FetchProfileById};
 use crate::app::tag::model::{NewTag, Tag};
 use crate::app::user::model::User;
 use crate::schema::articles::dsl::*;
@@ -204,13 +204,17 @@ pub fn fetch_following_articles(
 }
 
 pub struct UpdateArticleService {
+    pub me: User,
     pub article_id: Uuid,
     pub slug: Option<String>,
     pub title: Option<String>,
     pub description: Option<String>,
     pub body: Option<String>,
 }
-pub fn update_article(conn: &PgConnection, params: &UpdateArticleService) -> (Article, Vec<Tag>) {
+pub fn update_article(
+    conn: &PgConnection,
+    params: &UpdateArticleService,
+) -> (Article, Profile, Vec<Tag>) {
     let article = Article::update(
         &conn,
         &params.article_id,
@@ -222,5 +226,12 @@ pub fn update_article(conn: &PgConnection, params: &UpdateArticleService) -> (Ar
         },
     );
     let tag_list = Tag::fetch_list_by_article_id(&conn, params.article_id);
-    (article, tag_list)
+    let profile = profile::service::fetch_profile_by_id(
+        &conn,
+        &FetchProfileById {
+            me: params.me.to_owned(),
+            id: article.author_id,
+        },
+    );
+    (article, profile, tag_list)
 }

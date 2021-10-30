@@ -29,7 +29,7 @@ impl std::convert::From<(Article, Profile, Vec<Tag>)> for SingleArticleResponse 
                     username: profile.username,
                     bio: profile.bio,
                     image: profile.image,
-                    following: profile.following, // TODO: get following by db
+                    following: profile.following,
                 },
             },
         }
