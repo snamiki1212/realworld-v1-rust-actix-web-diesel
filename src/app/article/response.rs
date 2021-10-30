@@ -42,26 +42,6 @@ pub struct MultipleArticlesResponse {
     pub articlesCount: ArticleCount,
 }
 
-type DEPRECATED_Info = ((Article, User), Vec<Tag>);
-impl From<(Vec<DEPRECATED_Info>, ArticleCount)> for MultipleArticlesResponse {
-    fn from((info, articles_count): (Vec<DEPRECATED_Info>, ArticleCount)) -> Self {
-        let articles = info
-            .iter()
-            .map(|((article, user), tags_list)| {
-                ArticleContent::DEPRECATED_from(
-                    article.to_owned(),   // TODO: avoid copy
-                    user.clone(),         // TODO: avoid copy
-                    tags_list.to_owned(), // TODO: avoid copy
-                )
-            })
-            .collect();
-        Self {
-            articlesCount: articles_count,
-            articles: articles,
-        }
-    }
-}
-
 type Info = ((Article, Profile), Vec<Tag>);
 impl From<(Vec<Info>, ArticleCount)> for MultipleArticlesResponse {
     fn from((info, articles_count): (Vec<Info>, ArticleCount)) -> Self {
@@ -108,24 +88,6 @@ impl ArticleContent {
                 bio: profile.bio,
                 image: profile.image,
                 following: profile.following,
-            },
-        }
-    }
-
-    pub fn DEPRECATED_from(article: Article, user: User, tag_list: Vec<Tag>) -> Self {
-        Self {
-            slug: article.slug,
-            title: article.title,
-            description: article.description,
-            body: article.body,
-            tagList: tag_list.iter().map(move |tag| tag.name.clone()).collect(),
-            createdAt: article.created_at.to_string(),
-            updatedAt: article.updated_at.to_string(),
-            author: AuthorContent {
-                username: user.username,
-                bio: user.bio,
-                image: user.image,
-                following: true, // TODO: get following by db
             },
         }
     }
