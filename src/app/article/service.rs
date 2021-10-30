@@ -142,3 +142,63 @@ pub fn fetch_article(conn: &PgConnection, params: &FetchArticle) -> (Article, Pr
 
     (article, profile, tags_list)
 }
+
+use crate::schema::articles::dsl::*;
+use crate::schema::follows;
+use crate::schema::follows::dsl::*;
+pub struct FetchFollowedArticlesSerivce {
+    pub me: User,
+    pub offset: i64,
+    pub limit: i64,
+}
+pub fn fetch_following_articles(
+    conn: &PgConnection,
+    params: &FetchFollowedArticlesSerivce,
+) -> (Vec<((Article, User), Vec<Tag>)>, i64) {
+    let query = {
+        let following_user_ids = follows
+            .filter(follows::follower_id.eq(params.me.id))
+            .select(follows::followee_id)
+            .get_results::<Uuid>(conn)
+            .expect("could not fetch following uesrs.");
+
+        articles.filter(articles::author_id.eq_any(following_user_ids))
+    };
+
+    let articles_list = {
+        let article_and_user_list = query
+            .to_owned()
+            .inner_join(users::table)
+            .limit(params.limit)
+            .offset(params.offset)
+            .order(articles::created_at.desc())
+            .get_results::<(Article, User)>(conn)
+            .expect("could not fetch following articles.");
+
+        let articles_list = article_and_user_list
+            .clone() // TODO: avoid clone
+            .into_iter()
+            .map(|(article, _)| article)
+            .collect::<Vec<_>>();
+
+        let tags_list = Tag::belonging_to(&articles_list)
+            .load::<Tag>(conn)
+            .expect("could not fetch tags list.");
+
+        let tags_list: Vec<Vec<Tag>> = tags_list.grouped_by(&articles_list);
+
+        let articles_list = article_and_user_list
+            .into_iter()
+            .zip(tags_list)
+            .collect::<Vec<_>>();
+
+        articles_list
+    };
+
+    let articles_count = query
+        .select(diesel::dsl::count(articles::id))
+        .first::<i64>(conn)
+        .expect("couldn't fetch articles count.");
+
+    (articles_list, articles_count)
+}

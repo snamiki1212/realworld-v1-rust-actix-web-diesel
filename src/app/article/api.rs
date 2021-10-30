@@ -51,9 +51,35 @@ pub async fn index(
     HttpResponse::Ok().json(res)
 }
 
-pub async fn feed() -> impl Responder {
-    // TODO:
-    HttpResponse::Ok().body("feed of articles")
+#[derive(Deserialize)]
+pub struct FeedQueryParameter {
+    limit: Option<i64>,
+    offset: Option<i64>,
+}
+
+pub async fn feed(
+    state: web::Data<AppState>,
+    req: HttpRequest,
+    params: web::Query<FeedQueryParameter>,
+) -> impl Responder {
+    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let conn = state
+        .pool
+        .get()
+        .expect("couldn't get db connection from pool");
+    let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
+    let limit = params.limit.unwrap_or(20);
+    let (articles_list, articles_count) = service::fetch_following_articles(
+        &conn,
+        &service::FetchFollowedArticlesSerivce {
+            me: auth_user,
+            offset: offset,
+            limit: limit,
+        },
+    );
+
+    let res = response::MultipleArticlesResponse::from(articles_list, articles_count);
+    HttpResponse::Ok().json(res)
 }
 
 pub async fn show(
