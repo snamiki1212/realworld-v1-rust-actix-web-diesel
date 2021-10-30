@@ -31,7 +31,7 @@ pub async fn favorite(
             article_id: article_id,
         },
     );
-    let res = response::SingleArticleResponse::from(article, profile, tags_list);
+    let res = response::SingleArticleResponse::from((article, profile, tags_list));
 
     HttpResponse::Ok().json(res)
 }
@@ -58,6 +58,6 @@ pub async fn unfavorite(
             article_id: article_id,
         },
     );
-    let res = response::SingleArticleResponse::from(article, profile, tags_list);
+    let res = response::SingleArticleResponse::from((article, profile, tags_list));
     HttpResponse::Ok().json(res)
 }

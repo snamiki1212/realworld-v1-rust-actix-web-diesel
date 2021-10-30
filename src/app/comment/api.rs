@@ -45,7 +45,7 @@ pub async fn create(
         },
     );
 
-    let res = response::SingleCommentResponse::from(comment, profile);
+    let res = response::SingleCommentResponse::from((comment, profile));
     HttpResponse::Ok().json(res)
 }
 

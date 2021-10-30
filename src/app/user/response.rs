@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 pub struct UserResponse {
     pub user: AuthUser,
 }
-impl UserResponse {
-    pub fn from(user: User, token: String) -> Self {
+impl std::convert::From<(User, String)> for UserResponse {
+    fn from((user, token): (User, String)) -> Self {
         // REF: https://gothinkster.github.io/realworld/docs/specs/backend-specs/api-response-format/#users-for-authentication
         Self {
             user: AuthUser {

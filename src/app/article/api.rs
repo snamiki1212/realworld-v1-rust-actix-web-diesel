@@ -46,7 +46,7 @@ pub async fn index(
         (articles_list, articles_count)
     };
 
-    let res = response::MultipleArticlesResponse::from(articles_list, articles_count);
+    let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
     HttpResponse::Ok().json(res)
 }
 
@@ -77,7 +77,7 @@ pub async fn feed(
         },
     );
 
-    let res = response::MultipleArticlesResponse::from(articles_list, articles_count);
+    let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
     HttpResponse::Ok().json(res)
 }
 
@@ -100,7 +100,7 @@ pub async fn show(
         },
     );
 
-    let res = response::SingleArticleResponse::from(article, profile, tags_list);
+    let res = response::SingleArticleResponse::from((article, profile, tags_list));
 
     HttpResponse::Ok().json(res)
 }

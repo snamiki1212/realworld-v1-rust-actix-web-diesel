@@ -7,8 +7,8 @@ pub struct TagsResponse {
     pub tags: Vec<String>,
 }
 
-impl TagsResponse {
-    pub fn from(tags: Vec<Tag>) -> Self {
+impl std::convert::From<Vec<Tag>> for TagsResponse {
+    fn from(tags: Vec<Tag>) -> Self {
         let list = tags.iter().map(move |tag| tag.name.clone()).collect();
         TagsResponse { tags: list }
     }

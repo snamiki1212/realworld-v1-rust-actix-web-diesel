@@ -14,8 +14,8 @@ pub struct ProfileContent {
     pub following: bool,
 }
 
-impl ProfileResponse {
-    pub fn from(profile_model: ProfileModel) -> Self {
+impl std::convert::From<ProfileModel> for ProfileResponse {
+    fn from(profile_model: ProfileModel) -> Self {
         let inner = ProfileContent {
             username: profile_model.username,
             bio: profile_model.bio,
