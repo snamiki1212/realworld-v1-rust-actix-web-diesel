@@ -23,11 +23,28 @@ impl Follow {
             .execute(conn)
             .expect("couldn't insert follow.");
     }
+
+    pub fn delete_follow(conn: &PgConnection, params: &DeleteFollow) {
+        use crate::schema::follows::dsl::*;
+        use diesel::prelude::*;
+        diesel::delete(
+            follows
+                .filter(followee_id.eq(params.followee_id))
+                .filter(follower_id.eq(params.follower_id)),
+        )
+        .execute(conn)
+        .expect("couldn't delete follow.");
+    }
 }
 
 #[derive(Insertable)]
 #[table_name = "follows"]
 pub struct NewFollow {
+    pub follower_id: Uuid,
+    pub followee_id: Uuid,
+}
+
+pub struct DeleteFollow {
     pub follower_id: Uuid,
     pub followee_id: Uuid,
 }

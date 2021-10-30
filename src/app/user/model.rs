@@ -1,4 +1,4 @@
-use crate::app::follow::model::{Follow, NewFollow};
+use crate::app::follow::model::{DeleteFollow, Follow, NewFollow};
 use crate::app::profile::model::Profile;
 use crate::schema::users;
 use crate::schema::users::dsl::*;
@@ -126,16 +126,14 @@ impl User {
             .first::<User>(conn)
             .expect("could not find user by name.");
 
-        {
-            use crate::schema::follows::dsl::*;
-            diesel::delete(
-                follows
-                    .filter(followee_id.eq(followee.id))
-                    .filter(follower_id.eq(self.id)),
-            )
-            .execute(conn)
-            .expect("couldn't delete follow.");
-        };
+        Follow::delete_follow(
+            conn,
+            &DeleteFollow {
+                followee_id: followee.id,
+                follower_id: self.id,
+            },
+        );
+
         let profile = Profile {
             username: self.username.clone(),
             bio: self.bio.clone(),
