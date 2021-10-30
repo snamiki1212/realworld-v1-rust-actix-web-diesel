@@ -15,19 +15,6 @@ pub struct Profile {
     pub following: bool,
 }
 
-impl Profile {
-    pub fn find_by_name(conn: &PgConnection, username: &str) -> Result<Profile> {
-        let user = User::find_by_username(conn, username)?;
-        let profile = Profile {
-            username: user.username,
-            bio: user.bio,
-            image: user.image,
-            following: true, // TODO:
-        };
-        Ok(profile)
-    }
-}
-
 #[derive(Queryable, Serialize, Deserialize, Debug, Clone, Associations)]
 #[belongs_to(User, foreign_key = "followee_id", foreign_key = "follower_id")]
 #[table_name = "follows"]
