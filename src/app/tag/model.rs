@@ -40,8 +40,7 @@ impl Tag {
         list
     }
 
-    // TODO: rename create_list
-    pub fn create(conn: &PgConnection, records: Vec<NewTag>) -> Vec<Self> {
+    pub fn create_list(conn: &PgConnection, records: Vec<NewTag>) -> Vec<Self> {
         use crate::diesel::RunQueryDsl;
         use crate::schema::tags::dsl::*;
         // TODO: validate record params are valid.

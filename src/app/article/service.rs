@@ -35,7 +35,7 @@ fn create_tag_list(
                     article_id: &article.id,
                 })
                 .collect();
-            Tag::create(&conn, records)
+            Tag::create_list(&conn, records)
         })
         .unwrap_or(vec![])
 }
