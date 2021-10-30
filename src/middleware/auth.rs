@@ -12,10 +12,12 @@ use actix_web::{
     web::Data,
     Error, HttpRequest, HttpResponse,
 };
+use diesel::pg::PgConnection;
 use futures::future::{ok, Ready};
 use futures::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use uuid::Uuid;
 
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
@@ -95,6 +97,9 @@ fn should_skip_verify(req: &ServiceRequest) -> bool {
 
     return false;
 }
+fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> User {
+    User::find_by_id(&conn, user_id)
+}
 
 fn verify(req: &mut ServiceRequest) -> bool {
     // TODO: Does it need?
@@ -118,7 +123,7 @@ fn verify(req: &mut ServiceRequest) -> bool {
                                 .pool
                                 .get()
                                 .expect("couldn't get db connection from pool");
-                            let user = User::find_by_id(&conn, user_id);
+                            let user = find_auth_user(&conn, user_id);
                             req.head().extensions_mut().insert(user);
                         }
                         return true;

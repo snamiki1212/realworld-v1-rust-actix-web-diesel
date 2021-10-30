@@ -1,17 +1,9 @@
-// #[macro_use]
-// extern crate diesel;
-// extern crate dotenv;
 use diesel::pg::PgConnection;
-// use diesel::prelude::*;
+use diesel::r2d2::{ConnectionManager, Pool, PoolError};
 use dotenv::dotenv;
 use std::env;
 
-// use diesel::pg::PgConnection;
-
-use diesel::r2d2::{ConnectionManager, Pool, PoolError, PooledConnection};
-
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
-// type DbPooledConnection = PooledConnection<DbPool>;
 
 fn init_pool(database_url: &str) -> Result<DbPool, PoolError> {
     let manager = ConnectionManager::<PgConnection>::new(database_url);

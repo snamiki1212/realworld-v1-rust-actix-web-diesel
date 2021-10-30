@@ -2,7 +2,7 @@ use jsonwebtoken::{errors::Error, DecodingKey, EncodingKey, Header, TokenData, V
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-static KEY: [u8; 16] = *include_bytes!("../../secret.key"); // TODO:
+static KEY: [u8; 16] = *include_bytes!("../../secret.key");
 static ONE_DAY: i64 = 60 * 60 * 24; // in seconds
 
 pub fn decode(token: &str) -> jsonwebtoken::errors::Result<TokenData<Claims>> {
@@ -17,10 +17,6 @@ pub fn generate(user_id: Uuid, now: i64) -> Result<String, Error> {
     let claims = Claims::new(user_id, now);
     let token = jsonwebtoken::encode(&Header::default(), &claims, &EncodingKey::from_secret(&KEY));
     token
-}
-
-pub fn verify(token: &str) -> bool {
-    decode(token).is_ok()
 }
 
 #[derive(Debug, Serialize, Deserialize)]
