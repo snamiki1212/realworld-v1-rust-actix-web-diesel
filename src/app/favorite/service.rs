@@ -1,6 +1,6 @@
 use crate::app::article::model::Article;
 use crate::app::article::service::{fetch_article, FetchArticle};
-use crate::app::favorite::model::{Favorite, FavorteAction, UnfavoriteAction};
+use crate::app::favorite::model::{Favorite, FavoriteInfo, FavorteAction, UnfavoriteAction};
 use crate::app::profile::model::Profile;
 use crate::app::tag::model::Tag;
 use crate::app::user::model::User;
@@ -11,7 +11,10 @@ pub struct FavoriteService {
     pub me: User,
     pub article_id: Uuid,
 }
-pub fn favorite(conn: &PgConnection, params: &FavoriteService) -> (Article, Profile, Vec<Tag>) {
+pub fn favorite(
+    conn: &PgConnection,
+    params: &FavoriteService,
+) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
     let _ = Favorite::favorite(
         conn,
         &FavorteAction {
@@ -33,7 +36,10 @@ pub struct UnfavoriteService {
     pub me: User,
     pub article_id: Uuid,
 }
-pub fn unfavorite(conn: &PgConnection, params: &UnfavoriteService) -> (Article, Profile, Vec<Tag>) {
+pub fn unfavorite(
+    conn: &PgConnection,
+    params: &UnfavoriteService,
+) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
     let item = fetch_article(
         conn,
         &FetchArticle {
@@ -49,4 +55,26 @@ pub fn unfavorite(conn: &PgConnection, params: &UnfavoriteService) -> (Article, 
         },
     );
     item
+}
+
+pub fn fetch_favorites_count_by_article_id(conn: &PgConnection, _article_id: Uuid) -> i64 {
+    use crate::schema::favorites;
+    use diesel::prelude::*;
+    let favorites_count = favorites::table
+        .filter(favorites::article_id.eq_all(_article_id))
+        .select(diesel::dsl::count(favorites::created_at))
+        .first::<i64>(conn)
+        .expect("could not favorites count list.");
+    favorites_count
+}
+
+pub fn fetch_favorited_article_ids_by_user_id(conn: &PgConnection, user_id: Uuid) -> Vec<Uuid> {
+    use crate::schema::favorites;
+    use diesel::prelude::*;
+    let favorited_article_ids = favorites::table
+        .filter(favorites::user_id.eq(user_id))
+        .select(favorites::user_id)
+        .get_results::<Uuid>(conn)
+        .expect("could not find favorited articles ids.");
+    favorited_article_ids
 }

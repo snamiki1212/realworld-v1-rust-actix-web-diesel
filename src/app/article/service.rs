@@ -1,8 +1,10 @@
 use crate::app::article::model::{Article, NewArticle, UpdateArticle};
+use crate::app::favorite;
+use crate::app::favorite::model::FavoriteInfo;
 use crate::app::follow::model::Follow;
 use crate::app::profile;
 use crate::app::profile::model::Profile;
-use crate::app::profile::service::{fetch_profile_by_id, FetchProfileById};
+use crate::app::profile::service::FetchProfileById;
 use crate::app::tag::model::{NewTag, Tag};
 use crate::app::user::model::User;
 use crate::schema::articles::dsl::*;
@@ -20,7 +22,10 @@ pub struct CreateArticleSerivce {
     pub tag_list: Option<Vec<String>>,
     pub me: User,
 }
-pub fn create(conn: &PgConnection, params: &CreateArticleSerivce) -> (Article, Profile, Vec<Tag>) {
+pub fn create(
+    conn: &PgConnection,
+    params: &CreateArticleSerivce,
+) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
     let article = Article::create(
         &conn,
         &NewArticle {
@@ -39,7 +44,23 @@ pub fn create(conn: &PgConnection, params: &CreateArticleSerivce) -> (Article, P
             id: article.author_id,
         },
     );
-    (article, profile, tag_list)
+
+    let favorites_count = favorite::service::fetch_favorites_count_by_article_id(conn, article.id);
+
+    let favorited_article_ids =
+        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id);
+
+    let is_favorited = favorited_article_ids
+        .to_owned()
+        .into_iter()
+        .any(|_id| _id == article.id);
+
+    let favorite_info = FavoriteInfo {
+        is_favorited,
+        favorites_count,
+    };
+
+    (article, profile, favorite_info, tag_list)
 }
 
 fn create_tag_list(
@@ -71,8 +92,13 @@ pub struct FetchArticlesList {
     pub me: User,
 }
 
-type ArticlesList = Vec<((Article, Profile), Vec<Tag>)>;
-pub fn fetch_articles_list(conn: &PgConnection, params: FetchArticlesList) -> (ArticlesList, i64) {
+type ArticlesCount = i64;
+type ArticlesListInner = (Article, Profile, FavoriteInfo);
+type ArticlesList = Vec<(ArticlesListInner, Vec<Tag>)>;
+pub fn fetch_articles_list(
+    conn: &PgConnection,
+    params: FetchArticlesList,
+) -> (ArticlesList, ArticlesCount) {
     use diesel::prelude::*;
     let query = || {
         let mut query = articles::table.inner_join(users::table).into_boxed();
@@ -123,7 +149,7 @@ pub fn fetch_articles_list(conn: &PgConnection, params: FetchArticlesList) -> (A
 
         let tags_list = {
             let articles_list = article_and_user_list
-                .clone() // TODO: avoid clone
+                .clone()
                 .into_iter()
                 .map(|(article, _)| article)
                 .collect::<Vec<_>>();
@@ -134,6 +160,29 @@ pub fn fetch_articles_list(conn: &PgConnection, params: FetchArticlesList) -> (A
 
             let tags_list: Vec<Vec<Tag>> = tags_list.grouped_by(&articles_list);
             tags_list
+        };
+
+        let article_ids_list = article_and_user_list
+            .clone()
+            .into_iter()
+            .map(|(article, _)| article.id)
+            .collect::<Vec<_>>();
+
+        let favorites_count_list = article_ids_list
+            .into_iter()
+            .map(|article_id| {
+                favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
+            })
+            .collect::<Vec<_>>();
+
+        let favorited_article_ids =
+            favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id);
+
+        let is_favorited_by_me = |article: &Article| {
+            favorited_article_ids
+                .to_owned()
+                .into_iter()
+                .any(|_id| _id == article.id)
         };
 
         let article_and_profile_list = {
@@ -160,7 +209,19 @@ pub fn fetch_articles_list(conn: &PgConnection, params: FetchArticlesList) -> (A
                         image: user.image,
                         following: following.to_owned(),
                     };
-                    (article, profile)
+                    let is_favorited = is_favorited_by_me(&article);
+                    (article, profile, is_favorited)
+                })
+                .zip(favorites_count_list)
+                .map(|((article, profile, is_favorited), favorites_count)| {
+                    (
+                        article,
+                        profile,
+                        FavoriteInfo {
+                            is_favorited,
+                            favorites_count,
+                        },
+                    )
                 })
                 .collect::<Vec<_>>();
 
@@ -182,7 +243,10 @@ pub struct FetchArticle {
     pub article_id: Uuid,
     pub me: User,
 }
-pub fn fetch_article(conn: &PgConnection, params: &FetchArticle) -> (Article, Profile, Vec<Tag>) {
+pub fn fetch_article(
+    conn: &PgConnection,
+    params: &FetchArticle,
+) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
     use diesel::prelude::*;
     let FetchArticle { article_id, me } = params;
     let (article, author) = articles
@@ -199,11 +263,24 @@ pub fn fetch_article(conn: &PgConnection, params: &FetchArticle) -> (Article, Pr
         },
     );
 
+    let favorited_article_ids =
+        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id);
+
+    let is_favorited = favorited_article_ids
+        .to_owned()
+        .into_iter()
+        .any(|_id| _id == article.id);
+
+    let favorite_info = FavoriteInfo {
+        is_favorited,
+        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id),
+    };
+
     let tags_list = Tag::belonging_to(&article)
         .load::<Tag>(conn)
         .expect("could not fetch tags list.");
 
-    (article, profile, tags_list)
+    (article, profile, favorite_info, tags_list)
 }
 
 use crate::schema::articles::dsl::*;
@@ -217,7 +294,7 @@ pub struct FetchFollowedArticlesSerivce {
 pub fn fetch_following_articles(
     conn: &PgConnection,
     params: &FetchFollowedArticlesSerivce,
-) -> (Vec<((Article, Profile), Vec<Tag>)>, i64) {
+) -> (ArticlesList, ArticlesCount) {
     let query = {
         let following_user_ids = follows
             .filter(follows::follower_id.eq(params.me.id))
@@ -266,6 +343,29 @@ pub fn fetch_following_articles(
                 .get_results::<Follow>(conn)
                 .expect("could not fetch follow.");
 
+            let article_ids_list = article_and_user_list
+                .clone()
+                .into_iter()
+                .map(|(article, _)| article.id)
+                .collect::<Vec<_>>();
+
+            let favorites_count_list = article_ids_list
+                .into_iter()
+                .map(|article_id| {
+                    favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
+                })
+                .collect::<Vec<_>>();
+
+            let favorited_article_ids =
+                favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id);
+
+            let is_favorited_by_me = |article: &Article| {
+                favorited_article_ids
+                    .to_owned()
+                    .into_iter()
+                    .any(|_id| _id == article.id)
+            };
+
             let follows_list = follows_list.into_iter();
             let article_and_profile_list = article_and_user_list
                 .into_iter()
@@ -277,7 +377,19 @@ pub fn fetch_following_articles(
                         image: user.image,
                         following: following.to_owned(),
                     };
-                    (article, profile)
+                    let is_favorited = is_favorited_by_me(&article);
+                    (article, profile, is_favorited)
+                })
+                .zip(favorites_count_list)
+                .map(|((article, profile, is_favorited), favorites_count)| {
+                    (
+                        article,
+                        profile,
+                        FavoriteInfo {
+                            is_favorited,
+                            favorites_count,
+                        },
+                    )
                 })
                 .collect::<Vec<_>>();
 
@@ -311,7 +423,7 @@ pub struct UpdateArticleService {
 pub fn update_article(
     conn: &PgConnection,
     params: &UpdateArticleService,
-) -> (Article, Profile, Vec<Tag>) {
+) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
     let article = Article::update(
         &conn,
         &params.article_id,
@@ -322,7 +434,9 @@ pub fn update_article(
             body: params.body.to_owned(),
         },
     );
+
     let tag_list = Tag::fetch_list_by_article_id(&conn, params.article_id);
+
     let profile = profile::service::fetch_profile_by_id(
         &conn,
         &FetchProfileById {
@@ -330,5 +444,19 @@ pub fn update_article(
             id: article.author_id,
         },
     );
-    (article, profile, tag_list)
+
+    let favorited_article_ids =
+        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id);
+
+    let is_favorited = favorited_article_ids
+        .to_owned()
+        .into_iter()
+        .any(|_id| _id == article.id);
+
+    let favorite_info = FavoriteInfo {
+        is_favorited,
+        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id),
+    };
+
+    (article, profile, favorite_info, tag_list)
 }

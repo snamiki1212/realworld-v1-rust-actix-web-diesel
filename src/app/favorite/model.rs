@@ -51,3 +51,9 @@ pub struct UnfavoriteAction {
     pub user_id: Uuid,
     pub article_id: Uuid,
 }
+
+#[derive(Clone)]
+pub struct FavoriteInfo {
+    pub is_favorited: bool,
+    pub favorites_count: i64,
+}
