@@ -1,8 +1,9 @@
 use crate::app::article::model::{Article, NewArticle, UpdateArticle};
+use crate::app::favorite::model::FavoriteInfo;
 use crate::app::follow::model::Follow;
 use crate::app::profile;
 use crate::app::profile::model::Profile;
-use crate::app::profile::service::{fetch_profile_by_id, FetchProfileById};
+use crate::app::profile::service::FetchProfileById;
 use crate::app::tag::model::{NewTag, Tag};
 use crate::app::user::model::User;
 use crate::schema::articles::dsl::*;
@@ -71,10 +72,8 @@ pub struct FetchArticlesList {
     pub me: User,
 }
 
-type IsFavorited = bool;
-type FavoritedCount = i64;
 type ArticlesCount = i64;
-type ArticlesListInner = ((Article, Profile, IsFavorited), FavoritedCount);
+type ArticlesListInner = (Article, Profile, FavoriteInfo);
 type ArticlesList = Vec<(ArticlesListInner, Vec<Tag>)>;
 pub fn fetch_articles_list(
     conn: &PgConnection,
@@ -202,6 +201,16 @@ pub fn fetch_articles_list(
                     (article, profile, favorited)
                 })
                 .zip(favorites_count_list)
+                .map(|((article, profile, is_favorited), favorites_count)| {
+                    (
+                        article,
+                        profile,
+                        FavoriteInfo {
+                            is_favorited,
+                            favorites_count,
+                        },
+                    )
+                })
                 .collect::<Vec<_>>();
 
             article_and_profile_list
@@ -348,10 +357,20 @@ pub fn fetch_following_articles(
                         image: user.image,
                         following: following.to_owned(),
                     };
-                    let favorited = is_favorited_by_me(&article);
-                    (article, profile, favorited)
+                    let is_favorited = is_favorited_by_me(&article);
+                    (article, profile, is_favorited)
                 })
                 .zip(favorites_count_list)
+                .map(|((article, profile, is_favorited), favorites_count)| {
+                    (
+                        article,
+                        profile,
+                        FavoriteInfo {
+                            is_favorited,
+                            favorites_count,
+                        },
+                    )
+                })
                 .collect::<Vec<_>>();
 
             article_and_profile_list
