@@ -62,14 +62,6 @@ fn create_tag_list(
         .unwrap_or(vec![])
 }
 
-pub fn fetch_articles_count(conn: &PgConnection) -> i64 {
-    let articles_count = articles
-        .select(diesel::dsl::count(articles::id))
-        .first::<i64>(conn)
-        .expect("couldn't fetch articles count.");
-    articles_count
-}
-
 pub struct FetchArticlesList {
     pub tag: Option<String>,
     pub author: Option<String>,
@@ -79,12 +71,10 @@ pub struct FetchArticlesList {
     pub me: User,
 }
 
-pub fn fetch_articles_list(
-    conn: &PgConnection,
-    params: FetchArticlesList,
-) -> Vec<((Article, Profile), Vec<Tag>)> {
+type ArticlesList = Vec<((Article, Profile), Vec<Tag>)>;
+pub fn fetch_articles_list(conn: &PgConnection, params: FetchArticlesList) -> (ArticlesList, i64) {
     use diesel::prelude::*;
-    let article_and_user_list = {
+    let query = || {
         let mut query = articles::table.inner_join(users::table).into_boxed();
 
         if let Some(tag_name) = &params.tag {
@@ -117,11 +107,18 @@ pub fn fetch_articles_list(
         }
 
         query
-            .offset(params.offset)
-            .limit(params.limit)
-            .load::<(Article, User)>(conn)
-            .expect("couldn't fetch articles list.")
     };
+
+    let articles_count = query()
+        .select(diesel::dsl::count(articles::id))
+        .first::<i64>(conn)
+        .expect("couldn't fetch articles count.");
+
+    let article_and_user_list = query()
+        .offset(params.offset)
+        .limit(params.limit)
+        .load::<(Article, User)>(conn)
+        .expect("couldn't fetch articles list.");
 
     let tags_list = {
         let articles_list = article_and_user_list
@@ -174,7 +171,7 @@ pub fn fetch_articles_list(
         .zip(tags_list)
         .collect::<Vec<_>>();
 
-    articles_list
+    (articles_list, articles_count)
 }
 
 pub struct FetchArticle {

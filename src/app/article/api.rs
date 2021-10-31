@@ -31,21 +31,17 @@ pub async fn index(
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
 
-    let (articles_list, articles_count) = {
-        let articles_list = service::fetch_articles_list(
-            &conn,
-            service::FetchArticlesList {
-                tag: params.tag.clone(),
-                author: params.author.clone(),
-                favorited: params.favorited.clone(),
-                offset: offset,
-                limit: limit,
-                me: auth_user,
-            },
-        );
-        let articles_count = service::fetch_articles_count(&conn);
-        (articles_list, articles_count)
-    };
+    let (articles_list, articles_count) = service::fetch_articles_list(
+        &conn,
+        service::FetchArticlesList {
+            tag: params.tag.clone(),
+            author: params.author.clone(),
+            favorited: params.favorited.clone(),
+            offset: offset,
+            limit: limit,
+            me: auth_user,
+        },
+    );
 
     let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
     HttpResponse::Ok().json(res)
