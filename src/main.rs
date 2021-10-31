@@ -23,15 +23,16 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     HttpServer::new(move || {
+        let logger = Logger::default();
         let pool = utils::db::establish_connection();
         App::new()
-            .wrap(Logger::default())
+            .wrap(logger)
             .data(AppState { pool: pool })
             .wrap(middleware::cors::cors())
             .wrap(middleware::auth::Authentication)
             .service(web::scope("").configure(routes::api)) // TODO: call configure without emptpy scope
     })
-    .bind("127.0.0.1:8080")?
+    .bind(constants::BIND)?
     .run()
     .await
 }
