@@ -6,7 +6,7 @@ use crate::app::profile::service::{fetch_profile_by_id, FetchProfileById};
 use crate::app::tag::model::{NewTag, Tag};
 use crate::app::user::model::User;
 use crate::schema::articles::dsl::*;
-use crate::schema::{articles, tags, users};
+use crate::schema::{articles, favorites, tags, users};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use uuid::Uuid;
@@ -106,9 +106,14 @@ pub fn fetch_articles_list(
             query = query.filter(articles::id.eq_any(article_ids_by_author));
         }
 
-        if let Some(favorited) = &params.favorited {
-            // TODO:
-            println!("==>favorited");
+        if let Some(favorited_username) = &params.favorited {
+            let favorited_article_ids = favorites::table
+                .inner_join(users::table)
+                .filter(users::username.eq(favorited_username))
+                .select(favorites::article_id)
+                .load::<Uuid>(conn)
+                .expect("could not fetch favorited articles id.");
+            query = query.filter(articles::id.eq_any(favorited_article_ids));
         }
 
         query
