@@ -74,7 +74,7 @@ pub async fn feed(
         },
     );
 
-    let res = response::MultipleArticlesResponse::DEPRECATED_from((articles_list, articles_count));
+    let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
     HttpResponse::Ok().json(res)
 }
 
