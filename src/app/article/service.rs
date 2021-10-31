@@ -114,62 +114,66 @@ pub fn fetch_articles_list(conn: &PgConnection, params: FetchArticlesList) -> (A
         .first::<i64>(conn)
         .expect("couldn't fetch articles count.");
 
-    let article_and_user_list = query()
-        .offset(params.offset)
-        .limit(params.limit)
-        .load::<(Article, User)>(conn)
-        .expect("couldn't fetch articles list.");
+    let articles_list = {
+        let article_and_user_list = query()
+            .offset(params.offset)
+            .limit(params.limit)
+            .load::<(Article, User)>(conn)
+            .expect("couldn't fetch articles list.");
 
-    let tags_list = {
-        let articles_list = article_and_user_list
-            .clone() // TODO: avoid clone
+        let tags_list = {
+            let articles_list = article_and_user_list
+                .clone() // TODO: avoid clone
+                .into_iter()
+                .map(|(article, _)| article)
+                .collect::<Vec<_>>();
+
+            let tags_list = Tag::belonging_to(&articles_list)
+                .load::<Tag>(conn)
+                .expect("could not fetch tags list.");
+
+            let tags_list: Vec<Vec<Tag>> = tags_list.grouped_by(&articles_list);
+            tags_list
+        };
+
+        let article_and_profile_list = {
+            let user_ids_list = article_and_user_list
+                .clone() // TODO: avoid clone
+                .into_iter()
+                .map(|(_, user)| user.id)
+                .collect::<Vec<_>>();
+
+            let follows_list = follows::table
+                .filter(follows::follower_id.eq(params.me.id))
+                .filter(follows::followee_id.eq_any(user_ids_list))
+                .get_results::<Follow>(conn)
+                .expect("could not fetch follow.");
+
+            let follows_list = follows_list.into_iter();
+            let article_and_profile_list = article_and_user_list
+                .into_iter()
+                .map(|(article, user)| {
+                    let following = follows_list.clone().any(|item| item.followee_id == user.id);
+                    let profile = Profile {
+                        username: user.username,
+                        bio: user.bio,
+                        image: user.image,
+                        following: following.to_owned(),
+                    };
+                    (article, profile)
+                })
+                .collect::<Vec<_>>();
+
+            article_and_profile_list
+        };
+
+        let articles_list = article_and_profile_list
             .into_iter()
-            .map(|(article, _)| article)
+            .zip(tags_list)
             .collect::<Vec<_>>();
 
-        let tags_list = Tag::belonging_to(&articles_list)
-            .load::<Tag>(conn)
-            .expect("could not fetch tags list.");
-
-        let tags_list: Vec<Vec<Tag>> = tags_list.grouped_by(&articles_list);
-        tags_list
+        articles_list
     };
-
-    let article_and_profile_list = {
-        let user_ids_list = article_and_user_list
-            .clone() // TODO: avoid clone
-            .into_iter()
-            .map(|(_, user)| user.id)
-            .collect::<Vec<_>>();
-
-        let follows_list = follows::table
-            .filter(follows::follower_id.eq(params.me.id))
-            .filter(follows::followee_id.eq_any(user_ids_list))
-            .get_results::<Follow>(conn)
-            .expect("could not fetch follow.");
-
-        let follows_list = follows_list.into_iter();
-        let article_and_profile_list = article_and_user_list
-            .into_iter()
-            .map(|(article, user)| {
-                let following = follows_list.clone().any(|item| item.followee_id == user.id);
-                let profile = Profile {
-                    username: user.username,
-                    bio: user.bio,
-                    image: user.image,
-                    following: following.to_owned(),
-                };
-                (article, profile)
-            })
-            .collect::<Vec<_>>();
-
-        article_and_profile_list
-    };
-
-    let articles_list = article_and_profile_list
-        .into_iter()
-        .zip(tags_list)
-        .collect::<Vec<_>>();
 
     (articles_list, articles_count)
 }
