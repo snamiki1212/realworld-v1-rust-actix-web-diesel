@@ -24,14 +24,14 @@ pub async fn favorite(
 
     // TODO: validate article_id
 
-    let (article, profile, tags_list) = service::favorite(
+    let (article, profile, favorite_info, tags_list) = service::favorite(
         &conn,
         &service::FavoriteService {
             me: auth_user,
             article_id: article_id,
         },
     );
-    let res = response::SingleArticleResponse::from((article, profile, tags_list));
+    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
 
     HttpResponse::Ok().json(res)
 }
@@ -51,13 +51,13 @@ pub async fn unfavorite(
 
     // TODO: validate article_id
 
-    let (article, profile, tags_list) = service::unfavorite(
+    let (article, profile, favorite_info, tags_list) = service::unfavorite(
         &conn,
         &UnfavoriteService {
             me: auth_user,
             article_id: article_id,
         },
     );
-    let res = response::SingleArticleResponse::from((article, profile, tags_list));
+    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
     HttpResponse::Ok().json(res)
 }

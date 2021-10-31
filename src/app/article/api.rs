@@ -89,7 +89,7 @@ pub async fn show(
         .get()
         .expect("couldn't get db connection from pool");
     let article_id = path.into_inner();
-    let (article, profile, tags_list) = service::fetch_article(
+    let (article, profile, favorite_info, tags_list) = service::fetch_article(
         &conn,
         &service::FetchArticle {
             article_id: article_id,
@@ -97,7 +97,7 @@ pub async fn show(
         },
     );
 
-    let res = response::SingleArticleResponse::from((article, profile, tags_list));
+    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
 
     HttpResponse::Ok().json(res)
 }
@@ -113,7 +113,7 @@ pub async fn create(
         .get()
         .expect("couldn't get db connection from pool");
 
-    let (article, profile, tag_list) = service::create(
+    let (article, profile, favorite_info, tag_list) = service::create(
         &conn,
         &service::CreateArticleSerivce {
             author_id: auth_user.id,
@@ -125,7 +125,7 @@ pub async fn create(
             me: auth_user,
         },
     );
-    let res = response::SingleArticleResponse::from((article, profile, tag_list));
+    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tag_list));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -150,7 +150,7 @@ pub async fn update(
 
     // TODO: validation: slug is not empty
 
-    let (article, profile, tag_list) = service::update_article(
+    let (article, profile, favorite_info, tag_list) = service::update_article(
         &conn,
         &service::UpdateArticleService {
             me: auth_user,
@@ -162,7 +162,7 @@ pub async fn update(
         },
     );
 
-    let res = response::SingleArticleResponse::from((article, profile, tag_list));
+    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tag_list));
     HttpResponse::Ok().json(res)
 }
 

@@ -12,8 +12,10 @@ pub struct SingleArticleResponse {
     pub article: ArticleContent,
 }
 
-impl From<(Article, Profile, Vec<Tag>)> for SingleArticleResponse {
-    fn from((article, profile, tag_list): (Article, Profile, Vec<Tag>)) -> Self {
+impl From<(Article, Profile, FavoriteInfo, Vec<Tag>)> for SingleArticleResponse {
+    fn from(
+        (article, profile, favorite_info, tag_list): (Article, Profile, FavoriteInfo, Vec<Tag>),
+    ) -> Self {
         Self {
             article: ArticleContent {
                 slug: article.slug,
@@ -26,8 +28,8 @@ impl From<(Article, Profile, Vec<Tag>)> for SingleArticleResponse {
                     .collect(),
                 createdAt: article.created_at.to_string(),
                 updatedAt: article.updated_at.to_string(),
-                favorited: false,  // TODO: fix
-                favoritesCount: 0, // TODO: fix
+                favorited: favorite_info.is_favorited.to_owned(),
+                favoritesCount: favorite_info.favorites_count.to_owned(),
                 author: AuthorContent {
                     username: profile.username,
                     bio: profile.bio,
