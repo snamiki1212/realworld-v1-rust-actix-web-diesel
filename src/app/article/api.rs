@@ -22,7 +22,7 @@ pub async fn index(
     state: web::Data<AppState>,
     req: HttpRequest,
     params: web::Query<ArticlesListQueryParameter>,
-) -> impl Responder {
+) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
@@ -44,7 +44,7 @@ pub async fn index(
     );
 
     let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
-    HttpResponse::Ok().json(res)
+    Ok(HttpResponse::Ok().json(res))
 }
 
 #[derive(Deserialize)]
@@ -57,7 +57,7 @@ pub async fn feed(
     state: web::Data<AppState>,
     req: HttpRequest,
     params: web::Query<FeedQueryParameter>,
-) -> impl Responder {
+) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
@@ -75,14 +75,14 @@ pub async fn feed(
     );
 
     let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
-    HttpResponse::Ok().json(res)
+    Ok(HttpResponse::Ok().json(res))
 }
 
 pub async fn show(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
-) -> impl Responder {
+) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
@@ -99,7 +99,7 @@ pub async fn show(
 
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
 
-    HttpResponse::Ok().json(res)
+    Ok(HttpResponse::Ok().json(res))
 }
 
 pub async fn create(
@@ -134,7 +134,7 @@ pub async fn update(
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
     form: web::Json<request::UpdateArticleRequest>,
-) -> impl Responder {
+) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
@@ -163,14 +163,14 @@ pub async fn update(
     );
 
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tag_list));
-    HttpResponse::Ok().json(res)
+    Ok(HttpResponse::Ok().json(res))
 }
 
 pub async fn delete(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
-) -> impl Responder {
+) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
@@ -191,5 +191,5 @@ pub async fn delete(
         // NOTE: references tag rows are deleted automatically by DELETE CASCADE
     }
 
-    HttpResponse::Ok().json({})
+    Ok(HttpResponse::Ok().json({}))
 }

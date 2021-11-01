@@ -8,7 +8,10 @@ use uuid::Uuid;
 type ArticleIdSlug = String;
 type CommentIdSlug = String;
 
-pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> impl Responder {
+pub async fn index(
+    state: web::Data<AppState>,
+    req: HttpRequest,
+) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
@@ -17,7 +20,7 @@ pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> impl Respond
 
     let list = service::fetch_comments_list(&conn, &auth_user);
     let res = response::MultipleCommentsResponse::from(list);
-    HttpResponse::Ok().json(res)
+    Ok(HttpResponse::Ok().json(res))
 }
 
 pub async fn create(
@@ -25,7 +28,7 @@ pub async fn create(
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
     form: web::Json<request::CreateCommentRequest>,
-) -> impl Responder {
+) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
@@ -46,14 +49,14 @@ pub async fn create(
     );
 
     let res = response::SingleCommentResponse::from((comment, profile));
-    HttpResponse::Ok().json(res)
+    Ok(HttpResponse::Ok().json(res))
 }
 
 pub async fn delete(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<(ArticleIdSlug, CommentIdSlug)>,
-) -> impl Responder {
+) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
@@ -67,5 +70,5 @@ pub async fn delete(
 
     Comment::delete(&conn, &comment_id);
 
-    HttpResponse::Ok().json("OK")
+    Ok(HttpResponse::Ok().json("Ok"))
 }

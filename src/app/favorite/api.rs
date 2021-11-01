@@ -13,7 +13,7 @@ pub async fn favorite(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
-) -> impl Responder {
+) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
@@ -33,14 +33,14 @@ pub async fn favorite(
     );
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
 
-    HttpResponse::Ok().json(res)
+    Ok(HttpResponse::Ok().json(res))
 }
 
 pub async fn unfavorite(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
-) -> impl Responder {
+) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
@@ -59,5 +59,5 @@ pub async fn unfavorite(
         },
     );
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
-    HttpResponse::Ok().json(res)
+    Ok(HttpResponse::Ok().json(res))
 }
