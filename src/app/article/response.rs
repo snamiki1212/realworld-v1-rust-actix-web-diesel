@@ -22,14 +22,14 @@ impl From<(Article, Profile, FavoriteInfo, Vec<Tag>)> for SingleArticleResponse 
                 title: article.title,
                 description: article.description,
                 body: article.body,
-                tagList: tag_list
+                tag_list: tag_list
                     .iter()
                     .map(move |tag| tag.name.to_owned())
                     .collect(),
-                createdAt: article.created_at.to_string(),
-                updatedAt: article.updated_at.to_string(),
+                created_at: article.created_at.to_string(),
+                updated_at: article.updated_at.to_string(),
                 favorited: favorite_info.is_favorited.to_owned(),
-                favoritesCount: favorite_info.favorites_count.to_owned(),
+                favorites_count: favorite_info.favorites_count.to_owned(),
                 author: AuthorContent {
                     username: profile.username,
                     bio: profile.bio,
@@ -42,9 +42,10 @@ impl From<(Article, Profile, FavoriteInfo, Vec<Tag>)> for SingleArticleResponse 
 }
 
 #[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MultipleArticlesResponse {
     pub articles: Vec<ArticleContent>,
-    pub articlesCount: ArticleCount,
+    pub articles_count: ArticleCount,
 }
 
 type ArticlesCount = i64;
@@ -65,23 +66,24 @@ impl From<Item> for MultipleArticlesResponse {
             })
             .collect();
         Self {
-            articlesCount: articles_count,
+            articles_count: articles_count,
             articles: articles,
         }
     }
 }
 
 #[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ArticleContent {
     pub slug: String,
     pub title: String,
     pub description: String,
     pub body: String,
-    pub tagList: Vec<String>,
-    pub createdAt: String,
-    pub updatedAt: String,
+    pub tag_list: Vec<String>,
+    pub created_at: String,
+    pub updated_at: String,
     pub favorited: bool,
-    pub favoritesCount: i64,
+    pub favorites_count: i64,
     pub author: AuthorContent,
 }
 
@@ -94,11 +96,11 @@ impl From<(Article, Profile, FavoriteInfo, Vec<Tag>)> for ArticleContent {
             title: article.title,
             description: article.description,
             body: article.body,
-            tagList: tag_list.iter().map(move |tag| tag.name.clone()).collect(),
-            createdAt: article.created_at.to_string(),
-            updatedAt: article.updated_at.to_string(),
+            tag_list: tag_list.iter().map(move |tag| tag.name.clone()).collect(),
+            created_at: article.created_at.to_string(),
+            updated_at: article.updated_at.to_string(),
             favorited: favorite_info.is_favorited.to_owned(),
-            favoritesCount: favorite_info.favorites_count.to_owned(),
+            favorites_count: favorite_info.favorites_count.to_owned(),
             author: AuthorContent {
                 username: profile.username,
                 bio: profile.bio,

@@ -21,8 +21,8 @@ impl From<(Comment, Profile)> for SingleCommentResponse {
                     image: profile.image,
                     following: profile.following,
                 },
-                createdAt: comment.created_at,
-                updatedAt: comment.updated_at,
+                created_at: comment.created_at,
+                updated_at: comment.updated_at,
             },
         }
     }
@@ -42,8 +42,8 @@ impl From<Vec<(Comment, Profile)>> for MultipleCommentsResponse {
                     let (comment, profile) = item;
                     InnerComment {
                         id: comment.id,
-                        createdAt: comment.created_at,
-                        updatedAt: comment.updated_at,
+                        created_at: comment.created_at,
+                        updated_at: comment.updated_at,
                         body: comment.body,
                         author: InnerAuthor {
                             username: profile.username,
@@ -59,10 +59,11 @@ impl From<Vec<(Comment, Profile)>> for MultipleCommentsResponse {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct InnerComment {
     pub id: Uuid,
-    pub createdAt: NaiveDateTime,
-    pub updatedAt: NaiveDateTime,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
     pub body: String,
     pub author: InnerAuthor,
 }
