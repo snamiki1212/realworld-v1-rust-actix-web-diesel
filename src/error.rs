@@ -8,9 +8,6 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum AppError {
-    #[error("hoge error happen.")]
-    HogeError(String),
-    // ---TODO:
     // 401
     #[error("Unauthorized: {}", _0)]
     Unauthorized(JsonValue),
@@ -50,7 +47,7 @@ pub enum AppError {
 impl From<AppError> for HttpResponse {
     fn from(err: AppError) -> HttpResponse {
         match err {
-            AppError::HogeError(str) => HttpResponse::Unauthorized().json("aa"),
+            AppError::InternalServerError => HttpResponse::Unauthorized().json("msg"),
             _ => HttpResponse::InternalServerError().json("Internal server error"),
         }
     }
@@ -58,7 +55,7 @@ impl From<AppError> for HttpResponse {
 
 impl From<DieselError> for AppError {
     fn from(_error: DieselError) -> Self {
-        AppError::HogeError("diesel error".to_string())
+        AppError::InternalServerError
         // match error {
         //     DieselError::DatabaseError(kind, info) => {
         //         if let DatabaseErrorKind::UniqueViolation = kind {
