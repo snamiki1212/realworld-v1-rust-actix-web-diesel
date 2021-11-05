@@ -49,20 +49,10 @@ pub async fn signup(
     Ok(HttpResponse::Ok().json(res))
 }
 
-use crate::error::AppError;
-
-fn happen_err() -> Result<HttpResponse, AppError> {
-    Err(AppError::HogeError("this is hoge".to_string()))
-}
-
-pub async fn me(req: HttpRequest) -> actix_web::Result<HttpResponse> {
-    let _ = happen_err()?;
-    Ok(HttpResponse::Ok().json("not here"))
-    // return Err(actix_web::error::ErrorNotFound("hti sis not found"));
-    // return HttpResponse::Ok().json("this is ok");
-    // let user = auth::access_auth_user(&req)?;
-    // let user = response::UserResponse::from((user.to_owned(), user.generate_token()));
-    // HttpResponse::Ok().json(user)
+pub async fn me(req: HttpRequest) -> HttpResponse {
+    let user = auth::access_auth_user(&req).expect("could not fetch auth.");
+    let user = response::UserResponse::from((user.to_owned(), user.generate_token()));
+    HttpResponse::Ok().json(user)
 }
 
 pub async fn update(

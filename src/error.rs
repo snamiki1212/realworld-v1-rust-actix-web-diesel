@@ -1,15 +1,35 @@
-use actix_web::{error::Error as ActixWebError, HttpResponse};
+use actix_web::{error::Error as ActixWebError, HttpRequest, HttpResponse};
 use std::convert::From;
 // use std::fmt::{self, Debug, Display};
 // use std::fmt;
 use diesel::result::Error as DieselError;
+use serde_json::Value as JsonValue;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum AppError {
     #[error("hoge error happen.")]
     HogeError(String),
-    // err: anyhow::Error,
+    // ---TODO:
+    // 401
+    #[error("Unauthorized: {}", _0)]
+    Unauthorized(JsonValue),
+
+    // 403
+    #[error("Forbidden: {}", _0)]
+    Forbidden(JsonValue),
+
+    // 404
+    #[error("Not Found: {}", _0)]
+    NotFound(JsonValue),
+
+    // 422
+    #[error("Unprocessable Entity: {}", _0)]
+    UnprocessableEntity(JsonValue),
+
+    // 500
+    #[error("Internal Server Error")]
+    InternalServerError,
 }
 
 // impl fmt::Display for AppError {
@@ -18,11 +38,20 @@ pub enum AppError {
 //     }
 // }
 
-impl From<AppError> for ActixWebError {
-    fn from(err: AppError) -> ActixWebError {
+// impl From<AppError> for ActixWebError {
+//     fn from(err: AppError) -> ActixWebError {
+//         match err {
+//             AppError::HogeError(str) => actix_web::error::ErrorNotFound("not found error"),
+//             _ => actix_web::error::Error,
+//         }
+//     }
+// }
+
+impl From<AppError> for HttpResponse {
+    fn from(err: AppError) -> HttpResponse {
         match err {
-            AppError::HogeError(str) => actix_web::error::ErrorNotFound("not found error"),
-            _ => actix_web::error::ErrorForbidden("forbidden"),
+            AppError::HogeError(str) => HttpResponse::Unauthorized().json("aa"),
+            _ => HttpResponse::InternalServerError().json("Internal server error"),
         }
     }
 }

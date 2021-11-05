@@ -5,6 +5,7 @@ use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
 use diesel::result::Error as DieselError;
 // use diesel::result::Error;
+use crate::error::AppError;
 use diesel::Insertable;
 use diesel::*;
 use serde::{Deserialize, Serialize};
@@ -33,14 +34,12 @@ impl Tag {
         list
     }
 
-    pub fn list(conn: &PgConnection) -> anyhow::Result<Vec<Self>> {
+    pub fn list(conn: &PgConnection) -> Result<Vec<Self>, AppError> {
         use crate::schema;
         use diesel::prelude::*;
         use schema::tags::dsl::*;
-        match tags.load::<Self>(conn) {
-            Ok(list) => Ok(list),
-            Err(err) => Err(err.into()),
-        }
+        let list = tags.load::<Self>(conn)?;
+        Ok(list)
     }
 
     pub fn create_list(conn: &PgConnection, records: Vec<NewTag>) -> Vec<Self> {
