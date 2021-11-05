@@ -1,9 +1,9 @@
-use super::model::{Article, NewArticle, UpdateArticle};
+use super::model::Article;
 use super::service;
 use super::{request, response};
 use crate::middleware::auth;
 use crate::AppState;
-use actix_web::{web, HttpRequest, HttpResponse, Responder};
+use actix_web::{web, HttpRequest, HttpResponse};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -121,7 +121,7 @@ pub async fn create(
             slug: Article::convert_title_to_slug(&form.article.title),
             description: form.article.description.clone(),
             body: form.article.body.clone(),
-            tag_list: form.article.tagList.to_owned(),
+            tag_list: form.article.tag_list.to_owned(),
             me: auth_user,
         },
     );
@@ -168,10 +168,10 @@ pub async fn update(
 
 pub async fn delete(
     state: web::Data<AppState>,
-    req: HttpRequest,
+    // req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    // let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
     let conn = state
         .pool
         .get()

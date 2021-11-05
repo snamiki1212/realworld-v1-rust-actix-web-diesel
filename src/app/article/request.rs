@@ -6,11 +6,12 @@ pub struct CreateArticleRequest {
 }
 
 #[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateArticleInner {
     pub title: String,
     pub description: String,
     pub body: String,
-    pub tagList: Option<Vec<String>>,
+    pub tag_list: Option<Vec<String>>,
 }
 
 #[derive(Deserialize, Serialize)]
