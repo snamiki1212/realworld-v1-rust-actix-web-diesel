@@ -8,6 +8,7 @@ use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 mod app;
 mod constants;
+mod error;
 mod middleware;
 mod routes;
 mod schema;

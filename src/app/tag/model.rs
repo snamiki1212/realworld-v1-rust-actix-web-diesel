@@ -3,7 +3,8 @@ use crate::schema::tags;
 use crate::schema::*;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
-use diesel::result::Error;
+use diesel::result::Error as DieselError;
+// use diesel::result::Error;
 use diesel::Insertable;
 use diesel::*;
 use serde::{Deserialize, Serialize};
@@ -32,12 +33,14 @@ impl Tag {
         list
     }
 
-    pub fn list(conn: &PgConnection) -> Result<Vec<Self>, Error> {
+    pub fn list(conn: &PgConnection) -> anyhow::Result<Vec<Self>> {
         use crate::schema;
         use diesel::prelude::*;
         use schema::tags::dsl::*;
-        let list = tags.load::<Tag>(conn);
-        list
+        match tags.load::<Self>(conn) {
+            Ok(list) => Ok(list),
+            Err(err) => Err(err.into()),
+        }
     }
 
     pub fn create_list(conn: &PgConnection, records: Vec<NewTag>) -> Vec<Self> {
