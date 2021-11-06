@@ -2,12 +2,11 @@ use actix_web::{error::Error as ActixWebError, HttpRequest, HttpResponse};
 use bcrypt::BcryptError;
 use diesel::r2d2::{Error as R2D2Error, PoolError};
 use diesel::result::Error as DieselError;
-use jsonwebtoken::errors::Error as JwtError;
+use jsonwebtoken::errors::{Error as JwtError, ErrorKind as JwtErrorKind};
+use serde_json::json;
 use serde_json::Value as JsonValue;
 use std::convert::From;
 use thiserror::Error;
-// use std::fmt::{self, Debug, Display};
-// use std::fmt;
 
 #[derive(Error, Debug)]
 pub enum AppError {
@@ -69,8 +68,18 @@ impl From<BcryptError> for AppError {
 }
 
 impl From<JwtError> for AppError {
-    fn from(_err: JwtError) -> Self {
-        AppError::InternalServerError
+    fn from(err: JwtError) -> Self {
+        match err.kind() {
+            JwtErrorKind::InvalidToken => AppError::Unauthorized(json!({
+                "error": "Token is invalid"
+            })),
+            JwtErrorKind::InvalidIssuer => AppError::Unauthorized(json!({
+                "error": "Issuer is invalid",
+            })),
+            _ => AppError::Unauthorized(json!({
+                "error": "An issue was found with the token provided",
+            })),
+        }
     }
 }
 
@@ -99,6 +108,7 @@ impl From<DieselError> for AppError {
     }
 }
 
+//
 // #[derive(Error, Debug)]
 // pub struct MyError {
 //     err: anyhow::Error,
@@ -109,13 +119,13 @@ impl From<DieselError> for AppError {
 //     }
 // }
 // impl actix_web::error::ResponseError for MyError {}
-
+//
 // impl From<anyhow::Error> for MyError {
 //     fn from(err: anyhow::Error) -> MyError {
 //         MyError { err }
 //     }
 // }
-
+//
 // impl From<anyhow::Error> for actix_web::error::Error {
 //     fn from(err: anyhow::Error) -> actix_web::error::Error {
 //         match err {
@@ -123,7 +133,7 @@ impl From<DieselError> for AppError {
 //         }
 //     }
 // }
-
+//
 // impl actix_web::error::ResponseError for AppError {
 //     fn error_response(&self) -> HttpResponse {
 //         match *self {
@@ -132,3 +142,4 @@ impl From<DieselError> for AppError {
 //         }
 //     }
 // }
+//
