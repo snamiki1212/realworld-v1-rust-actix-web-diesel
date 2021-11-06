@@ -124,14 +124,27 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
                         let claims = token_data.claims;
                         let user_id = claims.user_id;
                         if let Some(state) = req.app_data::<Data<AppState>>() {
-                            let conn = state
-                                .get_conn()
-                                .expect("couldn't get db connection from pool");
-                            let user =
-                                find_auth_user(&conn, user_id).expect("could not find auth user.");
-                            req.head().extensions_mut().insert(user);
+                            let conn = state.get_conn();
+                            match conn {
+                                Ok(conn) => {
+                                    match find_auth_user(&conn, user_id) {
+                                        Ok(user) => {
+                                            req.head().extensions_mut().insert(user);
+                                            return true;
+                                        }
+                                        Err(_err) => {
+                                            warn!("couldn't find auth user.");
+                                            return false;
+                                        }
+                                    };
+                                }
+                                Err(_err) => {
+                                    warn!("couldn't find auth user.");
+                                    return false;
+                                }
+                            }
                         }
-                        return true;
+                        return false;
                     }
                     _ => {
                         error!("Invalid token");
