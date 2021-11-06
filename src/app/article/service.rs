@@ -36,7 +36,7 @@ pub fn create(
             description: params.description.to_owned(),
             body: params.body.to_owned(),
         },
-    );
+    )?;
     let tag_list = create_tag_list(&conn, &params.tag_list, &article)?;
     let profile = profile::service::fetch_profile_by_id(
         &conn,
@@ -427,7 +427,7 @@ pub fn update_article(
             description: params.description.to_owned(),
             body: params.body.to_owned(),
         },
-    );
+    )?;
 
     let tag_list = Tag::fetch_list_by_article_id(&conn, params.article_id)?;
 

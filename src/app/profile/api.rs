@@ -24,7 +24,7 @@ pub async fn show(
             me: me.to_owned(),
             username: _username,
         },
-    );
+    )?;
 
     let res = profile::response::ProfileResponse::from(profile);
     Ok(HttpResponse::Ok().json(res))

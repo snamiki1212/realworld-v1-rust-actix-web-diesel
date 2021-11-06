@@ -171,7 +171,7 @@ pub async fn delete(
     // req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    // let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    // let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()
@@ -185,7 +185,7 @@ pub async fn delete(
 
         // TODO: validation deletable auth_user.id == article.author_id ?
 
-        diesel::delete(articles.filter(id.eq(article_id)))
+        let _ = diesel::delete(articles.filter(id.eq(article_id)))
             .execute(&conn)
             .expect("couldn't delete article by id.");
         // NOTE: references tag rows are deleted automatically by DELETE CASCADE

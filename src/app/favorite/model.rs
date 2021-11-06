@@ -1,5 +1,6 @@
 use crate::app::article::model::Article;
 use crate::app::user::model::User;
+use crate::error::AppError;
 use crate::schema::favorites;
 use chrono::NaiveDateTime;
 use diesel::*;
@@ -19,24 +20,21 @@ pub struct Favorite {
 }
 
 impl Favorite {
-    pub fn favorite(conn: &PgConnection, record: &FavorteAction) -> usize {
+    pub fn favorite(conn: &PgConnection, record: &FavorteAction) -> Result<usize, AppError> {
         let item = diesel::insert_into(favorites::table)
             .values(record)
-            .execute(conn)
-            .expect("could not do favorite.");
-
-        item
+            .execute(conn)?;
+        Ok(item)
     }
 
-    pub fn unfavorite(conn: &PgConnection, params: &UnfavoriteAction) -> usize {
+    pub fn unfavorite(conn: &PgConnection, params: &UnfavoriteAction) -> Result<usize, AppError> {
         use crate::schema::favorites;
         use crate::schema::favorites::dsl::*;
         let item = diesel::delete(favorites::table)
             .filter(favorites::user_id.eq_all(params.user_id))
             .filter(favorites::article_id.eq_all(params.article_id))
-            .execute(conn)
-            .expect("could not unfavorite.");
-        item
+            .execute(conn)?;
+        Ok(item)
     }
 }
 

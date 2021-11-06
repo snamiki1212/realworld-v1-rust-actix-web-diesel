@@ -18,7 +18,7 @@ pub async fn index(
         .get()
         .expect("couldn't get db connection from pool");
 
-    let list = service::fetch_comments_list(&conn, &auth_user);
+    let list = service::fetch_comments_list(&conn, &auth_user)?;
     let res = response::MultipleCommentsResponse::from(list);
     Ok(HttpResponse::Ok().json(res))
 }
@@ -46,7 +46,7 @@ pub async fn create(
             article_id: article_id,
             author: auth_user,
         },
-    );
+    )?;
 
     let res = response::SingleCommentResponse::from((comment, profile));
     Ok(HttpResponse::Ok().json(res))
@@ -68,7 +68,7 @@ pub async fn delete(
     // TODO: Validate article exists
     // TODO: Validate comment is written by auth_user
 
-    Comment::delete(&conn, &comment_id);
+    let _ = Comment::delete(&conn, &comment_id)?;
 
     Ok(HttpResponse::Ok().json("Ok"))
 }

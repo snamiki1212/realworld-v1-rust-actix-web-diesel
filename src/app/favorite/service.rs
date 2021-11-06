@@ -22,7 +22,7 @@ pub fn favorite(
             user_id: params.me.id,
             article_id: params.article_id,
         },
-    );
+    )?;
     let item = fetch_article(
         conn,
         &FetchArticle {
@@ -54,7 +54,7 @@ pub fn unfavorite(
             user_id: params.me.id,
             article_id: params.article_id,
         },
-    );
+    )?;
     Ok(item)
 }
 

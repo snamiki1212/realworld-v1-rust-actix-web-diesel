@@ -1,5 +1,6 @@
 use super::model::Profile;
 use crate::app::user::model::User;
+use crate::error::AppError;
 use diesel::pg::PgConnection;
 use uuid::Uuid;
 
@@ -7,9 +8,12 @@ pub struct FetchProfileByName {
     pub me: User,
     pub username: String,
 }
-pub fn fetch_by_name(conn: &PgConnection, params: &FetchProfileByName) -> Profile {
+pub fn fetch_by_name(
+    conn: &PgConnection,
+    params: &FetchProfileByName,
+) -> Result<Profile, AppError> {
     let FetchProfileByName { me, username } = params;
-    let followee = User::find_by_username(&conn, username).expect("couldn't find user.");
+    let followee = User::find_by_username(&conn, username)?;
     let profile = fetch_profile_by_id(
         &conn,
         &FetchProfileById {
@@ -17,7 +21,7 @@ pub fn fetch_by_name(conn: &PgConnection, params: &FetchProfileByName) -> Profil
             id: followee.id,
         },
     );
-    profile
+    Ok(profile)
 }
 
 pub struct FetchProfileById {

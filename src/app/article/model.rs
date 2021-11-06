@@ -1,4 +1,5 @@
 use crate::app::user::model::User;
+use crate::error::AppError;
 use crate::schema::articles;
 use crate::schema::articles::dsl::*;
 use crate::utils::converter;
@@ -24,21 +25,23 @@ pub struct Article {
 }
 
 impl Article {
-    pub fn create(conn: &PgConnection, record: &NewArticle) -> Self {
+    pub fn create(conn: &PgConnection, record: &NewArticle) -> Result<Self, AppError> {
         let article = diesel::insert_into(articles::table)
             .values(record)
-            .get_result::<Article>(conn)
-            .expect("couldn't insert article");
+            .get_result::<Article>(conn)?;
 
-        article
+        Ok(article)
     }
 
-    pub fn update(conn: &PgConnection, article_id: &Uuid, record: &UpdateArticle) -> Self {
+    pub fn update(
+        conn: &PgConnection,
+        article_id: &Uuid,
+        record: &UpdateArticle,
+    ) -> Result<Self, AppError> {
         let article = diesel::update(articles.filter(id.eq(article_id)))
             .set(record)
-            .get_result::<Article>(conn)
-            .expect("couldn't update article.");
-        article
+            .get_result::<Article>(conn)?;
+        Ok(article)
     }
 
     pub fn convert_title_to_slug(_title: &str) -> String {

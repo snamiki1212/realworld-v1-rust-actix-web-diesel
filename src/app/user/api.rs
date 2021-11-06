@@ -38,7 +38,7 @@ pub async fn signup(
 }
 
 pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
-    let user = auth::access_auth_user(&req).expect("could not fetch auth.");
+    let user = auth::access_auth_user(&req)?;
     let token = user.generate_token()?;
     let user = response::UserResponse::from((user, token));
     Ok(HttpResponse::Ok().json(user))
