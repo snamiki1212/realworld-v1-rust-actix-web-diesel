@@ -12,13 +12,7 @@ pub async fn signin(
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-    let (user, token) =
-        web::block(move || User::signin(&conn, &form.user.email, &form.user.password))
-            .await
-            .map_err(|e| {
-                eprintln!("{}", e);
-                HttpResponse::InternalServerError().json(e.to_string())
-            })?;
+    let (user, token) = User::signin(&conn, &form.user.email, &form.user.password)?;
     let res = response::UserResponse::from((user, token));
     Ok(HttpResponse::Ok().json(res))
 }

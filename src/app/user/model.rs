@@ -1,10 +1,10 @@
 use crate::app::follow::model::{DeleteFollow, Follow, NewFollow};
 use crate::app::profile::model::Profile;
+use crate::error::AppError;
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use crate::schema::users::*;
 use crate::utils::token;
-use anyhow::Result;
 use bcrypt::{hash, verify, DEFAULT_COST};
 use chrono::prelude::*;
 use chrono::{DateTime, NaiveDateTime};
@@ -35,7 +35,7 @@ impl User {
         _email: &'a str,
         _username: &'a str,
         naive_password: &'a str,
-    ) -> Result<(User, Token)> {
+    ) -> anyhow::Result<(User, Token)> {
         use diesel::prelude::*;
         let hashed_password = Self::hash_password(naive_password);
 
@@ -57,12 +57,12 @@ impl User {
         conn: &PgConnection,
         _email: &str,
         naive_password: &str,
-    ) -> Result<(User, Token)> {
+    ) -> Result<(User, Token), AppError> {
         let user = users
             .filter(email.eq(_email))
             .limit(1)
             .first::<User>(conn)?;
-        verify(&naive_password, &user.password)?;
+        let _ = verify(&naive_password, &user.password)?;
 
         let token = user.generate_token();
         let result = (user, token);
@@ -80,7 +80,11 @@ impl User {
             .expect("could not find user by id.")
     }
 
-    pub fn update(conn: &PgConnection, user_id: Uuid, changeset: UpdatableUser) -> Result<Self> {
+    pub fn update(
+        conn: &PgConnection,
+        user_id: Uuid,
+        changeset: UpdatableUser,
+    ) -> anyhow::Result<Self> {
         let target = users.filter(id.eq(user_id));
         let user = diesel::update(target)
             .set(changeset)
@@ -88,7 +92,7 @@ impl User {
         Ok(user)
     }
 
-    pub fn find_by_username(conn: &PgConnection, _username: &str) -> Result<Self> {
+    pub fn find_by_username(conn: &PgConnection, _username: &str) -> anyhow::Result<Self> {
         let user = users
             .filter(username.eq(_username))
             .limit(1)
@@ -97,7 +101,7 @@ impl User {
         Ok(user)
     }
 
-    pub fn follow(&self, conn: &PgConnection, _username: &str) -> Result<Profile> {
+    pub fn follow(&self, conn: &PgConnection, _username: &str) -> anyhow::Result<Profile> {
         let followee = users
             .filter(username.eq(_username))
             .first::<User>(conn)
@@ -120,7 +124,7 @@ impl User {
         Ok(profile)
     }
 
-    pub fn unfollow(&self, conn: &PgConnection, _username: &str) -> Result<Profile> {
+    pub fn unfollow(&self, conn: &PgConnection, _username: &str) -> anyhow::Result<Profile> {
         let followee = users
             .filter(username.eq(_username))
             .first::<User>(conn)

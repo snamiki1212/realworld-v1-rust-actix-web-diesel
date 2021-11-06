@@ -7,13 +7,8 @@ use actix_web::{error::Error as ActixWebErr, web, HttpResponse};
 use anyhow::{Context, Result};
 
 pub async fn index(state: web::Data<AppState>) -> Result<HttpResponse, HttpResponse> {
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
-
+    let conn = state.pool.get().expect("could not get pool");
     let list = Tag::list(&conn)?;
-
     let res = response::TagsResponse::from(list);
     Ok(HttpResponse::Ok().json(res))
 }

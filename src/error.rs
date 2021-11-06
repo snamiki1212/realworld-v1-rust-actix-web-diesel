@@ -1,10 +1,12 @@
 use actix_web::{error::Error as ActixWebError, HttpRequest, HttpResponse};
-use std::convert::From;
-// use std::fmt::{self, Debug, Display};
-// use std::fmt;
+use bcrypt::BcryptError;
+use diesel::r2d2::{Error, PoolError};
 use diesel::result::Error as DieselError;
 use serde_json::Value as JsonValue;
+use std::convert::From;
 use thiserror::Error;
+// use std::fmt::{self, Debug, Display};
+// use std::fmt;
 
 #[derive(Error, Debug)]
 pub enum AppError {
@@ -50,6 +52,18 @@ impl From<AppError> for HttpResponse {
             AppError::InternalServerError => HttpResponse::Unauthorized().json("msg"),
             _ => HttpResponse::InternalServerError().json("Internal server error"),
         }
+    }
+}
+
+impl From<PoolError> for AppError {
+    fn from(_err: PoolError) -> Self {
+        AppError::InternalServerError
+    }
+}
+
+impl From<BcryptError> for AppError {
+    fn from(_err: BcryptError) -> Self {
+        AppError::InternalServerError
     }
 }
 

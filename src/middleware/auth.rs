@@ -16,6 +16,7 @@ use actix_web::{
 use diesel::pg::PgConnection;
 use futures::future::{ok, Ready};
 use futures::Future;
+use serde_json::json;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use uuid::Uuid;
@@ -145,7 +146,9 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
 pub fn access_auth_user(req: &HttpRequest) -> anyhow::Result<User> {
     let head = req.head();
     let extensions = head.extensions();
-    let _user = extensions.get::<User>();
-    let auth_user = _user.map(|user| user.to_owned());
-    auth_user.ok_or(anyhow::anyhow!("Unauthrized user."))
+    let auth_user = extensions.get::<User>();
+    let auth_user = auth_user.map(|user| user.to_owned());
+    let auth_user = auth_user.ok_or(AppError::Unauthorized(json!({"msg": "Unauthrized."})))?;
+
+    Ok(auth_user)
 }
