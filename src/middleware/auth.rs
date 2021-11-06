@@ -101,8 +101,9 @@ fn should_skip_verify(req: &ServiceRequest) -> bool {
 
     return false;
 }
-fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> User {
-    User::find_by_id(&conn, user_id)
+fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> Result<User, AppError> {
+    let user = User::find_by_id(&conn, user_id)?;
+    Ok(user)
 }
 
 fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
@@ -127,7 +128,8 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
                                 .pool
                                 .get()
                                 .expect("couldn't get db connection from pool");
-                            let user = find_auth_user(&conn, user_id);
+                            let user =
+                                find_auth_user(&conn, user_id).expect("could not find auth user.");
                             req.head().extensions_mut().insert(user);
                         }
                         return true;

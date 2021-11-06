@@ -70,18 +70,16 @@ impl User {
         hash(&naive_pw, DEFAULT_COST).expect("could not hash password.")
     }
 
-    pub fn find_by_id(conn: &PgConnection, _id: Uuid) -> Self {
-        users
-            .find(_id)
-            .first(conn)
-            .expect("could not find user by id.")
+    pub fn find_by_id(conn: &PgConnection, _id: Uuid) -> Result<Self, AppError> {
+        let user = users.find(_id).first(conn)?;
+        Ok(user)
     }
 
     pub fn update(
         conn: &PgConnection,
         user_id: Uuid,
         changeset: UpdatableUser,
-    ) -> anyhow::Result<Self> {
+    ) -> Result<Self, AppError> {
         let target = users.filter(id.eq(user_id));
         let user = diesel::update(target)
             .set(changeset)
@@ -89,20 +87,17 @@ impl User {
         Ok(user)
     }
 
-    pub fn find_by_username(conn: &PgConnection, _username: &str) -> anyhow::Result<Self> {
+    pub fn find_by_username(conn: &PgConnection, _username: &str) -> Result<Self, AppError> {
         let user = users
             .filter(username.eq(_username))
             .limit(1)
-            .first::<User>(conn)
-            .expect("could not find user by username");
+            .first::<User>(conn)?;
+
         Ok(user)
     }
 
-    pub fn follow(&self, conn: &PgConnection, _username: &str) -> anyhow::Result<Profile> {
-        let followee = users
-            .filter(username.eq(_username))
-            .first::<User>(conn)
-            .expect("could not find user by name.");
+    pub fn follow(&self, conn: &PgConnection, _username: &str) -> Result<Profile, AppError> {
+        let followee = users.filter(username.eq(_username)).first::<User>(conn)?;
 
         Follow::create_follow(
             &conn,
@@ -112,20 +107,16 @@ impl User {
             },
         );
 
-        let profile = Profile {
+        Ok(Profile {
             username: self.username.clone(),
             bio: self.bio.clone(),
             image: self.image.clone(),
             following: true,
-        };
-        Ok(profile)
+        })
     }
 
-    pub fn unfollow(&self, conn: &PgConnection, _username: &str) -> anyhow::Result<Profile> {
-        let followee = users
-            .filter(username.eq(_username))
-            .first::<User>(conn)
-            .expect("could not find user by name.");
+    pub fn unfollow(&self, conn: &PgConnection, _username: &str) -> Result<Profile, AppError> {
+        let followee = users.filter(username.eq(_username)).first::<User>(conn)?;
 
         Follow::delete_follow(
             conn,
@@ -135,13 +126,12 @@ impl User {
             },
         );
 
-        let profile = Profile {
+        Ok(Profile {
             username: self.username.clone(),
             bio: self.bio.clone(),
             image: self.image.clone(),
             following: false,
-        };
-        Ok(profile)
+        })
     }
 
     pub fn is_following(&self, conn: &PgConnection, _followee_id: &Uuid) -> bool {
