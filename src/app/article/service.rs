@@ -111,7 +111,7 @@ pub fn fetch_articles_list(
                 .filter(tags::name.eq(tag_name))
                 .select(tags::article_id)
                 .load::<Uuid>(conn)
-                .expect("could not fetch tagged article ids.");
+                .expect("could not fetch tagged article ids."); // TODO: use ? or error handling
             query = query.filter(articles::id.eq_any(tagged_article_ids));
         }
 
@@ -121,7 +121,7 @@ pub fn fetch_articles_list(
                 .filter(users::username.eq(author_name))
                 .select(articles::id)
                 .load::<Uuid>(conn)
-                .expect("could not fetch authors id.");
+                .expect("could not fetch authors id."); // TODO: use ? or error handling
             query = query.filter(articles::id.eq_any(article_ids_by_author));
         }
 
@@ -131,7 +131,7 @@ pub fn fetch_articles_list(
                 .filter(users::username.eq(favorited_username))
                 .select(favorites::article_id)
                 .load::<Uuid>(conn)
-                .expect("could not fetch favorited articles id.");
+                .expect("could not fetch favorited articles id."); // TODO: use ? or error handling
             query = query.filter(articles::id.eq_any(favorited_article_ids));
         }
 
@@ -166,13 +166,13 @@ pub fn fetch_articles_list(
             .map(|(article, _)| article.id)
             .collect::<Vec<_>>();
 
-        let favorites_count_list = article_ids_list
+        let favorites_count_list: Result<Vec<_>, _> = article_ids_list
             .into_iter()
             .map(|article_id| {
                 favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
-                    .expect("could not fetch favorites count.")
             })
-            .collect::<Vec<_>>();
+            .collect();
+        let favorites_count_list = favorites_count_list?;
 
         let favorited_article_ids =
             favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
@@ -338,13 +338,13 @@ pub fn fetch_following_articles(
                 .map(|(article, _)| article.id)
                 .collect::<Vec<_>>();
 
-            let favorites_count_list = article_ids_list
+            let favorites_count_list: Result<Vec<_>, _> = article_ids_list
                 .into_iter()
                 .map(|article_id| {
                     favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
-                        .expect("could not fetch favorites count")
                 })
-                .collect::<Vec<_>>();
+                .collect();
+            let favorites_count_list = favorites_count_list?;
 
             let favorited_article_ids =
                 favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;

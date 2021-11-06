@@ -63,7 +63,7 @@ pub fn fetch_comments_list(
                     id: _user.id,
                 },
             )
-            .expect("couldn't fetch profile.");
+            .expect("couldn't fetch profile."); // TODO: use ? or error handling
             (_comment.to_owned(), profile)
         })
         .collect::<Vec<(Comment, Profile)>>();
