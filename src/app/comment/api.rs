@@ -12,7 +12,7 @@ pub async fn index(
     state: web::Data<AppState>,
     req: HttpRequest,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()
@@ -29,7 +29,7 @@ pub async fn create(
     path: web::Path<ArticleIdSlug>,
     form: web::Json<request::CreateCommentRequest>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()
@@ -57,7 +57,7 @@ pub async fn delete(
     req: HttpRequest,
     path: web::Path<(ArticleIdSlug, CommentIdSlug)>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()

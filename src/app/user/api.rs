@@ -26,19 +26,12 @@ pub async fn signup(
         .pool
         .get()
         .expect("couldn't get db connection from pool");
-    let (user, token) = web::block(move || {
-        User::signup(
-            &conn,
-            &form.user.email,
-            &form.user.username,
-            &form.user.password,
-        )
-    })
-    .await
-    .map_err(|e| {
-        eprintln!("{}", e);
-        HttpResponse::InternalServerError().json(e.to_string())
-    })?;
+    let (user, token) = User::signup(
+        &conn,
+        &form.user.email,
+        &form.user.username,
+        &form.user.password,
+    )?;
 
     let res = response::UserResponse::from((user, token));
     Ok(HttpResponse::Ok().json(res))
@@ -47,7 +40,7 @@ pub async fn signup(
 pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
     let user = auth::access_auth_user(&req).expect("could not fetch auth.");
     let token = user.generate_token()?;
-    let user = response::UserResponse::from((user.to_owned(), token));
+    let user = response::UserResponse::from((user, token));
     Ok(HttpResponse::Ok().json(user))
 }
 
@@ -56,8 +49,7 @@ pub async fn update(
     req: HttpRequest,
     form: web::Json<request::Update>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    // --
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()

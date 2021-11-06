@@ -44,6 +44,8 @@ impl User {
             username: _username,
             password: &hashed_password,
         };
+
+        // TODO: move to model or service
         let user = diesel::insert_into(users::table)
             .values(&record)
             .get_result::<User>(conn)?;

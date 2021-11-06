@@ -11,7 +11,7 @@ pub async fn show(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let me = access_auth_user(&req).expect("couldn't get user on req extension.");
+    let me = access_auth_user(&req)?;
     let conn = state
         .pool
         .get()
@@ -35,14 +35,13 @@ pub async fn follow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let user = access_auth_user(&req).expect("couldn't get user on req extension.");
+    let user = access_auth_user(&req)?;
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
     let username = path.into_inner();
-
-    let profile = user.follow(&conn, &username).expect("couldn't follow user");
+    let profile = user.follow(&conn, &username)?;
     Ok(HttpResponse::Ok().json(profile))
 }
 
@@ -51,15 +50,12 @@ pub async fn unfollow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let user = access_auth_user(&req).expect("couldn't get user on req extension.");
+    let user = access_auth_user(&req)?;
     let conn = state
         .pool
         .get()
         .expect("couldn't get db connection from pool");
     let username = path.into_inner();
-
-    let profile = user
-        .unfollow(&conn, &username)
-        .expect("couldn't unfollow user");
+    let profile = user.unfollow(&conn, &username)?;
     Ok(HttpResponse::Ok().json(profile))
 }

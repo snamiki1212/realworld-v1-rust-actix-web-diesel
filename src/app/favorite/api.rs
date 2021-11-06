@@ -14,7 +14,7 @@ pub async fn favorite(
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()
@@ -41,7 +41,7 @@ pub async fn unfavorite(
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()

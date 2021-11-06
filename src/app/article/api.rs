@@ -23,7 +23,7 @@ pub async fn index(
     req: HttpRequest,
     params: web::Query<ArticlesListQueryParameter>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()
@@ -58,7 +58,7 @@ pub async fn feed(
     req: HttpRequest,
     params: web::Query<FeedQueryParameter>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()
@@ -83,7 +83,7 @@ pub async fn show(
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()
@@ -107,7 +107,7 @@ pub async fn create(
     req: HttpRequest,
     form: web::Json<request::CreateArticleRequest>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()
@@ -135,7 +135,7 @@ pub async fn update(
     path: web::Path<ArticleIdSlug>,
     form: web::Json<request::UpdateArticleRequest>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state
         .pool
         .get()

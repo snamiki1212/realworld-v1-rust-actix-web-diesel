@@ -145,7 +145,7 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
     false
 }
 
-pub fn access_auth_user(req: &HttpRequest) -> anyhow::Result<User> {
+pub fn access_auth_user(req: &HttpRequest) -> Result<User, AppError> {
     let head = req.head();
     let extensions = head.extensions();
     let auth_user = extensions.get::<User>();
