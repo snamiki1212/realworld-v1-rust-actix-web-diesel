@@ -9,10 +9,7 @@ pub async fn signin(
     state: web::Data<AppState>,
     form: web::Json<request::Signin>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let conn = state
-        .pool
-        .get()
-        .map_err(|_err| AppError::InternalServerError)?;
+    let conn = state.get_conn()?;
     let (user, token) = User::signin(&conn, &form.user.email, &form.user.password)?;
     let res = response::UserResponse::from((user, token));
     Ok(HttpResponse::Ok().json(res))
@@ -22,10 +19,7 @@ pub async fn signup(
     state: web::Data<AppState>,
     form: web::Json<request::Signup>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
+    let conn = state.get_conn()?;
     let (user, token) = User::signup(
         &conn,
         &form.user.email,
@@ -50,11 +44,7 @@ pub async fn update(
     form: web::Json<request::Update>,
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req)?;
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
-
+    let conn = state.get_conn()?;
     let user = form.user.clone();
 
     let user = UpdatableUser {

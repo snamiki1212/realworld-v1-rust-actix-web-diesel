@@ -34,7 +34,7 @@ pub fn create(
             id: author.id,
             me: author.to_owned(),
         },
-    );
+    )?;
     Ok((comment, profile))
 }
 
@@ -62,7 +62,8 @@ pub fn fetch_comments_list(
                     me: me.to_owned(),
                     id: _user.id,
                 },
-            );
+            )
+            .expect("couldn't fetch profile.");
             (_comment.to_owned(), profile)
         })
         .collect::<Vec<(Comment, Profile)>>();

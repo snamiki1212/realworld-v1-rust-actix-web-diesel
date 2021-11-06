@@ -125,8 +125,7 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
                         let user_id = claims.user_id;
                         if let Some(state) = req.app_data::<Data<AppState>>() {
                             let conn = state
-                                .pool
-                                .get()
+                                .get_conn()
                                 .expect("couldn't get db connection from pool");
                             let user =
                                 find_auth_user(&conn, user_id).expect("could not find auth user.");

@@ -44,12 +44,12 @@ pub fn create(
             me: params.me.to_owned(),
             id: article.author_id,
         },
-    );
+    )?;
 
-    let favorites_count = favorite::service::fetch_favorites_count_by_article_id(conn, article.id);
+    let favorites_count = favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
 
     let favorited_article_ids =
-        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id);
+        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
 
     let is_favorited = favorited_article_ids
         .to_owned()
@@ -170,11 +170,12 @@ pub fn fetch_articles_list(
             .into_iter()
             .map(|article_id| {
                 favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
+                    .expect("could not fetch favorites count.")
             })
             .collect::<Vec<_>>();
 
         let favorited_article_ids =
-            favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id);
+            favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
 
         let is_favorited_by_me = |article: &Article| {
             favorited_article_ids
@@ -257,10 +258,10 @@ pub fn fetch_article(
             me: me.to_owned(),
             id: author.id,
         },
-    );
+    )?;
 
     let favorited_article_ids =
-        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id);
+        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
 
     let is_favorited = favorited_article_ids
         .to_owned()
@@ -269,7 +270,7 @@ pub fn fetch_article(
 
     let favorite_info = FavoriteInfo {
         is_favorited,
-        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id),
+        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?,
     };
 
     let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
@@ -288,13 +289,12 @@ pub struct FetchFollowedArticlesSerivce {
 pub fn fetch_following_articles(
     conn: &PgConnection,
     params: &FetchFollowedArticlesSerivce,
-) -> (ArticlesList, ArticlesCount) {
+) -> Result<(ArticlesList, ArticlesCount), AppError> {
     let query = {
         let following_user_ids = follows
             .filter(follows::follower_id.eq(params.me.id))
             .select(follows::followee_id)
-            .get_results::<Uuid>(conn)
-            .expect("could not fetch following uesrs.");
+            .get_results::<Uuid>(conn)?;
 
         articles.filter(articles::author_id.eq_any(following_user_ids))
     };
@@ -306,8 +306,7 @@ pub fn fetch_following_articles(
             .limit(params.limit)
             .offset(params.offset)
             .order(articles::created_at.desc())
-            .get_results::<(Article, User)>(conn)
-            .expect("could not fetch following articles.");
+            .get_results::<(Article, User)>(conn)?;
 
         let tags_list = {
             let articles_list = article_and_user_list
@@ -316,10 +315,7 @@ pub fn fetch_following_articles(
                 .map(|(article, _)| article)
                 .collect::<Vec<_>>();
 
-            let tags_list = Tag::belonging_to(&articles_list)
-                .load::<Tag>(conn)
-                .expect("could not fetch tags list.");
-
+            let tags_list = Tag::belonging_to(&articles_list).load::<Tag>(conn)?;
             let tags_list: Vec<Vec<Tag>> = tags_list.grouped_by(&articles_list);
             tags_list
         };
@@ -334,8 +330,7 @@ pub fn fetch_following_articles(
             let follows_list = follows::table
                 .filter(follows::follower_id.eq(params.me.id))
                 .filter(follows::followee_id.eq_any(user_ids_list))
-                .get_results::<Follow>(conn)
-                .expect("could not fetch follow.");
+                .get_results::<Follow>(conn)?;
 
             let article_ids_list = article_and_user_list
                 .clone()
@@ -347,11 +342,12 @@ pub fn fetch_following_articles(
                 .into_iter()
                 .map(|article_id| {
                     favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
+                        .expect("could not fetch favorites count")
                 })
                 .collect::<Vec<_>>();
 
             let favorited_article_ids =
-                favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id);
+                favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
 
             let is_favorited_by_me = |article: &Article| {
                 favorited_article_ids
@@ -400,10 +396,9 @@ pub fn fetch_following_articles(
 
     let articles_count = query
         .select(diesel::dsl::count(articles::id))
-        .first::<i64>(conn)
-        .expect("couldn't fetch articles count.");
+        .first::<i64>(conn)?;
 
-    (articles_list, articles_count)
+    Ok((articles_list, articles_count))
 }
 
 pub struct UpdateArticleService {
@@ -437,10 +432,10 @@ pub fn update_article(
             me: params.me.to_owned(),
             id: article.author_id,
         },
-    );
+    )?;
 
     let favorited_article_ids =
-        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id);
+        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
 
     let is_favorited = favorited_article_ids
         .to_owned()
@@ -449,7 +444,7 @@ pub fn update_article(
 
     let favorite_info = FavoriteInfo {
         is_favorited,
-        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id),
+        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?,
     };
 
     Ok((article, profile, favorite_info, tag_list))

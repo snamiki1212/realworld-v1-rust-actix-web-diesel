@@ -24,10 +24,7 @@ pub async fn index(
     params: web::Query<ArticlesListQueryParameter>,
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req)?;
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
+    let conn = state.get_conn()?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
 
@@ -59,10 +56,7 @@ pub async fn feed(
     params: web::Query<FeedQueryParameter>,
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req)?;
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
+    let conn = state.get_conn()?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
     let (articles_list, articles_count) = service::fetch_following_articles(
@@ -72,7 +66,7 @@ pub async fn feed(
             offset: offset,
             limit: limit,
         },
-    );
+    )?;
 
     let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
     Ok(HttpResponse::Ok().json(res))
@@ -84,10 +78,7 @@ pub async fn show(
     path: web::Path<ArticleIdSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req)?;
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
+    let conn = state.get_conn()?;
     let article_id = path.into_inner();
     let (article, profile, favorite_info, tags_list) = service::fetch_article(
         &conn,
@@ -108,11 +99,7 @@ pub async fn create(
     form: web::Json<request::CreateArticleRequest>,
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req)?;
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
-
+    let conn = state.get_conn()?;
     let (article, profile, favorite_info, tag_list) = service::create(
         &conn,
         &service::CreateArticleSerivce {
@@ -136,10 +123,7 @@ pub async fn update(
     form: web::Json<request::UpdateArticleRequest>,
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req)?;
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
+    let conn = state.get_conn()?;
     let article_id = path.into_inner();
     // TODO: validation deletable auth_user.id == article.author_id ?
     let article_slug = &form
@@ -172,10 +156,7 @@ pub async fn delete(
     path: web::Path<ArticleIdSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
     // let auth_user = auth::access_auth_user(&req)?;
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
+    let conn = state.get_conn()?;
     let article_id = path.into_inner();
 
     let _ = service::delete_article(&conn, article_id)?;

@@ -18,6 +18,17 @@ pub struct AppState {
     pub pool: utils::db::DbPool,
 }
 
+use crate::error::AppError;
+use diesel::pg::PgConnection;
+use diesel::r2d2::{ConnectionManager, PooledConnection};
+type AppPool = PooledConnection<ConnectionManager<PgConnection>>;
+impl AppState {
+    pub fn get_conn(&self) -> Result<AppPool, AppError> {
+        let conn = self.pool.get()?;
+        Ok(conn)
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
@@ -28,7 +39,7 @@ async fn main() -> std::io::Result<()> {
         let pool = utils::db::establish_connection();
         App::new()
             .wrap(logger)
-            .data(AppState { pool: pool })
+            .data(AppState { pool })
             .wrap(middleware::cors::cors())
             .wrap(middleware::auth::Authentication)
             .service(web::scope("").configure(routes::api)) // TODO: call configure without emptpy scope

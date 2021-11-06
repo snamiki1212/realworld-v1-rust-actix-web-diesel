@@ -20,7 +20,7 @@ pub fn fetch_by_name(
             me: me.to_owned(),
             id: followee.id,
         },
-    );
+    )?;
     Ok(profile)
 }
 
@@ -28,7 +28,10 @@ pub struct FetchProfileById {
     pub me: User,
     pub id: Uuid,
 }
-pub fn fetch_profile_by_id(conn: &PgConnection, params: &FetchProfileById) -> Profile {
+pub fn fetch_profile_by_id(
+    conn: &PgConnection,
+    params: &FetchProfileById,
+) -> Result<Profile, AppError> {
     let FetchProfileById { me, id } = params;
     let is_following = me.is_following(&conn, id);
     let profile = Profile {
@@ -37,5 +40,5 @@ pub fn fetch_profile_by_id(conn: &PgConnection, params: &FetchProfileById) -> Pr
         image: me.image.to_owned(),
         following: is_following,
     };
-    profile
+    Ok(profile)
 }
