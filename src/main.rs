@@ -27,7 +27,7 @@ async fn main() -> std::io::Result<()> {
             .data(middleware::state::AppState { pool })
             .wrap(middleware::cors::cors())
             .wrap(middleware::auth::Authentication)
-            .service(web::scope("").configure(routes::api)) // TODO: call configure without emptpy scope
+            .configure(routes::api)
     })
     .bind(constants::BIND)?
     .run()
