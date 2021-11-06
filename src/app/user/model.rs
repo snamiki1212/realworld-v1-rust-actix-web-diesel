@@ -4,8 +4,7 @@ use crate::error::AppError;
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use crate::schema::users::*;
-use crate::utils::token;
-use bcrypt::{hash, verify, BcryptResult, DEFAULT_COST};
+use crate::utils::{hasher, token};
 use chrono::prelude::*;
 use chrono::{DateTime, NaiveDateTime};
 use diesel::pg::PgConnection;
@@ -37,7 +36,7 @@ impl User {
         naive_password: &'a str,
     ) -> Result<(User, Token), AppError> {
         use diesel::prelude::*;
-        let hashed_password = Self::hash_password(naive_password)?;
+        let hashed_password = hasher::hash_password(naive_password)?;
 
         let record = SignupUser {
             email: _email,
@@ -63,13 +62,9 @@ impl User {
             .filter(email.eq(_email))
             .limit(1)
             .first::<User>(conn)?;
-        let _ = verify(&naive_password, &user.password)?;
+        let _ = hasher::verify(&naive_password, &user.password)?;
         let token = user.generate_token()?;
         Ok((user, token))
-    }
-
-    fn hash_password(naive_pw: &str) -> BcryptResult<String> {
-        hash(&naive_pw, DEFAULT_COST)
     }
 
     pub fn find_by_id(conn: &PgConnection, _id: Uuid) -> Result<Self, AppError> {
