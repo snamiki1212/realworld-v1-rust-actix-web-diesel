@@ -35,7 +35,7 @@ impl User {
         _email: &'a str,
         _username: &'a str,
         naive_password: &'a str,
-    ) -> anyhow::Result<(User, Token)> {
+    ) -> Result<(User, Token), AppError> {
         use diesel::prelude::*;
         let hashed_password = Self::hash_password(naive_password);
 
@@ -48,9 +48,8 @@ impl User {
             .values(&record)
             .get_result::<User>(conn)?;
 
-        let token = user.generate_token();
-        let result = (user, token);
-        Ok(result)
+        let token = user.generate_token()?;
+        Ok((user, token))
     }
 
     pub fn signin(
@@ -63,10 +62,8 @@ impl User {
             .limit(1)
             .first::<User>(conn)?;
         let _ = verify(&naive_password, &user.password)?;
-
-        let token = user.generate_token();
-        let result = (user, token);
-        Ok(result)
+        let token = user.generate_token()?;
+        Ok((user, token))
     }
 
     fn hash_password(naive_pw: &str) -> String {
@@ -158,9 +155,10 @@ impl User {
 }
 
 impl User {
-    pub fn generate_token(&self) -> String {
+    pub fn generate_token(&self) -> Result<String, AppError> {
         let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nanosecond -> second
-        token::generate(self.id, now).expect("could not encode jwt.")
+        let token = token::generate(self.id, now)?;
+        Ok(token)
     }
 }
 

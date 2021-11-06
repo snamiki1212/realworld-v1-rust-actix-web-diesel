@@ -2,6 +2,7 @@ use actix_web::{error::Error as ActixWebError, HttpRequest, HttpResponse};
 use bcrypt::BcryptError;
 use diesel::r2d2::{Error, PoolError};
 use diesel::result::Error as DieselError;
+use jsonwebtoken::errors::Error as JwtError;
 use serde_json::Value as JsonValue;
 use std::convert::From;
 use thiserror::Error;
@@ -63,6 +64,12 @@ impl From<PoolError> for AppError {
 
 impl From<BcryptError> for AppError {
     fn from(_err: BcryptError) -> Self {
+        AppError::InternalServerError
+    }
+}
+
+impl From<JwtError> for AppError {
+    fn from(_err: JwtError) -> Self {
         AppError::InternalServerError
     }
 }

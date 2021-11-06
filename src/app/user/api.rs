@@ -43,10 +43,11 @@ pub async fn signup(
     Ok(HttpResponse::Ok().json(res))
 }
 
-pub async fn me(req: HttpRequest) -> HttpResponse {
+pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
     let user = auth::access_auth_user(&req).expect("could not fetch auth.");
-    let user = response::UserResponse::from((user.to_owned(), user.generate_token()));
-    HttpResponse::Ok().json(user)
+    let token = user.generate_token()?;
+    let user = response::UserResponse::from((user.to_owned(), token));
+    Ok(HttpResponse::Ok().json(user))
 }
 
 pub async fn update(
@@ -77,7 +78,7 @@ pub async fn update(
             HttpResponse::InternalServerError().json(e.to_string())
         })?;
 
-    let token = &user.generate_token();
+    let token = &user.generate_token()?;
     let res = response::UserResponse::from((user, token.to_string()));
 
     Ok(HttpResponse::Ok().json(res))
