@@ -26,7 +26,6 @@ pub async fn signup(
         &form.user.username,
         &form.user.password,
     )?;
-
     let res = response::UserResponse::from((user, token));
     Ok(HttpResponse::Ok().json(res))
 }
@@ -46,7 +45,6 @@ pub async fn update(
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let user = form.user.clone();
-
     let user = UpdatableUser {
         email: user.email,
         username: user.username,
@@ -54,15 +52,8 @@ pub async fn update(
         image: user.image,
         bio: user.bio,
     };
-    let user = web::block(move || User::update(&conn, auth_user.id, user))
-        .await
-        .map_err(|e| {
-            eprintln!("{}", e);
-            HttpResponse::InternalServerError().json(e.to_string())
-        })?;
-
+    let user = User::update(&conn, auth_user.id, user)?;
     let token = &user.generate_token()?;
     let res = response::UserResponse::from((user, token.to_string()));
-
     Ok(HttpResponse::Ok().json(res))
 }

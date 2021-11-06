@@ -158,8 +158,6 @@ pub async fn delete(
     // let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let article_id = path.into_inner();
-
     let _ = service::delete_article(&conn, article_id)?;
-
     Ok(HttpResponse::Ok().json({}))
 }
