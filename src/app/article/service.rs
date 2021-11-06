@@ -454,3 +454,16 @@ pub fn update_article(
 
     Ok((article, profile, favorite_info, tag_list))
 }
+
+pub fn delete_article(conn: &PgConnection, _article_id: Uuid) -> Result<(), AppError> {
+    // TODO: move this logic into service
+    use crate::schema::articles::dsl::*;
+    use diesel::prelude::*;
+
+    // TODO: validation deletable auth_user.id == article.author_id ?
+
+    let _ = diesel::delete(articles.filter(id.eq(_article_id))).execute(conn)?;
+    // NOTE: references tag rows are deleted automatically by DELETE CASCADE
+
+    Ok(())
+}

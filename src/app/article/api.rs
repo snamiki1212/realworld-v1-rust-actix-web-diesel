@@ -178,18 +178,7 @@ pub async fn delete(
         .expect("couldn't get db connection from pool");
     let article_id = path.into_inner();
 
-    {
-        // TODO: move this logic into service
-        use crate::schema::articles::dsl::*;
-        use diesel::prelude::*;
-
-        // TODO: validation deletable auth_user.id == article.author_id ?
-
-        let _ = diesel::delete(articles.filter(id.eq(article_id)))
-            .execute(&conn)
-            .expect("couldn't delete article by id.");
-        // NOTE: references tag rows are deleted automatically by DELETE CASCADE
-    }
+    let _ = service::delete_article(&conn, article_id)?;
 
     Ok(HttpResponse::Ok().json({}))
 }
