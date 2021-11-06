@@ -4,8 +4,8 @@ use super::{
 };
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
+use crate::utils::uuid;
 use actix_web::{web, HttpRequest, HttpResponse};
-use uuid::Uuid;
 
 type ArticleIdSlug = String;
 
@@ -17,7 +17,7 @@ pub async fn favorite(
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let article_id = path.into_inner();
-    let article_id = Uuid::parse_str(&article_id).expect("invalid url:article id is invalid."); // TODO: validate
+    let article_id = uuid::parse(&article_id)?;
 
     // TODO: validate article_id
 
@@ -41,7 +41,7 @@ pub async fn unfavorite(
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let article_id = path.into_inner();
-    let article_id = Uuid::parse_str(&article_id).expect("invalid url:article id is invalid."); // TODO: validate
+    let article_id = uuid::parse(&article_id)?;
 
     // TODO: validate article_id
 

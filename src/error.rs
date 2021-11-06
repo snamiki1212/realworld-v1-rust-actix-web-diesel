@@ -7,6 +7,7 @@ use serde_json::json;
 use serde_json::Value as JsonValue;
 use std::convert::From;
 use thiserror::Error;
+use uuid::Error as UuidError;
 
 #[derive(Error, Debug)]
 pub enum AppError {
@@ -100,5 +101,11 @@ impl From<DieselError> for AppError {
             }
             _ => AppError::InternalServerError,
         }
+    }
+}
+
+impl From<UuidError> for AppError {
+    fn from(_err: UuidError) -> Self {
+        AppError::NotFound(json!({"error":"Uuid is invalid."}))
     }
 }
