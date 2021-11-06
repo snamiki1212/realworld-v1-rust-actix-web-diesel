@@ -7,6 +7,7 @@ use crate::app::profile::model::Profile;
 use crate::app::profile::service::FetchProfileById;
 use crate::app::tag::model::{NewTag, Tag};
 use crate::app::user::model::User;
+use crate::error::AppError;
 use crate::schema::articles::dsl::*;
 use crate::schema::{articles, favorites, tags, users};
 use diesel::pg::PgConnection;
@@ -25,7 +26,7 @@ pub struct CreateArticleSerivce {
 pub fn create(
     conn: &PgConnection,
     params: &CreateArticleSerivce,
-) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
+) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let article = Article::create(
         &conn,
         &NewArticle {
@@ -36,7 +37,7 @@ pub fn create(
             body: params.body.to_owned(),
         },
     );
-    let tag_list = create_tag_list(&conn, &params.tag_list, &article);
+    let tag_list = create_tag_list(&conn, &params.tag_list, &article)?;
     let profile = profile::service::fetch_profile_by_id(
         &conn,
         &FetchProfileById {
@@ -60,15 +61,15 @@ pub fn create(
         favorites_count,
     };
 
-    (article, profile, favorite_info, tag_list)
+    Ok((article, profile, favorite_info, tag_list))
 }
 
 fn create_tag_list(
     conn: &PgConnection,
     tag_list: &Option<Vec<String>>,
     article: &Article,
-) -> Vec<Tag> {
-    tag_list
+) -> Result<Vec<Tag>, AppError> {
+    let list = tag_list
         .as_ref()
         .map(|tag_list| {
             let records = tag_list
@@ -78,9 +79,11 @@ fn create_tag_list(
                     article_id: &article.id,
                 })
                 .collect();
-            Tag::create_list(&conn, records)
+            let list = Tag::create_list(&conn, records);
+            list
         })
-        .unwrap_or(vec![])
+        .unwrap_or(Ok(vec![]));
+    list
 }
 
 pub struct FetchArticlesList {
@@ -423,7 +426,7 @@ pub struct UpdateArticleService {
 pub fn update_article(
     conn: &PgConnection,
     params: &UpdateArticleService,
-) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
+) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let article = Article::update(
         &conn,
         &params.article_id,
@@ -435,7 +438,7 @@ pub fn update_article(
         },
     );
 
-    let tag_list = Tag::fetch_list_by_article_id(&conn, params.article_id);
+    let tag_list = Tag::fetch_list_by_article_id(&conn, params.article_id)?;
 
     let profile = profile::service::fetch_profile_by_id(
         &conn,
@@ -458,5 +461,5 @@ pub fn update_article(
         favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id),
     };
 
-    (article, profile, favorite_info, tag_list)
+    Ok((article, profile, favorite_info, tag_list))
 }

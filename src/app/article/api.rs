@@ -124,7 +124,7 @@ pub async fn create(
             tag_list: form.article.tag_list.to_owned(),
             me: auth_user,
         },
-    );
+    )?;
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tag_list));
     Ok(HttpResponse::Ok().json(res))
 }
@@ -160,7 +160,7 @@ pub async fn update(
             description: form.article.description.clone(),
             body: form.article.body.clone(),
         },
-    );
+    )?;
 
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tag_list));
     Ok(HttpResponse::Ok().json(res))
