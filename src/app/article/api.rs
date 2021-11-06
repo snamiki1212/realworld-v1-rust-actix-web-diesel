@@ -2,7 +2,7 @@ use super::model::Article;
 use super::service;
 use super::{request, response};
 use crate::middleware::auth;
-use crate::AppState;
+use crate::middleware::state::AppState;
 use actix_web::{web, HttpRequest, HttpResponse};
 use serde::Deserialize;
 use uuid::Uuid;

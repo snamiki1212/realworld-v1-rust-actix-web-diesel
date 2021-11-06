@@ -1,7 +1,7 @@
 use super::model::{Comment, CreateComment};
 use super::{request, response, service};
 use crate::middleware::auth;
-use crate::AppState;
+use crate::middleware::state::AppState;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use uuid::Uuid;
 

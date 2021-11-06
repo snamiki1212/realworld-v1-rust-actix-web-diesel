@@ -2,7 +2,7 @@ extern crate serde_json;
 use super::model::Tag;
 use super::response;
 use crate::error::AppError;
-use crate::AppState;
+use crate::middleware::state::AppState;
 use actix_web::{error::Error as ActixWebErr, web, HttpResponse};
 use anyhow::{Context, Result};
 

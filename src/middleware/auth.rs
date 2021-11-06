@@ -2,8 +2,8 @@ use crate::app::user::model::User;
 use crate::constants;
 use crate::error::AppError;
 use crate::middleware;
+use crate::middleware::state::AppState;
 use crate::utils::token;
-use crate::AppState;
 use actix_service::{Service, Transform};
 use actix_web::HttpMessage;
 use actix_web::{
