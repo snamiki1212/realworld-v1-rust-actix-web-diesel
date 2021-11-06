@@ -94,20 +94,19 @@ impl User {
             .filter(username.eq(_username))
             .limit(1)
             .first::<User>(conn)?;
-
         Ok(user)
     }
 
     pub fn follow(&self, conn: &PgConnection, _username: &str) -> Result<Profile, AppError> {
         let followee = users.filter(username.eq(_username)).first::<User>(conn)?;
 
-        Follow::create_follow(
+        let _ = Follow::create_follow(
             &conn,
             &NewFollow {
                 follower_id: self.id,
                 followee_id: followee.id,
             },
-        );
+        )?;
 
         Ok(Profile {
             username: self.username.clone(),
@@ -120,13 +119,13 @@ impl User {
     pub fn unfollow(&self, conn: &PgConnection, _username: &str) -> Result<Profile, AppError> {
         let followee = users.filter(username.eq(_username)).first::<User>(conn)?;
 
-        Follow::delete_follow(
+        let _ = Follow::delete_follow(
             conn,
             &DeleteFollow {
                 followee_id: followee.id,
                 follower_id: self.id,
             },
-        );
+        )?;
 
         Ok(Profile {
             username: self.username.clone(),

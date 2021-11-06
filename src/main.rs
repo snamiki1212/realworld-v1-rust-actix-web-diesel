@@ -5,7 +5,7 @@ extern crate diesel;
 extern crate log;
 
 use actix_web::middleware::Logger;
-use actix_web::{web, App, HttpServer};
+use actix_web::{App, HttpServer};
 mod app;
 mod constants;
 mod error;
