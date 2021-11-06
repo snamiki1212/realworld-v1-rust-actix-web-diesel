@@ -6,10 +6,9 @@ use crate::schema::users::dsl::*;
 use crate::schema::users::*;
 use crate::utils::{hasher, token};
 use chrono::prelude::*;
-use chrono::{DateTime, NaiveDateTime};
+use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use jsonwebtoken::{EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 

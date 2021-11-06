@@ -1,8 +1,8 @@
-use super::model::{Comment, CreateComment};
+use super::model::Comment;
 use super::{request, response, service};
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
-use actix_web::{web, HttpRequest, HttpResponse, Responder};
+use actix_web::{web, HttpRequest, HttpResponse};
 use uuid::Uuid;
 
 type ArticleIdSlug = String;

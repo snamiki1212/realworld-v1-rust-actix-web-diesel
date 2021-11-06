@@ -1,9 +1,8 @@
 use crate::app::user::model::{UpdatableUser, User};
 use crate::app::user::{request, response};
-use crate::error::AppError;
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
-use actix_web::{web, HttpRequest, HttpResponse, Responder};
+use actix_web::{web, HttpRequest, HttpResponse};
 
 pub async fn signin(
     state: web::Data<AppState>,

@@ -1,11 +1,9 @@
 use crate::app::article::model::Article;
+use crate::error::AppError;
 use crate::schema::tags;
 use crate::schema::*;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
-use diesel::result::Error as DieselError;
-// use diesel::result::Error;
-use crate::error::AppError;
 use diesel::Insertable;
 use diesel::*;
 use serde::{Deserialize, Serialize};

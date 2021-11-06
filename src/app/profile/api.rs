@@ -2,7 +2,7 @@ use super::service;
 use crate::app::profile;
 use crate::middleware::auth::access_auth_user;
 use crate::middleware::state::AppState;
-use actix_web::{web, HttpRequest, HttpResponse, Responder};
+use actix_web::{web, HttpRequest, HttpResponse};
 
 type UsernameSlug = String;
 
