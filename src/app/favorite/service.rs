@@ -4,6 +4,7 @@ use crate::app::favorite::model::{Favorite, FavoriteInfo, FavorteAction, Unfavor
 use crate::app::profile::model::Profile;
 use crate::app::tag::model::Tag;
 use crate::app::user::model::User;
+use crate::error::AppError;
 use diesel::pg::PgConnection;
 use uuid::Uuid;
 
@@ -14,7 +15,7 @@ pub struct FavoriteService {
 pub fn favorite(
     conn: &PgConnection,
     params: &FavoriteService,
-) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
+) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let _ = Favorite::favorite(
         conn,
         &FavorteAction {
@@ -28,8 +29,8 @@ pub fn favorite(
             article_id: params.article_id,
             me: params.me.to_owned(),
         },
-    );
-    item
+    )?;
+    Ok(item)
 }
 
 pub struct UnfavoriteService {
@@ -39,14 +40,14 @@ pub struct UnfavoriteService {
 pub fn unfavorite(
     conn: &PgConnection,
     params: &UnfavoriteService,
-) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
+) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let item = fetch_article(
         conn,
         &FetchArticle {
             article_id: params.article_id,
             me: params.me.to_owned(),
         },
-    );
+    )?;
     let _ = Favorite::unfavorite(
         conn,
         &UnfavoriteAction {
@@ -54,7 +55,7 @@ pub fn unfavorite(
             article_id: params.article_id,
         },
     );
-    item
+    Ok(item)
 }
 
 pub fn fetch_favorites_count_by_article_id(conn: &PgConnection, _article_id: Uuid) -> i64 {

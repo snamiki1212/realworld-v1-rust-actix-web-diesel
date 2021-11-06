@@ -101,7 +101,7 @@ type ArticlesList = Vec<(ArticlesListInner, Vec<Tag>)>;
 pub fn fetch_articles_list(
     conn: &PgConnection,
     params: FetchArticlesList,
-) -> (ArticlesList, ArticlesCount) {
+) -> Result<(ArticlesList, ArticlesCount), AppError> {
     use diesel::prelude::*;
     let query = || {
         let mut query = articles::table.inner_join(users::table).into_boxed();
@@ -140,15 +140,14 @@ pub fn fetch_articles_list(
 
     let articles_count = query()
         .select(diesel::dsl::count(articles::id))
-        .first::<i64>(conn)
-        .expect("couldn't fetch articles count.");
+        .first::<i64>(conn)?;
 
     let articles_list = {
-        let article_and_user_list = query()
-            .offset(params.offset)
-            .limit(params.limit)
-            .load::<(Article, User)>(conn)
-            .expect("couldn't fetch articles list.");
+        let article_and_user_list =
+            query()
+                .offset(params.offset)
+                .limit(params.limit)
+                .load::<(Article, User)>(conn)?;
 
         let tags_list = {
             let articles_list = article_and_user_list
@@ -156,11 +155,7 @@ pub fn fetch_articles_list(
                 .into_iter()
                 .map(|(article, _)| article)
                 .collect::<Vec<_>>();
-
-            let tags_list = Tag::belonging_to(&articles_list)
-                .load::<Tag>(conn)
-                .expect("could not fetch tags list.");
-
+            let tags_list = Tag::belonging_to(&articles_list).load::<Tag>(conn)?;
             let tags_list: Vec<Vec<Tag>> = tags_list.grouped_by(&articles_list);
             tags_list
         };
@@ -198,8 +193,7 @@ pub fn fetch_articles_list(
             let follows_list = follows::table
                 .filter(follows::follower_id.eq(params.me.id))
                 .filter(follows::followee_id.eq_any(user_ids_list))
-                .get_results::<Follow>(conn)
-                .expect("could not fetch follow.");
+                .get_results::<Follow>(conn)?;
 
             let follows_list = follows_list.into_iter();
             let article_and_profile_list = article_and_user_list
@@ -239,7 +233,7 @@ pub fn fetch_articles_list(
         articles_list
     };
 
-    (articles_list, articles_count)
+    Ok((articles_list, articles_count))
 }
 
 pub struct FetchArticle {
@@ -249,14 +243,13 @@ pub struct FetchArticle {
 pub fn fetch_article(
     conn: &PgConnection,
     params: &FetchArticle,
-) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
+) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     use diesel::prelude::*;
     let FetchArticle { article_id, me } = params;
     let (article, author) = articles
         .inner_join(users::table)
         .filter(articles::id.eq(article_id))
-        .get_result::<(Article, User)>(conn)
-        .expect("could not fetch article by id.");
+        .get_result::<(Article, User)>(conn)?;
 
     let profile = profile::service::fetch_profile_by_id(
         &conn,
@@ -279,11 +272,9 @@ pub fn fetch_article(
         favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id),
     };
 
-    let tags_list = Tag::belonging_to(&article)
-        .load::<Tag>(conn)
-        .expect("could not fetch tags list.");
+    let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
 
-    (article, profile, favorite_info, tags_list)
+    Ok((article, profile, favorite_info, tags_list))
 }
 
 use crate::schema::articles::dsl::*;

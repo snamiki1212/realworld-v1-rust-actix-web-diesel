@@ -41,7 +41,7 @@ pub async fn index(
             limit: limit,
             me: auth_user,
         },
-    );
+    )?;
 
     let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
     Ok(HttpResponse::Ok().json(res))
@@ -95,7 +95,7 @@ pub async fn show(
             article_id: article_id,
             me: auth_user,
         },
-    );
+    )?;
 
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
 
