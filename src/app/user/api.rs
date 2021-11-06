@@ -1,5 +1,6 @@
 use crate::app::user::model::{UpdatableUser, User};
 use crate::app::user::{request, response};
+use crate::error::AppError;
 use crate::middleware::auth;
 use crate::AppState;
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
@@ -11,7 +12,7 @@ pub async fn signin(
     let conn = state
         .pool
         .get()
-        .expect("couldn't get db connection from pool");
+        .map_err(|_err| AppError::InternalServerError)?;
     let (user, token) = User::signin(&conn, &form.user.email, &form.user.password)?;
     let res = response::UserResponse::from((user, token));
     Ok(HttpResponse::Ok().json(res))
