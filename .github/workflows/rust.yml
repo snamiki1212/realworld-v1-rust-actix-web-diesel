@@ -45,7 +45,10 @@ jobs:
         run: cp .env.example .env
       - name: Build
         run: cargo build --verbose
+
+      - name: Ready for e2e
+        run: cd e2e
       - name: Run server and ...
         run: cargo run --bin conduit &
       - name: Run e2e test
-        run: cd e2e && APIURL=http://localhost:8080/api sh ./run-api-tests.sh
+        run: APIURL=http://localhost:8080/api sh ./run-api-tests.sh
