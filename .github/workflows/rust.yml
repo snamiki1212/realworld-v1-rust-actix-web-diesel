@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Create secrey.key
-        run: cp secrey.key.example secret.key
+        run: cp secret.key.example secret.key
       - name: Build
         run: cargo build --verbose
       - name: Run tests
