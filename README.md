@@ -16,7 +16,7 @@ $ cargo run --bin conduit
 
 ```zsh
 # run e2e
-$ sh e2e/run-api-tests.sh
+$ APIURL=http://localhost:8080/api sh e2e/run-api-tests.sh
 ```
 
 ## LICENSE

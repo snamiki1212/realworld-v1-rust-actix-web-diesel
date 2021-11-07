@@ -46,4 +46,4 @@ jobs:
       - name: Run server and ...
         run: cargo run --bin conduit &
       - name: Run e2e test
-        run: sh e2e/run-api-tests.sh
+        run: APIURL=http://localhost:8080/api sh e2e/run-api-tests.sh
