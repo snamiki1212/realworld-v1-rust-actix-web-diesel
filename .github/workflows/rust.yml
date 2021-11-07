@@ -10,14 +10,40 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  test_integration_and_unit:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out repo
+        uses: actions/checkout@v2
       - name: Create secrey.key
         run: cp secret.key.example secret.key
       - name: Build
         run: cargo build --verbose
       - name: Run tests
         run: cargo test --verbose
+
+  test_e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+      - name: Create secrey.key
+        run: cp secret.key.example secret.key
+      - name: Build
+        run: cargo build --verbose
+      - name: Serve
+        run: cargo run --bin conduit
+      - name: Run e2e test
+        run: sh e2e/run-api-tests.sh

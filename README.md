@@ -2,11 +2,21 @@
 
 Realworld App using Rust/actix-web.
 
-## NOTE: dev
+## Getting Started
 
 ```zsh
-cargo install diesel_cli --no-default-features --features postgres
-cargo run --bin conduit
+# prerequisite
+$ cargo install diesel_cli --no-default-features --features postgres
+
+# run server
+$ cargo run --bin conduit
+```
+
+## e2e test
+
+```zsh
+# run e2e
+$ sh e2e/run-api-tests.sh
 ```
 
 ## LICENSE
