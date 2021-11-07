@@ -4,6 +4,7 @@ use crate::app::favorite::model::{Favorite, FavoriteInfo, FavorteAction, Unfavor
 use crate::app::profile::model::Profile;
 use crate::app::tag::model::Tag;
 use crate::app::user::model::User;
+use crate::error::AppError;
 use diesel::pg::PgConnection;
 use uuid::Uuid;
 
@@ -14,22 +15,22 @@ pub struct FavoriteService {
 pub fn favorite(
     conn: &PgConnection,
     params: &FavoriteService,
-) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
+) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let _ = Favorite::favorite(
         conn,
         &FavorteAction {
             user_id: params.me.id,
             article_id: params.article_id,
         },
-    );
+    )?;
     let item = fetch_article(
         conn,
         &FetchArticle {
             article_id: params.article_id,
             me: params.me.to_owned(),
         },
-    );
-    item
+    )?;
+    Ok(item)
 }
 
 pub struct UnfavoriteService {
@@ -39,42 +40,46 @@ pub struct UnfavoriteService {
 pub fn unfavorite(
     conn: &PgConnection,
     params: &UnfavoriteService,
-) -> (Article, Profile, FavoriteInfo, Vec<Tag>) {
+) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let item = fetch_article(
         conn,
         &FetchArticle {
             article_id: params.article_id,
             me: params.me.to_owned(),
         },
-    );
+    )?;
     let _ = Favorite::unfavorite(
         conn,
         &UnfavoriteAction {
             user_id: params.me.id,
             article_id: params.article_id,
         },
-    );
-    item
+    )?;
+    Ok(item)
 }
 
-pub fn fetch_favorites_count_by_article_id(conn: &PgConnection, _article_id: Uuid) -> i64 {
+pub fn fetch_favorites_count_by_article_id(
+    conn: &PgConnection,
+    _article_id: Uuid,
+) -> Result<i64, AppError> {
     use crate::schema::favorites;
     use diesel::prelude::*;
     let favorites_count = favorites::table
         .filter(favorites::article_id.eq_all(_article_id))
         .select(diesel::dsl::count(favorites::created_at))
-        .first::<i64>(conn)
-        .expect("could not favorites count list.");
-    favorites_count
+        .first::<i64>(conn)?;
+    Ok(favorites_count)
 }
 
-pub fn fetch_favorited_article_ids_by_user_id(conn: &PgConnection, user_id: Uuid) -> Vec<Uuid> {
+pub fn fetch_favorited_article_ids_by_user_id(
+    conn: &PgConnection,
+    user_id: Uuid,
+) -> Result<Vec<Uuid>, AppError> {
     use crate::schema::favorites;
     use diesel::prelude::*;
     let favorited_article_ids = favorites::table
         .filter(favorites::user_id.eq(user_id))
         .select(favorites::user_id)
-        .get_results::<Uuid>(conn)
-        .expect("could not find favorited articles ids.");
-    favorited_article_ids
+        .get_results::<Uuid>(conn)?;
+    Ok(favorited_article_ids)
 }

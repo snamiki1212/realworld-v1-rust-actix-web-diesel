@@ -1,4 +1,5 @@
 use crate::app::user::model::User;
+use crate::error::AppError;
 use crate::schema::follows;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
@@ -16,24 +17,24 @@ pub struct Follow {
 }
 
 impl Follow {
-    pub fn create_follow(conn: &PgConnection, params: &NewFollow) {
+    pub fn create_follow(conn: &PgConnection, params: &NewFollow) -> Result<(), AppError> {
         use diesel::prelude::*;
-        diesel::insert_into(follows::table)
+        let _ = diesel::insert_into(follows::table)
             .values(params)
-            .execute(conn)
-            .expect("couldn't insert follow.");
+            .execute(conn)?;
+        Ok(())
     }
 
-    pub fn delete_follow(conn: &PgConnection, params: &DeleteFollow) {
+    pub fn delete_follow(conn: &PgConnection, params: &DeleteFollow) -> Result<(), AppError> {
         use crate::schema::follows::dsl::*;
         use diesel::prelude::*;
-        diesel::delete(
+        let _ = diesel::delete(
             follows
                 .filter(followee_id.eq(params.followee_id))
                 .filter(follower_id.eq(params.follower_id)),
         )
-        .execute(conn)
-        .expect("couldn't delete follow.");
+        .execute(conn)?;
+        Ok(())
     }
 }
 

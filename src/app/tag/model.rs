@@ -1,9 +1,9 @@
 use crate::app::article::model::Article;
+use crate::error::AppError;
 use crate::schema::tags;
 use crate::schema::*;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
-use diesel::result::Error;
 use diesel::Insertable;
 use diesel::*;
 use serde::{Deserialize, Serialize};
@@ -21,35 +21,36 @@ pub struct Tag {
 }
 
 impl Tag {
-    pub fn fetch_list_by_article_id(conn: &PgConnection, _article_id: Uuid) -> Vec<Self> {
+    pub fn fetch_list_by_article_id(
+        conn: &PgConnection,
+        _article_id: Uuid,
+    ) -> Result<Vec<Self>, AppError> {
         use crate::schema::tags;
         use crate::schema::tags::dsl::*;
         use diesel::prelude::*;
         let list = tags
             .filter(tags::article_id.eq(_article_id))
-            .get_results::<Self>(conn)
-            .expect("could not fetch tags.");
-        list
+            .get_results::<Self>(conn)?;
+        Ok(list)
     }
 
-    pub fn list(conn: &PgConnection) -> Result<Vec<Self>, Error> {
+    pub fn list(conn: &PgConnection) -> Result<Vec<Self>, AppError> {
         use crate::schema;
         use diesel::prelude::*;
         use schema::tags::dsl::*;
-        let list = tags.load::<Tag>(conn);
-        list
+        let list = tags.load::<Self>(conn)?;
+        Ok(list)
     }
 
-    pub fn create_list(conn: &PgConnection, records: Vec<NewTag>) -> Vec<Self> {
+    pub fn create_list(conn: &PgConnection, records: Vec<NewTag>) -> Result<Vec<Self>, AppError> {
         use crate::diesel::RunQueryDsl;
         use crate::schema::tags::dsl::*;
         // TODO: validate record params are valid.
         let tags_list = diesel::insert_into(tags)
             .values(records)
-            .get_results::<Tag>(conn)
-            .expect("couldn't insert tags.");
+            .get_results::<Tag>(conn)?;
 
-        tags_list
+        Ok(tags_list)
     }
 }
 

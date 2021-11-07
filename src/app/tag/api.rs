@@ -1,22 +1,13 @@
 extern crate serde_json;
-
 use super::model::Tag;
 use super::response;
-use crate::AppState;
-
+use crate::middleware::state::AppState;
 use actix_web::{web, HttpResponse};
+use anyhow::Result;
 
 pub async fn index(state: web::Data<AppState>) -> Result<HttpResponse, HttpResponse> {
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
-
-    let list = web::block(move || Tag::list(&conn)).await.map_err(|e| {
-        eprintln!("{}", e);
-        HttpResponse::InternalServerError().json(e.to_string())
-    })?;
-
+    let conn = state.get_conn()?;
+    let list = Tag::list(&conn)?;
     let res = response::TagsResponse::from(list);
     Ok(HttpResponse::Ok().json(res))
 }

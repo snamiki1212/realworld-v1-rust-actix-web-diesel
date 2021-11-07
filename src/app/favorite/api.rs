@@ -3,9 +3,9 @@ use super::{
     service::{self, UnfavoriteService},
 };
 use crate::middleware::auth;
-use crate::AppState;
-use actix_web::{web, HttpRequest, HttpResponse, Responder};
-use uuid::Uuid;
+use crate::middleware::state::AppState;
+use crate::utils::uuid;
+use actix_web::{web, HttpRequest, HttpResponse};
 
 type ArticleIdSlug = String;
 
@@ -14,13 +14,10 @@ pub async fn favorite(
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
+    let auth_user = auth::access_auth_user(&req)?;
+    let conn = state.get_conn()?;
     let article_id = path.into_inner();
-    let article_id = Uuid::parse_str(&article_id).expect("invalid url:article id is invalid."); // TODO: validate
+    let article_id = uuid::parse(&article_id)?;
 
     // TODO: validate article_id
 
@@ -30,7 +27,7 @@ pub async fn favorite(
             me: auth_user,
             article_id: article_id,
         },
-    );
+    )?;
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
 
     Ok(HttpResponse::Ok().json(res))
@@ -41,13 +38,10 @@ pub async fn unfavorite(
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req).expect("couldn't access auth user.");
-    let conn = state
-        .pool
-        .get()
-        .expect("couldn't get db connection from pool");
+    let auth_user = auth::access_auth_user(&req)?;
+    let conn = state.get_conn()?;
     let article_id = path.into_inner();
-    let article_id = Uuid::parse_str(&article_id).expect("invalid url:article id is invalid."); // TODO: validate
+    let article_id = uuid::parse(&article_id)?;
 
     // TODO: validate article_id
 
@@ -57,7 +51,7 @@ pub async fn unfavorite(
             me: auth_user,
             article_id: article_id,
         },
-    );
+    )?;
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
     Ok(HttpResponse::Ok().json(res))
 }

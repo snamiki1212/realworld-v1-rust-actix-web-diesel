@@ -1,8 +1,9 @@
 use crate::app::user::model::User;
 use crate::constants;
+use crate::error::AppError;
 use crate::middleware;
+use crate::middleware::state::AppState;
 use crate::utils::token;
-use crate::AppState;
 use actix_service::{Service, Transform};
 use actix_web::HttpMessage;
 use actix_web::{
@@ -15,6 +16,7 @@ use actix_web::{
 use diesel::pg::PgConnection;
 use futures::future::{ok, Ready};
 use futures::Future;
+use serde_json::json;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use uuid::Uuid;
@@ -66,7 +68,7 @@ where
     }
 
     fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
-        if should_skip_verify(&req) || verify(&mut req) {
+        if should_skip_verify(&req) || verify_and_insert_auth_user(&mut req) {
             let fut = self.service.call(req);
             Box::pin(async move {
                 let res = fut.await?;
@@ -99,11 +101,12 @@ fn should_skip_verify(req: &ServiceRequest) -> bool {
 
     return false;
 }
-fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> User {
-    User::find_by_id(&conn, user_id)
+fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> Result<User, AppError> {
+    let user = User::find_by_id(&conn, user_id)?;
+    Ok(user)
 }
 
-fn verify(req: &mut ServiceRequest) -> bool {
+fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
     // TODO: Does it need?
     req.headers_mut().append(
         HeaderName::from_static("content-length"),
@@ -121,14 +124,27 @@ fn verify(req: &mut ServiceRequest) -> bool {
                         let claims = token_data.claims;
                         let user_id = claims.user_id;
                         if let Some(state) = req.app_data::<Data<AppState>>() {
-                            let conn = state
-                                .pool
-                                .get()
-                                .expect("couldn't get db connection from pool");
-                            let user = find_auth_user(&conn, user_id);
-                            req.head().extensions_mut().insert(user);
+                            let conn = state.get_conn();
+                            match conn {
+                                Ok(conn) => {
+                                    match find_auth_user(&conn, user_id) {
+                                        Ok(user) => {
+                                            req.head().extensions_mut().insert(user);
+                                            return true;
+                                        }
+                                        Err(_err) => {
+                                            warn!("couldn't find auth user.");
+                                            return false;
+                                        }
+                                    };
+                                }
+                                Err(_err) => {
+                                    warn!("couldn't find auth user.");
+                                    return false;
+                                }
+                            }
                         }
-                        return true;
+                        return false;
                     }
                     _ => {
                         error!("Invalid token");
@@ -141,11 +157,12 @@ fn verify(req: &mut ServiceRequest) -> bool {
     false
 }
 
-pub fn access_auth_user(req: &HttpRequest) -> Option<User> {
+pub fn access_auth_user(req: &HttpRequest) -> Result<User, AppError> {
     let head = req.head();
     let extensions = head.extensions();
-    let _user = extensions.get::<User>();
-    let auth_user = _user.map(|user| user.to_owned());
-    // auth_user.ok_or("ok")
-    auth_user
+    let auth_user = extensions.get::<User>();
+    let auth_user = auth_user.map(|user| user.to_owned());
+    let auth_user = auth_user.ok_or(AppError::Unauthorized(json!({"msg": "Unauthrized."})))?;
+
+    Ok(auth_user)
 }

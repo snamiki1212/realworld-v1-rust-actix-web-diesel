@@ -2,6 +2,7 @@ use super::model::{Comment, CreateComment};
 use crate::app::profile::model::Profile;
 use crate::app::profile::service::{fetch_profile_by_id, FetchProfileById};
 use crate::app::user::model::User;
+use crate::error::AppError;
 use diesel::pg::PgConnection;
 use uuid::Uuid;
 
@@ -10,7 +11,10 @@ pub struct CreateCommentService {
     pub article_id: Uuid,
     pub author: User,
 }
-pub fn create(conn: &PgConnection, params: &CreateCommentService) -> (Comment, Profile) {
+pub fn create(
+    conn: &PgConnection,
+    params: &CreateCommentService,
+) -> Result<(Comment, Profile), AppError> {
     let CreateCommentService {
         body,
         article_id,
@@ -23,18 +27,21 @@ pub fn create(conn: &PgConnection, params: &CreateCommentService) -> (Comment, P
             author_id: author.id,
             article_id: article_id.to_owned(),
         },
-    );
+    )?;
     let profile = fetch_profile_by_id(
         &conn,
         &FetchProfileById {
             id: author.id,
             me: author.to_owned(),
         },
-    );
-    (comment, profile)
+    )?;
+    Ok((comment, profile))
 }
 
-pub fn fetch_comments_list(conn: &PgConnection, me: &User) -> Vec<(Comment, Profile)> {
+pub fn fetch_comments_list(
+    conn: &PgConnection,
+    me: &User,
+) -> Result<Vec<(Comment, Profile)>, AppError> {
     use crate::schema::comments;
     use crate::schema::comments::dsl::*;
     use crate::schema::follows;
@@ -43,8 +50,7 @@ pub fn fetch_comments_list(conn: &PgConnection, me: &User) -> Vec<(Comment, Prof
     let _comments = comments
         .inner_join(users::table)
         .filter(comments::article_id.eq(article_id))
-        .get_results::<(Comment, User)>(conn)
-        .expect("could not fetch comments list.");
+        .get_results::<(Comment, User)>(conn)?;
 
     let _comments = _comments
         .iter()
@@ -56,10 +62,11 @@ pub fn fetch_comments_list(conn: &PgConnection, me: &User) -> Vec<(Comment, Prof
                     me: me.to_owned(),
                     id: _user.id,
                 },
-            );
+            )
+            .expect("couldn't fetch profile."); // TODO: use ? or error handling
             (_comment.to_owned(), profile)
         })
         .collect::<Vec<(Comment, Profile)>>();
 
-    _comments
+    Ok(_comments)
 }
