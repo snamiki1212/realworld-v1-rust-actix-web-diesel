@@ -4,9 +4,7 @@ use actix_web::http;
 use std::env;
 
 pub fn cors() -> Cors {
-    let frontend_origin = env::var(env_key::FRONTEND_ORIGIN).ok();
-    let frontend_origin = frontend_origin.ok_or("*").unwrap();
-
+    let frontend_origin = env::var(env_key::FRONTEND_ORIGIN).unwrap_or("*".to_string());
     let cors = Cors::default()
         .allowed_origin(&frontend_origin)
         .allowed_origin_fn(|origin, _req_head| origin.as_bytes().ends_with(b".rust-lang.org"))

@@ -92,15 +92,14 @@ fn should_skip_verify(req: &ServiceRequest) -> bool {
     if Method::OPTIONS == *req.method() {
         return true;
     }
-
     for ignore_route in constants::IGNORE_AUTH_ROUTES.iter() {
         if req.path().starts_with(ignore_route) {
             return true;
         }
     }
-
     return false;
 }
+
 fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> Result<User, AppError> {
     let user = User::find_by_id(&conn, user_id)?;
     Ok(user)
@@ -161,7 +160,7 @@ pub fn access_auth_user(req: &HttpRequest) -> Result<User, AppError> {
     let head = req.head();
     let extensions = head.extensions();
     let auth_user = extensions.get::<User>();
-    let auth_user = auth_user.map(|user| user.to_owned());
+    let auth_user = auth_user.map(|user| user.to_owned()); // TODO: avoid copy
     let auth_user = auth_user.ok_or(AppError::Unauthorized(json!({"msg": "Unauthrized."})))?;
 
     Ok(auth_user)
