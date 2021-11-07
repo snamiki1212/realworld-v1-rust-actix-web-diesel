@@ -87,9 +87,7 @@ pub async fn show(
             me: auth_user,
         },
     )?;
-
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
-
     Ok(HttpResponse::Ok().json(res))
 }
 

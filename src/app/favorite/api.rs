@@ -18,9 +18,7 @@ pub async fn favorite(
     let conn = state.get_conn()?;
     let article_id = path.into_inner();
     let article_id = uuid::parse(&article_id)?;
-
     // TODO: validate article_id
-
     let (article, profile, favorite_info, tags_list) = service::favorite(
         &conn,
         &service::FavoriteService {
@@ -29,7 +27,6 @@ pub async fn favorite(
         },
     )?;
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
-
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -42,9 +39,7 @@ pub async fn unfavorite(
     let conn = state.get_conn()?;
     let article_id = path.into_inner();
     let article_id = uuid::parse(&article_id)?;
-
     // TODO: validate article_id
-
     let (article, profile, favorite_info, tags_list) = service::unfavorite(
         &conn,
         &UnfavoriteService {

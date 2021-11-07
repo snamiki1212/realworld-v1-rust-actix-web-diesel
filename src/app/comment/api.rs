@@ -29,9 +29,7 @@ pub async fn create(
     let conn = state.get_conn()?;
     let article_id = path.into_inner();
     let article_id = uuid::parse(&article_id)?;
-
     // TODO: Validate this article of article_id is written by auth_user
-
     let (comment, profile) = service::create(
         &conn,
         &service::CreateCommentService {
@@ -40,7 +38,6 @@ pub async fn create(
             author: auth_user,
         },
     )?;
-
     let res = response::SingleCommentResponse::from((comment, profile));
     Ok(HttpResponse::Ok().json(res))
 }
@@ -57,8 +54,6 @@ pub async fn delete(
     let comment_id = uuid::parse(&comment_id)?;
     // TODO: Validate article exists
     // TODO: Validate comment is written by auth_user
-
     let _ = Comment::delete(&conn, &comment_id)?;
-
     Ok(HttpResponse::Ok().json("Ok"))
 }
