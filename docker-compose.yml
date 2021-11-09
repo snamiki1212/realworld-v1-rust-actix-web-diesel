@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  app:
+    container_name: conduit_app
+    build:
+      context: .
+    volumes:
+      - "./:/app"
+    links:
+      - db
+    # command: 'bash -c "diesel setup && cargo watch --exec run"'
+    command: 'bash -c "diesel setup && cargo watch --exec run"'
+    ports:
+      - "8080:8080"
+  db:
+    image: "postgres:14.0-alpine"
+    environment:
+      - POSTGRES_DB=realworld-rust-actix-web
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
