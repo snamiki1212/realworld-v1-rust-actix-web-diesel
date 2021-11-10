@@ -16,9 +16,9 @@ mod utils;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    println!("start conduit server...");
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
-
     HttpServer::new(move || {
         let logger = Logger::default();
         let pool = utils::db::establish_connection();

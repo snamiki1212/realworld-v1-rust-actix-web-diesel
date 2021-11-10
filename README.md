@@ -1,15 +1,15 @@
 # Overview
 
-Realworld App using Rust/actix-web.
+Realworld App using Rust, actix-web, and diesel.
 
 ## Getting Started
 
 ```zsh
-# prerequisite
-$ cargo install diesel_cli --no-default-features --features postgres
+$ docker-compose up -d
 
-# run server
-$ cargo run --bin conduit
+# TODO: add healtch check
+# $ curl -X localhost:8080/api/healthcheck
+# # ok
 ```
 
 ## e2e test
