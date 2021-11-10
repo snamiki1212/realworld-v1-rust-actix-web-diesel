@@ -105,6 +105,9 @@ fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> Result<User, AppError> 
     Ok(user)
 }
 
+// const TOKEN_IDENTIFIER: &str = "Bearer";
+const TOKEN_IDENTIFIER: &str = "Token";
+
 fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
     // TODO: Does it need?
     req.headers_mut().append(
@@ -115,7 +118,7 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
     if let Some(authen_header) = req.headers().get(constants::AUTHORIZATION) {
         info!("Parsing authorization header...");
         if let Ok(authen_str) = authen_header.to_str() {
-            if authen_str.starts_with("bearer") || authen_str.starts_with("Bearer") {
+            if authen_str.starts_with(TOKEN_IDENTIFIER) {
                 info!("Parsing token...");
                 let token = authen_str[6..authen_str.len()].trim();
                 match token::decode(&token) {
