@@ -5,6 +5,7 @@ use actix_web::web::{delete, get, post, put};
 pub fn api(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api")
+            .service(web::scope("/healthcheck").route("", get().to(app::healthcheck::api::index)))
             .service(web::scope("/tags").route("", get().to(app::tag::api::index)))
             .service(
                 web::scope("/users")

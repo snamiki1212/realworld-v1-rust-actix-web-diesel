@@ -6,10 +6,8 @@ Realworld App using Rust, actix-web, and diesel.
 
 ```zsh
 $ docker-compose up -d
-
-# TODO: add healtch check
-# $ curl -X localhost:8080/api/healthcheck
-# # ok
+$ curl -X localhost:8080/api/healthcheck
+# => OK
 ```
 
 ## e2e test
