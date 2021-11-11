@@ -1,4 +1,5 @@
 use super::model::{Comment, CreateComment};
+use crate::app::article::model::{Article, FetchBySlugAndAuthorId};
 use crate::app::profile::model::Profile;
 use crate::app::profile::service::{fetch_profile_by_id, FetchProfileById};
 use crate::app::user::model::User;
@@ -8,7 +9,7 @@ use uuid::Uuid;
 
 pub struct CreateCommentService {
     pub body: String,
-    pub article_id: Uuid,
+    pub article_title_slug: String,
     pub author: User,
 }
 pub fn create(
@@ -17,15 +18,22 @@ pub fn create(
 ) -> Result<(Comment, Profile), AppError> {
     let CreateCommentService {
         body,
-        article_id,
+        article_title_slug,
         author,
     } = params;
+    let article = Article::fetch_by_slug_and_author_id(
+        conn,
+        &FetchBySlugAndAuthorId {
+            slug: article_title_slug.to_owned(),
+            author_id: author.id,
+        },
+    )?;
     let comment = Comment::create(
         &conn,
         &CreateComment {
             body: body.to_string(),
             author_id: author.id,
-            article_id: article_id.to_owned(),
+            article_id: article.id.to_owned(),
         },
     )?;
     let profile = fetch_profile_by_id(

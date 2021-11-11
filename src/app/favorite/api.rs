@@ -35,14 +35,12 @@ pub async fn unfavorite(
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
-    let article_id = path.into_inner();
-    let article_id = uuid::parse(&article_id)?;
-    // TODO: validate article_id
+    let article_title_slug = path.into_inner();
     let (article, profile, favorite_info, tags_list) = service::unfavorite(
         &conn,
         &UnfavoriteService {
             me: auth_user,
-            article_id: article_id,
+            article_title_slug,
         },
     )?;
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));

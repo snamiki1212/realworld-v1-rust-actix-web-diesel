@@ -27,14 +27,12 @@ pub async fn create(
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
-    let article_id = path.into_inner();
-    let article_id = uuid::parse(&article_id)?;
-    // TODO: Validate this article of article_id is written by auth_user
+    let article_title_slug = path.into_inner();
     let (comment, profile) = service::create(
         &conn,
         &service::CreateCommentService {
             body: form.comment.body.to_owned(),
-            article_id: article_id,
+            article_title_slug,
             author: auth_user,
         },
     )?;
