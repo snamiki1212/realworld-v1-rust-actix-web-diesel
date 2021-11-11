@@ -21,7 +21,7 @@ $ APIURL=http://localhost:8080/api sh e2e/run-api-tests.sh
 
 ### Req to res flow
 
-![Req to res flow](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/snamiki1212/realworld-rust-actix-web/main/doc/data_flow.pu)
+![Req to res flow](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/snamiki1212/realworld-rust-actix-web/main/doc/data_flow.pu)
 
 ## LICENSE
 
