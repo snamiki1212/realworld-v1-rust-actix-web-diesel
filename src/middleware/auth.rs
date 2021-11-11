@@ -89,11 +89,12 @@ where
 }
 
 fn should_skip_verify(req: &ServiceRequest) -> bool {
-    if Method::OPTIONS == *req.method() {
+    let method = req.method();
+    if Method::OPTIONS == *method {
         return true;
     }
-    for ignore_route in constants::IGNORE_AUTH_ROUTES.iter() {
-        if req.path().starts_with(ignore_route) {
+    for IgnoreAuthRoute { path, method } in IGNORE_AUTH_ROUTES.iter() {
+        if req.path().starts_with(path) && req.method() == method {
             return true;
         }
     }
@@ -164,7 +165,35 @@ pub fn access_auth_user(req: &HttpRequest) -> Result<User, AppError> {
     let extensions = head.extensions();
     let auth_user = extensions.get::<User>();
     let auth_user = auth_user.map(|user| user.to_owned()); // TODO: avoid copy
-    let auth_user = auth_user.ok_or(AppError::Unauthorized(json!({"msg": "Unauthrized."})))?;
+    let auth_user = auth_user.ok_or(AppError::Unauthorized(json!({"error": "Unauthrized."})))?;
 
     Ok(auth_user)
 }
+
+struct IgnoreAuthRoute {
+    path: &'static str,
+    method: Method,
+}
+
+const IGNORE_AUTH_ROUTES: [IgnoreAuthRoute; 5] = [
+    IgnoreAuthRoute {
+        path: "/api/healthcheck",
+        method: Method::GET,
+    },
+    IgnoreAuthRoute {
+        path: "/api/tags",
+        method: Method::GET,
+    },
+    IgnoreAuthRoute {
+        path: "/api/users",
+        method: Method::POST,
+    },
+    IgnoreAuthRoute {
+        path: "/api/users/login",
+        method: Method::POST,
+    },
+    IgnoreAuthRoute {
+        path: "/api/articles",
+        method: Method::GET,
+    },
+];
