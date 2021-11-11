@@ -23,7 +23,6 @@ pub async fn index(
     req: HttpRequest,
     params: web::Query<ArticlesListQueryParameter>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
@@ -36,7 +35,6 @@ pub async fn index(
             favorited: params.favorited.clone(),
             offset: offset,
             limit: limit,
-            me: auth_user,
         },
     )?;
 

@@ -92,7 +92,6 @@ pub struct FetchArticlesList {
     pub favorited: Option<String>,
     pub offset: i64,
     pub limit: i64,
-    pub me: User,
 }
 
 type ArticlesCount = i64;
@@ -174,40 +173,17 @@ pub fn fetch_articles_list(
             .collect();
         let favorites_count_list = favorites_count_list?;
 
-        let favorited_article_ids =
-            favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
-
-        let is_favorited_by_me = |article: &Article| {
-            favorited_article_ids
-                .to_owned()
-                .into_iter()
-                .any(|_id| _id == article.id)
-        };
-
         let article_and_profile_list = {
-            let user_ids_list = article_and_user_list
-                .clone() // TODO: avoid clone
-                .into_iter()
-                .map(|(_, user)| user.id)
-                .collect::<Vec<_>>();
-
-            let follows_list = follows::table
-                .filter(follows::follower_id.eq(params.me.id))
-                .filter(follows::followee_id.eq_any(user_ids_list))
-                .get_results::<Follow>(conn)?;
-
-            let follows_list = follows_list.into_iter();
             let article_and_profile_list = article_and_user_list
                 .into_iter()
                 .map(|(article, user)| {
-                    let following = follows_list.clone().any(|item| item.followee_id == user.id);
                     let profile = Profile {
                         username: user.username,
                         bio: user.bio,
                         image: user.image,
-                        following: following.to_owned(),
+                        following: false, // NOTE: because not authz
                     };
-                    let is_favorited = is_favorited_by_me(&article);
+                    let is_favorited = false; // NOTE: because not authz
                     (article, profile, is_favorited)
                 })
                 .zip(favorites_count_list)
