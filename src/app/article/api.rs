@@ -73,16 +73,10 @@ pub async fn show(
     req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let article_title_slug = path.into_inner();
-    let (article, profile, favorite_info, tags_list) = service::fetch_article_by_slug(
-        &conn,
-        &service::FetchArticleBySlug {
-            article_title_slug,
-            me: auth_user,
-        },
-    )?;
+    let (article, profile, favorite_info, tags_list) =
+        service::fetch_article_by_slug(&conn, &service::FetchArticleBySlug { article_title_slug })?;
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
     Ok(HttpResponse::Ok().json(res))
 }

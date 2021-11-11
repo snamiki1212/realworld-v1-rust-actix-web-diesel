@@ -256,17 +256,13 @@ pub fn fetch_article(
 
 pub struct FetchArticleBySlug {
     pub article_title_slug: String,
-    pub me: User,
 }
 pub fn fetch_article_by_slug(
     conn: &PgConnection,
     params: &FetchArticleBySlug,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     use diesel::prelude::*;
-    let FetchArticleBySlug {
-        article_title_slug,
-        me,
-    } = params;
+    let FetchArticleBySlug { article_title_slug } = params;
     let (article, author) = articles
         .inner_join(users::table)
         .filter(articles::slug.eq(article_title_slug))
@@ -275,13 +271,13 @@ pub fn fetch_article_by_slug(
     let profile = profile::service::fetch_profile_by_id(
         &conn,
         &FetchProfileById {
-            me: me.to_owned(),
+            me: author.to_owned(),
             id: author.id,
         },
     )?;
 
     let favorited_article_ids =
-        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
+        favorite::service::fetch_favorited_article_ids_by_user_id(conn, author.id)?;
 
     let is_favorited = favorited_article_ids
         .to_owned()
