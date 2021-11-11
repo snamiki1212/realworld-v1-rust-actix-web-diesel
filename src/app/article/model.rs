@@ -35,12 +35,17 @@ impl Article {
 
     pub fn update(
         conn: &PgConnection,
-        article_id: &Uuid,
+        article_title_slug: &String,
+        _author_id: &Uuid,
         record: &UpdateArticle,
     ) -> Result<Self, AppError> {
-        let article = diesel::update(articles.filter(id.eq(article_id)))
-            .set(record)
-            .get_result::<Article>(conn)?;
+        let article = diesel::update(
+            articles
+                .filter(articles::slug.eq(article_title_slug))
+                .filter(articles::id.eq_all(_author_id)),
+        )
+        .set(record)
+        .get_result::<Article>(conn)?;
         Ok(article)
     }
 

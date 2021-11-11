@@ -115,12 +115,12 @@ pub async fn create(
 pub async fn update(
     state: web::Data<AppState>,
     req: HttpRequest,
-    path: web::Path<ArticleIdSlug>,
+    path: web::Path<ArticleTitleSlug>,
     form: web::Json<request::UpdateArticleRequest>,
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
-    let article_id = path.into_inner();
+    let article_title_slug = path.into_inner();
     // TODO: validation deletable auth_user.id == article.author_id ?
     let article_slug = &form
         .article
@@ -128,13 +128,11 @@ pub async fn update(
         .as_ref()
         .map(|_title| Article::convert_title_to_slug(_title));
 
-    // TODO: validation: slug is not empty
-
     let (article, profile, favorite_info, tag_list) = service::update_article(
         &conn,
         &service::UpdateArticleService {
             me: auth_user,
-            article_id,
+            article_title_slug,
             slug: article_slug.to_owned(),
             title: form.article.title.clone(),
             description: form.article.description.clone(),

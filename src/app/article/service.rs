@@ -423,7 +423,7 @@ pub fn fetch_following_articles(
 
 pub struct UpdateArticleService {
     pub me: User,
-    pub article_id: Uuid,
+    pub article_title_slug: String,
     pub slug: Option<String>,
     pub title: Option<String>,
     pub description: Option<String>,
@@ -435,7 +435,8 @@ pub fn update_article(
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let article = Article::update(
         &conn,
-        &params.article_id,
+        &params.article_title_slug,
+        &params.me.id,
         &UpdateArticle {
             slug: params.slug.to_owned(),
             title: params.title.to_owned(),
@@ -444,7 +445,7 @@ pub fn update_article(
         },
     )?;
 
-    let tag_list = Tag::fetch_list_by_article_id(&conn, params.article_id)?;
+    let tag_list = Tag::fetch_list_by_article_id(&conn, article.id)?;
 
     let profile = profile::service::fetch_profile_by_id(
         &conn,
