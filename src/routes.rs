@@ -27,26 +27,26 @@ pub fn api(cfg: &mut web::ServiceConfig) {
                     ),
             )
             .service(
-                web::scope("/articles/{article_title_slug}/comments")
-                    .route("", get().to(app::comment::api::index))
-                    .route("", post().to(app::comment::api::create))
-                    .route("/{comment_id}", delete().to(app::comment::api::delete)),
-            )
-            .service(
-                web::scope("/articles/{article_title_slug}/favorite")
-                    .route("", post().to(app::favorite::api::favorite))
-                    .route("", delete().to(app::favorite::api::unfavorite)),
-            )
-            .service(
                 web::scope("/articles")
-                    .route("", get().to(app::article::api::index))
                     .route("/feed", get().to(app::article::api::feed))
-                    .route("/{article_title_slug}", get().to(app::article::api::show))
+                    .route("", get().to(app::article::api::index))
                     .route("", post().to(app::article::api::create))
-                    .route("/{article_title_slug}", put().to(app::article::api::update))
-                    .route(
-                        "/{article_title_slug}",
-                        delete().to(app::article::api::delete),
+                    .service(
+                        web::scope("/{article_title_slug}")
+                            .route("", get().to(app::article::api::show))
+                            .route("", put().to(app::article::api::update))
+                            .route("", delete().to(app::article::api::delete))
+                            .service(
+                                web::scope("/favorite")
+                                    .route("", post().to(app::favorite::api::favorite))
+                                    .route("", delete().to(app::favorite::api::unfavorite)),
+                            )
+                            .service(
+                                web::scope("/comments")
+                                    .route("", get().to(app::comment::api::index))
+                                    .route("", post().to(app::comment::api::create))
+                                    .route("/{comment_id}", delete().to(app::comment::api::delete)),
+                            ),
                     ),
             ),
     );
