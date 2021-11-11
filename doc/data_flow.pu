@@ -11,15 +11,16 @@ database DB
 ' client->server
 Client -> Middleware: request
 Middleware -> Controller
+activate Controller #FFB000
 Controller -> Controller: Assign to Request Object\n(/[domain]/request.rs)
 Controller -> Service
 Service -> DB
 
 
 ' server->client
-Service <- DB
-Controller <- Service
-Controller -> Controller: Convert into Response Object\n(/[domain]/response.rs)
-Middleware <- Controller
-Client <- Middleware: response
+Service <-- DB
+Controller <-- Service
+Controller --> Controller: Convert into Response Object\n(/[domain]/response.rs)
+Client <-- Controller: response
+deactivate Controller
 @enduml
