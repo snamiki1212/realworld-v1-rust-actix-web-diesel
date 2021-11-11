@@ -5,9 +5,7 @@ use crate::middleware::auth;
 use crate::middleware::state::AppState;
 use actix_web::{web, HttpRequest, HttpResponse};
 use serde::Deserialize;
-use uuid::Uuid;
 
-type ArticleIdSlug = Uuid;
 type ArticleTitleSlug = String;
 
 #[derive(Deserialize)]
@@ -121,7 +119,6 @@ pub async fn update(
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let article_title_slug = path.into_inner();
-    // TODO: validation deletable auth_user.id == article.author_id ?
     let article_slug = &form
         .article
         .title
@@ -146,12 +143,18 @@ pub async fn update(
 
 pub async fn delete(
     state: web::Data<AppState>,
-    // req: HttpRequest,
-    path: web::Path<ArticleIdSlug>,
+    req: HttpRequest,
+    path: web::Path<ArticleTitleSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
-    // let auth_user = auth::access_auth_user(&req)?;
+    let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
-    let article_id = path.into_inner();
-    let _ = service::delete_article(&conn, article_id)?;
+    let article_title_slug = path.into_inner();
+    let _ = service::delete_article(
+        &conn,
+        &service::DeleteArticle {
+            slug: article_title_slug,
+            author_id: auth_user.id,
+        },
+    )?;
     Ok(HttpResponse::Ok().json({}))
 }
