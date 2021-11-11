@@ -36,14 +36,21 @@ impl Comment {
         Ok(new_comment)
     }
 
-    pub fn delete(conn: &PgConnection, comment_id: &Uuid) -> Result<(), AppError> {
+    pub fn delete(conn: &PgConnection, params: &DeleteCommentAction) -> Result<(), AppError> {
         use crate::schema::comments;
         use crate::schema::comments::dsl::*;
         use diesel::prelude::*;
         let _ = diesel::delete(comments)
-            .filter(comments::id.eq(comment_id))
+            .filter(comments::id.eq(params.comment_id))
+            .filter(comments::author_id.eq(params.author_id))
+            .filter(comments::article_id.eq(params.article_id))
             .execute(conn)?;
-
         Ok(())
     }
+}
+
+pub struct DeleteCommentAction {
+    pub comment_id: Uuid,
+    pub article_id: Uuid,
+    pub author_id: Uuid,
 }

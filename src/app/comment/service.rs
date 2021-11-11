@@ -1,4 +1,4 @@
-use super::model::{Comment, CreateComment};
+use super::model::{Comment, CreateComment, DeleteCommentAction};
 use crate::app::article::model::{Article, FetchBySlugAndAuthorId};
 use crate::app::profile::model::Profile;
 use crate::app::profile::service::{fetch_profile_by_id, FetchProfileById};
@@ -77,4 +77,28 @@ pub fn fetch_comments_list(
         .collect::<Vec<(Comment, Profile)>>();
 
     Ok(_comments)
+}
+
+pub struct DeleteCommentService {
+    pub article_title_slug: String,
+    pub author_id: Uuid,
+    pub comment_id: Uuid,
+}
+pub fn delete_comment(conn: &PgConnection, params: &DeleteCommentService) -> Result<(), AppError> {
+    let article = Article::fetch_by_slug_and_author_id(
+        conn,
+        &FetchBySlugAndAuthorId {
+            slug: params.article_title_slug.to_owned(),
+            author_id: params.author_id,
+        },
+    )?;
+    let _ = Comment::delete(
+        &conn,
+        &DeleteCommentAction {
+            comment_id: params.comment_id,
+            article_id: article.id,
+            author_id: params.author_id,
+        },
+    )?;
+    Ok(())
 }

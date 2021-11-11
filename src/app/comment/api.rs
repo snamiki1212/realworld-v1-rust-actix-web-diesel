@@ -1,9 +1,10 @@
-use super::model::Comment;
+use super::model::{Comment, DeleteCommentAction};
 use super::{request, response, service};
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
 use crate::utils::uuid;
 use actix_web::{web, HttpRequest, HttpResponse};
+use diesel::QueryDsl;
 
 type ArticleIdSlug = String;
 type CommentIdSlug = String;
@@ -47,11 +48,15 @@ pub async fn delete(
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
-    let (article_id, comment_id) = path.into_inner();
-    let article_id = uuid::parse(&article_id)?;
+    let (article_title_slug, comment_id) = path.into_inner();
     let comment_id = uuid::parse(&comment_id)?;
-    // TODO: Validate article exists
-    // TODO: Validate comment is written by auth_user
-    let _ = Comment::delete(&conn, &comment_id)?;
+    let _ = service::delete_comment(
+        &conn,
+        &service::DeleteCommentService {
+            article_title_slug,
+            comment_id,
+            author_id: auth_user.id,
+        },
+    )?;
     Ok(HttpResponse::Ok().json("Ok"))
 }
