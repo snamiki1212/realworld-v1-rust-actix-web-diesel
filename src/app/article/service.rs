@@ -254,6 +254,50 @@ pub fn fetch_article(
     Ok((article, profile, favorite_info, tags_list))
 }
 
+pub struct FetchArticleBySlug {
+    pub article_title_slug: String,
+    pub me: User,
+}
+pub fn fetch_article_by_slug(
+    conn: &PgConnection,
+    params: &FetchArticleBySlug,
+) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
+    use diesel::prelude::*;
+    let FetchArticleBySlug {
+        article_title_slug,
+        me,
+    } = params;
+    let (article, author) = articles
+        .inner_join(users::table)
+        .filter(articles::slug.eq(article_title_slug))
+        .get_result::<(Article, User)>(conn)?;
+
+    let profile = profile::service::fetch_profile_by_id(
+        &conn,
+        &FetchProfileById {
+            me: me.to_owned(),
+            id: author.id,
+        },
+    )?;
+
+    let favorited_article_ids =
+        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
+
+    let is_favorited = favorited_article_ids
+        .to_owned()
+        .into_iter()
+        .any(|_id| _id == article.id);
+
+    let favorite_info = FavoriteInfo {
+        is_favorited,
+        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?,
+    };
+
+    let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
+
+    Ok((article, profile, favorite_info, tags_list))
+}
+
 use crate::schema::articles::dsl::*;
 use crate::schema::follows;
 use crate::schema::follows::dsl::*;

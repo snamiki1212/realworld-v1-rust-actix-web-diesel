@@ -8,6 +8,7 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 type ArticleIdSlug = Uuid;
+type ArticleTitleSlug = String;
 
 #[derive(Deserialize)]
 pub struct ArticlesListQueryParameter {
@@ -72,15 +73,15 @@ pub async fn feed(
 pub async fn show(
     state: web::Data<AppState>,
     req: HttpRequest,
-    path: web::Path<ArticleIdSlug>,
+    path: web::Path<ArticleTitleSlug>,
 ) -> Result<HttpResponse, HttpResponse> {
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
-    let article_id = path.into_inner();
-    let (article, profile, favorite_info, tags_list) = service::fetch_article(
+    let article_title_slug = path.into_inner();
+    let (article, profile, favorite_info, tags_list) = service::fetch_article_by_slug(
         &conn,
-        &service::FetchArticle {
-            article_id: article_id,
+        &service::FetchArticleBySlug {
+            article_title_slug,
             me: auth_user,
         },
     )?;

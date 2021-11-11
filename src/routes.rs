@@ -41,10 +41,13 @@ pub fn api(cfg: &mut web::ServiceConfig) {
                 web::scope("/articles")
                     .route("", get().to(app::article::api::index))
                     .route("/feed", get().to(app::article::api::feed))
-                    .route("/{id}", get().to(app::article::api::show))
+                    .route("/{article_title_slug}", get().to(app::article::api::show))
                     .route("", post().to(app::article::api::create))
-                    .route("/{id}", put().to(app::article::api::update))
-                    .route("/{id}", delete().to(app::article::api::delete)),
+                    .route("/{article_title_slug}", put().to(app::article::api::update))
+                    .route(
+                        "/{article_title_slug}",
+                        delete().to(app::article::api::delete),
+                    ),
             ),
     );
 }
