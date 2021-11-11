@@ -47,6 +47,19 @@ impl Article {
     pub fn convert_title_to_slug(_title: &str) -> String {
         converter::to_kebab(_title)
     }
+
+    pub fn fetch_by_slug_and_author_id(
+        conn: &PgConnection,
+        params: &FetchBySlugAndAuthorId,
+    ) -> Result<Self, AppError> {
+        use crate::schema::articles;
+        use crate::schema::articles::dsl::*;
+        let item = articles
+            .filter(slug.eq_all(params.slug.to_owned()))
+            .filter(author_id.eq_all(params.author_id))
+            .first::<Self>(conn)?;
+        Ok(item)
+    }
 }
 
 #[derive(Insertable, Clone)]
@@ -66,4 +79,9 @@ pub struct UpdateArticle {
     pub title: Option<String>,
     pub description: Option<String>,
     pub body: Option<String>,
+}
+
+pub struct FetchBySlugAndAuthorId {
+    pub slug: String,
+    pub author_id: Uuid,
 }

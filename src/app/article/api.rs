@@ -20,7 +20,6 @@ pub struct ArticlesListQueryParameter {
 
 pub async fn index(
     state: web::Data<AppState>,
-    req: HttpRequest,
     params: web::Query<ArticlesListQueryParameter>,
 ) -> Result<HttpResponse, HttpResponse> {
     let conn = state.get_conn()?;

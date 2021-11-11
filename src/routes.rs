@@ -27,13 +27,13 @@ pub fn api(cfg: &mut web::ServiceConfig) {
                     ),
             )
             .service(
-                web::scope("/articles/{article_id}/comments")
+                web::scope("/articles/{article_title_slug}/comments")
                     .route("", get().to(app::comment::api::index))
                     .route("", post().to(app::comment::api::create))
                     .route("/{comment_id}", delete().to(app::comment::api::delete)),
             )
             .service(
-                web::scope("/articles/{id}/favorite")
+                web::scope("/articles/{article_title_slug}/favorite")
                     .route("", post().to(app::favorite::api::favorite))
                     .route("", delete().to(app::favorite::api::unfavorite)),
             )

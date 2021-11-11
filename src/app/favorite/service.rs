@@ -1,4 +1,4 @@
-use crate::app::article::model::Article;
+use crate::app::article::model::{Article, FetchBySlugAndAuthorId};
 use crate::app::article::service::{fetch_article, FetchArticle};
 use crate::app::favorite::model::{Favorite, FavoriteInfo, FavorteAction, UnfavoriteAction};
 use crate::app::profile::model::Profile;
@@ -10,23 +10,30 @@ use uuid::Uuid;
 
 pub struct FavoriteService {
     pub me: User,
-    pub article_id: Uuid,
+    pub article_title_slug: String,
 }
 pub fn favorite(
     conn: &PgConnection,
     params: &FavoriteService,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
+    let article = Article::fetch_by_slug_and_author_id(
+        conn,
+        &FetchBySlugAndAuthorId {
+            slug: params.article_title_slug.to_owned(),
+            author_id: params.me.id,
+        },
+    )?;
     let _ = Favorite::favorite(
         conn,
         &FavorteAction {
             user_id: params.me.id,
-            article_id: params.article_id,
+            article_id: article.id,
         },
     )?;
     let item = fetch_article(
         conn,
         &FetchArticle {
-            article_id: params.article_id,
+            article_id: article.id,
             me: params.me.to_owned(),
         },
     )?;
