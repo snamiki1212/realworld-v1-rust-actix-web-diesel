@@ -34,7 +34,8 @@ pub async fn follow(
     let conn = state.get_conn()?;
     let username = path.into_inner();
     let profile = auth_user.follow(&conn, &username)?;
-    Ok(HttpResponse::Ok().json(profile))
+    let res = profile::response::ProfileResponse::from(profile);
+    Ok(HttpResponse::Ok().json(res))
 }
 
 pub async fn unfollow(
@@ -46,5 +47,6 @@ pub async fn unfollow(
     let conn = state.get_conn()?;
     let username = path.into_inner();
     let profile = auth_user.unfollow(&conn, &username)?;
-    Ok(HttpResponse::Ok().json(profile))
+    let res = profile::response::ProfileResponse::from(profile);
+    Ok(HttpResponse::Ok().json(res))
 }
