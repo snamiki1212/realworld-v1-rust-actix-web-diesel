@@ -2,6 +2,7 @@ use crate::app::article::model::Article;
 use crate::app::favorite::model::FavoriteInfo;
 use crate::app::profile::model::Profile;
 use crate::app::tag::model::Tag;
+use crate::utils::date::Iso8601;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 
@@ -26,8 +27,8 @@ impl From<(Article, Profile, FavoriteInfo, Vec<Tag>)> for SingleArticleResponse 
                     .iter()
                     .map(move |tag| tag.name.to_owned())
                     .collect(),
-                created_at: article.created_at.to_string(),
-                updated_at: article.updated_at.to_string(),
+                created_at: Iso8601(article.created_at),
+                updated_at: Iso8601(article.updated_at),
                 favorited: favorite_info.is_favorited.to_owned(),
                 favorites_count: favorite_info.favorites_count.to_owned(),
                 author: AuthorContent {
@@ -80,8 +81,8 @@ pub struct ArticleContent {
     pub description: String,
     pub body: String,
     pub tag_list: Vec<String>,
-    pub created_at: String,
-    pub updated_at: String,
+    pub created_at: Iso8601,
+    pub updated_at: Iso8601,
     pub favorited: bool,
     pub favorites_count: i64,
     pub author: AuthorContent,
@@ -97,8 +98,8 @@ impl From<(Article, Profile, FavoriteInfo, Vec<Tag>)> for ArticleContent {
             description: article.description,
             body: article.body,
             tag_list: tag_list.iter().map(move |tag| tag.name.clone()).collect(),
-            created_at: article.created_at.to_string(),
-            updated_at: article.updated_at.to_string(),
+            created_at: Iso8601(article.created_at),
+            updated_at: Iso8601(article.updated_at),
             favorited: favorite_info.is_favorited.to_owned(),
             favorites_count: favorite_info.favorites_count.to_owned(),
             author: AuthorContent {
