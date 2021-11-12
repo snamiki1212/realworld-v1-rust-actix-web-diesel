@@ -93,8 +93,8 @@ fn should_skip_verify(req: &ServiceRequest) -> bool {
     if Method::OPTIONS == *method {
         return true;
     }
-    for IgnoreAuthRoute { path, method } in IGNORE_AUTH_ROUTES.iter() {
-        if req.path().starts_with(path) && req.method() == method {
+    for route in IGNORE_AUTH_ROUTES.iter() {
+        if route.is_match_path_and_method(req.path(), req.method()) {
             return true;
         }
     }
@@ -165,7 +165,9 @@ pub fn access_auth_user(req: &HttpRequest) -> Result<User, AppError> {
     let extensions = head.extensions();
     let auth_user = extensions.get::<User>();
     let auth_user = auth_user.map(|user| user.to_owned()); // TODO: avoid copy
-    let auth_user = auth_user.ok_or(AppError::Unauthorized(json!({"error": "Unauthrized."})))?;
+    let auth_user = auth_user.ok_or(AppError::Unauthorized(
+        json!({"error": "Unauthrized user. Need auth token on header."}),
+    ))?;
 
     Ok(auth_user)
 }
@@ -173,6 +175,60 @@ pub fn access_auth_user(req: &HttpRequest) -> Result<User, AppError> {
 struct IgnoreAuthRoute {
     path: &'static str,
     method: Method,
+}
+
+impl IgnoreAuthRoute {
+    fn is_match_path_and_method(&self, path: &str, method: &Method) -> bool {
+        self.is_match_path(path) && self.is_match_method(method)
+    }
+
+    fn is_match_path(&self, path: &str) -> bool {
+        let expect_path = self.path.split("/").collect::<Vec<_>>();
+        let this_path = path.split("/").collect::<Vec<_>>();
+        if expect_path.len() != this_path.len() {
+            return false;
+        };
+        let path_set = expect_path.iter().zip(this_path.iter());
+        for (expect_path, this_path) in path_set {
+            if IgnoreAuthRoute::is_slug_path(*expect_path) {
+                continue;
+            }
+            if expect_path != this_path {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    fn is_match_method(&self, method: &Method) -> bool {
+        self.method == method
+    }
+
+    fn is_slug_path(text: &str) -> bool {
+        let first = text.chars().nth(0).unwrap_or(' ');
+        let last = text.chars().last().unwrap_or(' ');
+        first == '{' && last == '}'
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::http::Method;
+    #[test]
+    fn is_match_path_and_method_test() {
+        let route = IgnoreAuthRoute {
+            path: "/api/healthcheck",
+            method: Method::GET,
+        };
+        assert!(route.is_match_path_and_method("/api/healthcheck", &Method::GET));
+
+        let route = IgnoreAuthRoute {
+            path: "/api/{this-is-slug}/healthcheck",
+            method: Method::POST,
+        };
+        assert!(route.is_match_path_and_method("/api/1234/healthcheck", &Method::POST));
+    }
 }
 
 const IGNORE_AUTH_ROUTES: [IgnoreAuthRoute; 6] = [
