@@ -41,7 +41,7 @@ pub fn create(
     let profile = profile::service::fetch_profile_by_id(
         &conn,
         &FetchProfileById {
-            me: params.me.to_owned(),
+            user: params.me.to_owned(),
             id: article.author_id,
         },
     )?;
@@ -231,7 +231,7 @@ pub fn fetch_article(
     let profile = profile::service::fetch_profile_by_id(
         &conn,
         &FetchProfileById {
-            me: me.to_owned(),
+            user: me.to_owned(),
             id: author.id,
         },
     )?;
@@ -271,7 +271,7 @@ pub fn fetch_article_by_slug(
     let profile = profile::service::fetch_profile_by_id(
         &conn,
         &FetchProfileById {
-            me: author.to_owned(),
+            user: author.to_owned(),
             id: author.id,
         },
     )?;
@@ -446,7 +446,7 @@ pub fn update_article(
     let profile = profile::service::fetch_profile_by_id(
         &conn,
         &FetchProfileById {
-            me: params.me.to_owned(),
+            user: params.me.to_owned(),
             id: article.author_id,
         },
     )?;

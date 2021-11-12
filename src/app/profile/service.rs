@@ -17,7 +17,7 @@ pub fn fetch_by_name(
     let profile = fetch_profile_by_id(
         &conn,
         &FetchProfileById {
-            me: me.to_owned(),
+            user: me.to_owned(),
             id: followee.id,
         },
     )?;
@@ -25,20 +25,38 @@ pub fn fetch_by_name(
 }
 
 pub struct FetchProfileById {
-    pub me: User,
+    pub user: User,
     pub id: Uuid,
 }
 pub fn fetch_profile_by_id(
     conn: &PgConnection,
     params: &FetchProfileById,
 ) -> Result<Profile, AppError> {
-    let FetchProfileById { me, id } = params;
-    let is_following = me.is_following(&conn, id);
+    let FetchProfileById { user, id } = params;
+    let is_following = user.is_following(&conn, id);
     let profile = Profile {
-        username: me.username.to_owned(),
-        bio: me.bio.to_owned(),
-        image: me.image.to_owned(),
+        username: user.username.to_owned(),
+        bio: user.bio.to_owned(),
+        image: user.image.to_owned(),
         following: is_following,
     };
     Ok(profile)
+}
+
+pub struct ConverUserToProfile<'a> {
+    pub user: &'a User,
+    pub me: &'a Option<User>,
+}
+pub fn conver_user_to_profile(conn: &PgConnection, params: &ConverUserToProfile) -> Profile {
+    let following = match params.me.as_ref() {
+        Some(me) => me.is_following(conn, &params.user.id),
+        None => false,
+    };
+    let profile = Profile {
+        username: params.user.username.to_owned(),
+        bio: params.user.bio.to_owned(),
+        image: params.user.image.to_owned(),
+        following,
+    };
+    profile
 }

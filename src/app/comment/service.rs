@@ -1,7 +1,9 @@
 use super::model::{Comment, CreateComment, DeleteCommentAction};
 use crate::app::article::model::{Article, FetchBySlugAndAuthorId};
 use crate::app::profile::model::Profile;
-use crate::app::profile::service::{fetch_profile_by_id, FetchProfileById};
+use crate::app::profile::service::{
+    conver_user_to_profile, fetch_profile_by_id, ConverUserToProfile, FetchProfileById,
+};
 use crate::app::user::model::User;
 use crate::error::AppError;
 use diesel::pg::PgConnection;
@@ -40,7 +42,7 @@ pub fn create(
         &conn,
         &FetchProfileById {
             id: author.id,
-            me: author.to_owned(),
+            user: author.to_owned(),
         },
     )?;
     Ok((comment, profile))
@@ -48,7 +50,7 @@ pub fn create(
 
 pub fn fetch_comments_list(
     conn: &PgConnection,
-    me: &User,
+    me: &Option<User>,
 ) -> Result<Vec<(Comment, Profile)>, AppError> {
     use crate::schema::comments;
     use crate::schema::comments::dsl::*;
@@ -64,14 +66,13 @@ pub fn fetch_comments_list(
         .iter()
         .map(|(_comment, _user)| {
             // TODO: avoid N+1. Write one query to fetch all data somehow.
-            let profile = fetch_profile_by_id(
-                &conn,
-                &FetchProfileById {
-                    me: me.to_owned(),
-                    id: _user.id,
+            let profile = conver_user_to_profile(
+                conn,
+                &ConverUserToProfile {
+                    user: _user,
+                    me: me,
                 },
-            )
-            .expect("couldn't fetch profile."); // TODO: use ? or error handling
+            );
             (_comment.to_owned(), profile)
         })
         .collect::<Vec<(Comment, Profile)>>();

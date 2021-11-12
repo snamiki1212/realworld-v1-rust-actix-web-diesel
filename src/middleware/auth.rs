@@ -175,7 +175,7 @@ struct IgnoreAuthRoute {
     method: Method,
 }
 
-const IGNORE_AUTH_ROUTES: [IgnoreAuthRoute; 5] = [
+const IGNORE_AUTH_ROUTES: [IgnoreAuthRoute; 6] = [
     IgnoreAuthRoute {
         path: "/api/healthcheck",
         method: Method::GET,
@@ -194,6 +194,10 @@ const IGNORE_AUTH_ROUTES: [IgnoreAuthRoute; 5] = [
     },
     IgnoreAuthRoute {
         path: "/api/articles",
+        method: Method::GET,
+    },
+    IgnoreAuthRoute {
+        path: "/api/articles/{article_title_slug}/comments",
         method: Method::GET,
     },
 ];

@@ -13,7 +13,7 @@ pub async fn index(
     state: web::Data<AppState>,
     req: HttpRequest,
 ) -> Result<HttpResponse, HttpResponse> {
-    let auth_user = auth::access_auth_user(&req)?;
+    let auth_user = auth::access_auth_user(&req).ok();
     let conn = state.get_conn()?;
     let list = service::fetch_comments_list(&conn, &auth_user)?;
     let res = response::MultipleCommentsResponse::from(list);
