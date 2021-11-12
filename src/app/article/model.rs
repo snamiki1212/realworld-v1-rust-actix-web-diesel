@@ -42,7 +42,7 @@ impl Article {
         let article = diesel::update(
             articles
                 .filter(articles::slug.eq(article_title_slug))
-                .filter(articles::id.eq_all(_author_id)),
+                .filter(articles::author_id.eq_all(_author_id)),
         )
         .set(record)
         .get_result::<Article>(conn)?;
