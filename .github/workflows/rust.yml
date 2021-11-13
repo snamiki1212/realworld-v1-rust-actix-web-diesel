@@ -53,3 +53,6 @@ jobs:
       #   run: |
       #     cd e2e
       #     APIURL=http://localhost:8080/api sh ./run-api-tests.sh
+
+      - name: Wait for waking docker
+        run: ./wait-for-it.sh localhost:8080/api/healthcheck --timeout=3 --strict -- echo "Waked up container"
