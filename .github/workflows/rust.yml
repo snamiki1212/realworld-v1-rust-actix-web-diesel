@@ -18,6 +18,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Create secrey.key
         run: cp secret.key.example secret.key
+      - name: Create .env
+        run: cp .env.example .env
       - name: Build
         run: cargo build --verbose
       - name: Run tests
@@ -43,16 +45,13 @@ jobs:
         run: cp secret.key.example secret.key
       - name: Create .env
         run: cp .env.example .env
-
-      # TODO: ci skip temp
-      # - name: Build
-      #   run: cargo build --verbose
-      # - name: Run server and ...
-      #   run: cargo run --bin conduit &
-      # - name: Run e2e test
-      #   run: |
-      #     cd e2e
-      #     APIURL=http://localhost:8080/api sh ./run-api-tests.sh
-
-      - name: Wait for waking docker
-        run: ./wait-for-it.sh localhost:8080/api/healthcheck --timeout=3 --strict -- echo "Waked up container"
+      - name: Build
+        run: cargo build --verbose
+      - name: Run server on background
+        run: cargo run --bin conduit &
+      - name: Wait for waking server
+        run: ./wait-for-it.sh localhost:8080/api/healthcheck --timeout=300 --strict -- echo "Waked up container"
+      - name: Run e2e test
+        run: |
+          cd e2e
+          APIURL=http://localhost:8080/api sh ./run-api-tests.sh
