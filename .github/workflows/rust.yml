@@ -51,9 +51,11 @@ jobs:
         run: cargo run --bin conduit &
       - name: Wait for waking server
         run: ./wait-for-it.sh localhost:8080 --timeout=300 --strict -- echo "Waked up container"
-      - name: Ready for npx
-        uses: actions/setup-node@v2
-        with:
-          node-version: "14"
-      - name: Run e2e test
-        run: APIURL=http://localhost:8080/api sh ./e2e/run-api-tests.sh
+      - name: Health check
+        run: curl http://localhost:8080/api/healthcheck
+      # - name: Ready for npx
+      #   uses: actions/setup-node@v2
+      #   with:
+      #     node-version: "14"
+      # - name: Run e2e test
+      #   run: APIURL=http://localhost:8080/api sh ./e2e/run-api-tests.sh
