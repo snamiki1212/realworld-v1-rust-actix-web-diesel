@@ -50,7 +50,7 @@ jobs:
       - name: Run server on background
         run: cargo run --bin conduit &
       - name: Wait for waking server
-        run: ./wait-for-it.sh localhost:8080/api/healthcheck --timeout=300 --strict -- echo "Waked up container"
+        run: ./wait-for-it.sh localhost:8080 --timeout=300 --strict -- echo "Waked up container"
       - name: Run e2e test
         run: |
           cd e2e
