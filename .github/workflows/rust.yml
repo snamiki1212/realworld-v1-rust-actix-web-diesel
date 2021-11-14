@@ -32,7 +32,7 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: postgres
+          POSTGRES_DB: realworld-rust-actix-web
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
         ports:
