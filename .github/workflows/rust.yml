@@ -48,11 +48,13 @@ jobs:
       - name: Build
         run: cargo build --verbose
       - name: Run server on background
-        run: cargo run &
-      - name: Wait for waking server
-        run: ./wait-for-it.sh localhost:8080 --timeout=300 --strict -- echo "Waked up container"
-      - name: Health check
-        run: curl http://0.0.0.0:8080/api/healthcheck --max-time 10 --verbose
+        run: |
+          cargo run &
+          curl http://0.0.0.0:8080/api/healthcheck --max-time 10 --verbose
+      # - name: Wait for waking server
+      #   run: ./wait-for-it.sh localhost:8080 --timeout=300 --strict -- echo "Waked up container"
+      # - name: Health check
+      #   run:
       # - name: Ready for npx
       #   uses: actions/setup-node@v2
       #   with:
