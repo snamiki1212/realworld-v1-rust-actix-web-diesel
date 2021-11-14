@@ -49,7 +49,7 @@ jobs:
         run: cargo build --verbose
       - name: Run server on background
         run: |
-          cargo run &
+          cargo run & \
           ( \
             ./wait-for-it.sh 0.0.0.0:8080 --timeout=300 --strict -- echo "Waked up container" && \
             diesel setup && \
