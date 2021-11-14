@@ -51,6 +51,7 @@ jobs:
         run: |
           cargo run &
           ( \
+            ./wait-for-it.sh 0.0.0.0:8080 --timeout=300 --strict -- echo "Waked up container" && \
             diesel setup && \
             curl http://0.0.0.0:8080/api/healthcheck \
               --max-time 60 \
