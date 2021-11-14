@@ -47,6 +47,8 @@ jobs:
         run: cp .env.example .env
       - name: Build
         run: cargo build --verbose
+      - name: Install diesel CLI
+        run: cargo install diesel_cli
       - name: Run server on background
         run: |
           cargo run & \
