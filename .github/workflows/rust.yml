@@ -53,7 +53,7 @@ jobs:
         run: |
           cargo run &
           echo "waiting for server..."
-          ./wait-for-it.sh 0.0.0.0:8080 --timeout=300 --strict -- echo "Waked up container"
+          ./scripts/wait-for-it.sh 0.0.0.0:8080 --timeout=300 --strict -- echo "Waked up container"
           echo "setup diesel..."
           diesel setup
           echo "check health check..."
