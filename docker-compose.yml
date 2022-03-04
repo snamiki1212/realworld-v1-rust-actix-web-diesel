@@ -6,12 +6,13 @@ services:
       context: .
     volumes:
       - "./:/app"
-    links:
+    depends_on:
       - db
-    # command: 'bash -c "diesel setup && cargo watch --exec run"'
     command: 'bash -c "diesel setup && cargo watch --exec run"'
     ports:
       - "8080:8080"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/realworld-rust-actix-web
   db:
     image: "postgres:14.0-alpine"
     environment:
