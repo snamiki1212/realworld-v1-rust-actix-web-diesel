@@ -1,6 +1,6 @@
 # Overview
 
-Realworld App using Rust, actix-web, and diesel.
+Realworld App using `Rust`, `actix-web`, and `diesel`.
 
 ## Getting Started
 
