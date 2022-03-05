@@ -21,7 +21,25 @@ $ APIURL=http://localhost:8080/api sh e2e/run-api-tests.sh
 
 ### Req to res flow
 
-![Req to res flow](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/snamiki1212/realworld-rust-actix-web/main/doc/data_flow.pu)
+```mermaid
+sequenceDiagram
+  actor Client
+  participant Middleware as Middleware<br>/middleware/*
+  participant Controller as Controller<br>/[domain]/api.rs
+  participant Service as Service<br>/[domain]/service.rs
+  participant DB
+
+  Client ->> Middleware: request
+  Middleware ->> Controller: 
+  Controller ->> Controller: Assign to Request Object<br>(/[domain]/request.rs)
+  Controller ->> Service: 
+  Service ->> DB: 
+
+  DB ->> Service: 
+  Service ->> Controller: 
+  Controller ->> Controller: Convert into Response Object<br>(/[domain]/response.rs)
+  Controller ->> Client: response
+```
 
 ## LICENSE
 
