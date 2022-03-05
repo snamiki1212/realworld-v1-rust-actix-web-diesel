@@ -6,7 +6,7 @@ Realworld App using `Rust`, `actix-web`, and `diesel`.
 
 ```zsh
 $ docker-compose up -d
-$ curl -X localhost:8080/api/healthcheck
+$ curl http://localhost:8080/api/healthcheck
 # => OK
 ```
 
