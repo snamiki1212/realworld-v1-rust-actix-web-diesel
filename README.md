@@ -27,7 +27,7 @@ Realworld App using `Rust`, `actix-web`, and `diesel`.
 
 </details>
 
-## e2e test
+## E2E Test
 
 ```zsh
 # run e2e
@@ -36,7 +36,7 @@ $ APIURL=http://localhost:8080/api sh e2e/run-api-tests.sh
 
 ## Architecture
 
-### Req to res flow
+### Flow from Request to Response
 
 ```mermaid
 sequenceDiagram
