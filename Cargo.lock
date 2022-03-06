@@ -520,7 +520,6 @@ name = "conduit"
 version = "0.1.0"
 dependencies = [
  "actix-cors",
- "actix-service",
  "actix-web",
  "anyhow",
  "bcrypt",

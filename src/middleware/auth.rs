@@ -4,11 +4,9 @@ use crate::error::AppError;
 use crate::middleware;
 use crate::middleware::state::AppState;
 use crate::utils::token;
-use actix_service::{Service, Transform};
 use actix_web::HttpMessage;
 use actix_web::{
-    dev::ServiceRequest,
-    dev::ServiceResponse,
+    dev::{Service, ServiceRequest, ServiceResponse, Transform},
     http::{HeaderName, HeaderValue, Method},
     web::Data,
     Error, HttpRequest, HttpResponse,

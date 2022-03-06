@@ -53,7 +53,7 @@ thiserror = { version = "1.0" }
 futures = { version = "0.3" }
 
 # Service trait and combinators for representing asynchronous request/response operati…
-actix-service = { version = "1.0.6" } # TODO: Update 2.x
+# actix-service = { version = "2" }
 
 # Cross-Origin Resource Sharing (CORS) controls for Actix Web
 actix-cors = { version = "0.5.4" }
