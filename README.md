@@ -4,6 +4,11 @@ Realworld App using `Rust`, `actix-web`, and `diesel`.
 
 ## Getting Started
 
+```zsh
+$ cp .env.example .env
+$ cp secret.key.example secret.key
+```
+
 <details>
   <summary>Docker</summary>
   
