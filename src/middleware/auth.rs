@@ -68,7 +68,7 @@ where
     }
 
     fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
-        if should_skip_verify(&req) || verify_and_insert_auth_user(&mut req) {
+        if should_skip_verification(&req) || verify_and_insert_auth_user(&mut req) {
             let fut = self.service.call(req);
             Box::pin(async move {
                 let res = fut.await?;
@@ -88,7 +88,7 @@ where
     }
 }
 
-fn should_skip_verify(req: &ServiceRequest) -> bool {
+fn should_skip_verification(req: &ServiceRequest) -> bool {
     let method = req.method();
     if Method::OPTIONS == *method {
         return true;
