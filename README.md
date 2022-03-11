@@ -14,8 +14,6 @@ $ cp secret.key.example secret.key
   
   ```zsh
   $ docker-compose up -d
-  $ curl http://localhost:8080/api/healthcheck
-  # => OK
   ```
 </details>
 
@@ -31,6 +29,11 @@ $ cp secret.key.example secret.key
   ```
 
 </details>
+
+```zsh
+$ curl http://localhost:8080/api/healthcheck
+  # => OK
+```
 
 ## E2E Test
 
