@@ -85,7 +85,10 @@ pub struct DeleteCommentService {
     pub author_id: Uuid,
     pub comment_id: Uuid,
 }
-pub fn delete_comment(conn: &PgConnection, params: &DeleteCommentService) -> Result<(), AppError> {
+pub fn delete_comment(
+    conn: &PgConnection,
+    params: &DeleteCommentService,
+) -> Result<(), AppError> {
     let article = Article::fetch_by_slug_and_author_id(
         conn,
         &FetchBySlugAndAuthorId {
