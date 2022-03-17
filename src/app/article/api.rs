@@ -1,6 +1,7 @@
 use super::model::Article;
 use super::service;
 use super::{request, response};
+use crate::error::AppError;
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
 use actix_web::{web, HttpRequest, HttpResponse};
@@ -20,7 +21,7 @@ pub struct ArticlesListQueryParameter {
 pub async fn index(
     state: web::Data<AppState>,
     params: web::Query<ArticlesListQueryParameter>,
-) -> Result<HttpResponse, HttpResponse> {
+) -> Result<HttpResponse, AppError> {
     let conn = state.get_conn()?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
@@ -50,7 +51,7 @@ pub async fn feed(
     state: web::Data<AppState>,
     req: HttpRequest,
     params: web::Query<FeedQueryParameter>,
-) -> Result<HttpResponse, HttpResponse> {
+) -> Result<HttpResponse, AppError> {
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
@@ -72,7 +73,7 @@ pub async fn show(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
-) -> Result<HttpResponse, HttpResponse> {
+) -> Result<HttpResponse, AppError> {
     let conn = state.get_conn()?;
     let article_title_slug = path.into_inner();
     let (article, profile, favorite_info, tags_list) =
@@ -85,7 +86,7 @@ pub async fn create(
     state: web::Data<AppState>,
     req: HttpRequest,
     form: web::Json<request::CreateArticleRequest>,
-) -> Result<HttpResponse, HttpResponse> {
+) -> Result<HttpResponse, AppError> {
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let (article, profile, favorite_info, tag_list) = service::create(
@@ -109,7 +110,7 @@ pub async fn update(
     req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
     form: web::Json<request::UpdateArticleRequest>,
-) -> Result<HttpResponse, HttpResponse> {
+) -> Result<HttpResponse, AppError> {
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let article_title_slug = path.into_inner();
@@ -139,7 +140,7 @@ pub async fn delete(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
-) -> Result<HttpResponse, HttpResponse> {
+) -> Result<HttpResponse, AppError> {
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let article_title_slug = path.into_inner();

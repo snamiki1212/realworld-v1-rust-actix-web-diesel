@@ -8,7 +8,7 @@ use actix_web::{web, HttpRequest, HttpResponse};
 pub async fn signin(
     state: web::Data<AppState>,
     form: web::Json<request::Signin>,
-) -> actix_web::Result<impl actix_web::Responder> {
+) -> Result<HttpResponse, AppError> {
     let conn = state.get_conn()?;
     let (user, token) = User::signin(&conn, &form.user.email, &form.user.password)?;
     let res = response::UserResponse::from((user, token));
@@ -30,7 +30,7 @@ pub async fn signup(
     Ok(HttpResponse::Ok().json(res))
 }
 
-pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
+pub async fn me(req: HttpRequest) -> Result<HttpResponse, AppError> {
     let user = auth::access_auth_user(&req)?;
     let token = user.generate_token()?;
     let res = response::UserResponse::from((user, token));

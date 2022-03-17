@@ -157,7 +157,8 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
 }
 
 pub fn access_auth_user(req: &HttpRequest) -> Result<User, AppError> {
-    let auth_user = req.extensions().get::<User>();
+    let auth_user = req.extensions();
+    let auth_user = auth_user.get::<User>();
     let auth_user = auth_user.map(|user| user.to_owned()); // TODO: avoid copy
     let auth_user = auth_user.ok_or(AppError::Unauthorized(
         json!({"error": "Unauthrized user. Need auth token on header."}),
