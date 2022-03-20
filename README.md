@@ -39,7 +39,7 @@ $ curl http://localhost:8080/api/healthcheck
 
 ```zsh
 # run e2e
-$ APIURL=http://localhost:8080/api sh e2e/run-api-tests.sh
+$ APIURL=http://localhost:8080/api zsh e2e/run-api-tests.sh
 ```
 
 ## Architecture
