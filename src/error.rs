@@ -1,4 +1,8 @@
-use actix_web::HttpResponse;
+use actix_web::{
+    error::Error as ActixWebError,
+    http::{header::ContentType, StatusCode},
+    HttpResponse,
+};
 use bcrypt::BcryptError;
 use diesel::r2d2::{Error as R2D2Error, PoolError};
 use diesel::result::{DatabaseErrorKind, Error as DieselError};
@@ -32,9 +36,9 @@ pub enum AppError {
     InternalServerError,
 }
 
-impl From<AppError> for HttpResponse {
-    fn from(err: AppError) -> HttpResponse {
-        match err {
+impl actix_web::error::ResponseError for AppError {
+    fn error_response(&self) -> HttpResponse {
+        match self {
             AppError::Unauthorized(ref msg) => HttpResponse::Unauthorized().json(msg),
             AppError::Forbidden(ref msg) => HttpResponse::Forbidden().json(msg),
             AppError::NotFound(ref msg) => HttpResponse::NotFound().json(msg),
@@ -42,6 +46,15 @@ impl From<AppError> for HttpResponse {
             AppError::InternalServerError => {
                 HttpResponse::InternalServerError().json("Internal Server Error")
             }
+        }
+    }
+    fn status_code(&self) -> StatusCode {
+        match *self {
+            AppError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
+            AppError::Forbidden(_) => StatusCode::FORBIDDEN,
+            AppError::NotFound(_) => StatusCode::NOT_FOUND,
+            AppError::UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
+            AppError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

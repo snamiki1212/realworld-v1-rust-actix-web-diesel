@@ -1,5 +1,6 @@
 use crate::app::user::model::{UpdatableUser, User};
 use crate::app::user::{request, response};
+use crate::error::AppError;
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
 use actix_web::{web, HttpRequest, HttpResponse};
@@ -7,7 +8,7 @@ use actix_web::{web, HttpRequest, HttpResponse};
 pub async fn signin(
     state: web::Data<AppState>,
     form: web::Json<request::Signin>,
-) -> Result<HttpResponse, HttpResponse> {
+) -> Result<HttpResponse, AppError> {
     let conn = state.get_conn()?;
     let (user, token) = User::signin(&conn, &form.user.email, &form.user.password)?;
     let res = response::UserResponse::from((user, token));
@@ -17,7 +18,7 @@ pub async fn signin(
 pub async fn signup(
     state: web::Data<AppState>,
     form: web::Json<request::Signup>,
-) -> Result<HttpResponse, HttpResponse> {
+) -> Result<HttpResponse, AppError> {
     let conn = state.get_conn()?;
     let (user, token) = User::signup(
         &conn,
@@ -29,7 +30,7 @@ pub async fn signup(
     Ok(HttpResponse::Ok().json(res))
 }
 
-pub async fn me(req: HttpRequest) -> Result<HttpResponse, HttpResponse> {
+pub async fn me(req: HttpRequest) -> Result<HttpResponse, AppError> {
     let user = auth::access_auth_user(&req)?;
     let token = user.generate_token()?;
     let res = response::UserResponse::from((user, token));
@@ -40,7 +41,7 @@ pub async fn update(
     state: web::Data<AppState>,
     req: HttpRequest,
     form: web::Json<request::Update>,
-) -> Result<HttpResponse, HttpResponse> {
+) -> Result<HttpResponse, AppError> {
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let user = User::update(
