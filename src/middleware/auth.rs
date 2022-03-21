@@ -89,12 +89,10 @@ fn should_skip_verification(req: &ServiceRequest) -> bool {
     if Method::OPTIONS == *method {
         return true;
     }
-    for route in IGNORE_AUTH_ROUTES.iter() {
-        if route.is_match_path_and_method(req.path(), req.method()) {
-            return true;
-        }
-    }
-    false
+
+    IGNORE_AUTH_ROUTES
+        .iter()
+        .any(|route| route.is_match_path_and_method(req.path(), req.method()))
 }
 
 fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> Result<User, AppError> {
