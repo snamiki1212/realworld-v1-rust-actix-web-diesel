@@ -24,7 +24,7 @@ async fn main() -> std::io::Result<()> {
         let pool = utils::db::establish_connection();
         App::new()
             .wrap(logger)
-            .data(middleware::state::AppState { pool }) // TODO: replace with new API
+            .app_data(middleware::state::AppState { pool })
             .wrap(middleware::cors::cors())
             .wrap(middleware::auth::Authentication)
             .configure(routes::api)
