@@ -42,6 +42,12 @@ $ curl http://localhost:8080/api/healthcheck
 $ APIURL=http://localhost:8080/api zsh e2e/run-api-tests.sh
 ```
 
+## Tech Stacks
+
+- Rust Edition 2021
+- ActixWeb 4.x
+- Diesel 1.4.x
+
 ## Architecture
 
 ### Flow from Request to Response
