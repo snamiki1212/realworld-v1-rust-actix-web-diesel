@@ -16,12 +16,16 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
+
       - name: Create secrey.key
         run: cp secret.key.example secret.key
+
       - name: Create .env
         run: cp .env.example .env
+
       - name: Build
         run: cargo build --verbose
+
       - name: Run tests
         run: cargo test --verbose
 
@@ -41,14 +45,19 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
+
       - name: Create secrey.key
         run: cp secret.key.example secret.key
+
       - name: Create .env
         run: cp .env.example .env
+
       - name: Build
         run: cargo build --verbose
+
       - name: Install diesel CLI
         run: cargo install diesel_cli
+
       - name: Run server on background
         run: |
           cargo run &
