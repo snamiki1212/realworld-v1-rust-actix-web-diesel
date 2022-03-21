@@ -71,7 +71,7 @@ where
                 Ok(res)
             })
         } else {
-            std::panic!("crush it");
+            std::panic!("crush it"); // TODO:
         }
         // else {
         //     Box::pin(async move {
@@ -94,11 +94,11 @@ fn should_skip_verification(req: &ServiceRequest) -> bool {
             return true;
         }
     }
-    return false;
+    false
 }
 
 fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> Result<User, AppError> {
-    let user = User::find_by_id(&conn, user_id)?;
+    let user = User::find_by_id(conn, user_id)?;
     Ok(user)
 }
 
@@ -178,8 +178,8 @@ impl IgnoreAuthRoute {
     }
 
     fn is_match_path(&self, path: &str) -> bool {
-        let expect_path = self.path.split("/").collect::<Vec<_>>();
-        let this_path = path.split("/").collect::<Vec<_>>();
+        let expect_path = self.path.split('/').collect::<Vec<_>>();
+        let this_path = path.split('/').collect::<Vec<_>>();
         if expect_path.len() != this_path.len() {
             return false;
         };
@@ -192,7 +192,7 @@ impl IgnoreAuthRoute {
                 return false;
             }
         }
-        return true;
+        true
     }
 
     fn is_match_method(&self, method: &Method) -> bool {
@@ -200,7 +200,7 @@ impl IgnoreAuthRoute {
     }
 
     fn is_slug_path(text: &str) -> bool {
-        let first = text.chars().nth(0).unwrap_or(' ');
+        let first = text.chars().next().unwrap_or(' ');
         let last = text.chars().last().unwrap_or(' ');
         first == '{' && last == '}'
     }

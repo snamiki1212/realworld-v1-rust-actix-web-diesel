@@ -1,8 +1,4 @@
-use actix_web::{
-    error::Error as ActixWebError,
-    http::{header::ContentType, StatusCode},
-    HttpResponse,
-};
+use actix_web::{http::StatusCode, HttpResponse};
 use bcrypt::BcryptError;
 use diesel::r2d2::{Error as R2D2Error, PoolError};
 use diesel::result::{DatabaseErrorKind, Error as DieselError};

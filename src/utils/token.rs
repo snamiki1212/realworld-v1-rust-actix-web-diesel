@@ -7,7 +7,7 @@ static ONE_DAY: i64 = 60 * 60 * 24; // in seconds
 
 pub fn decode(token: &str) -> jsonwebtoken::errors::Result<TokenData<Claims>> {
     jsonwebtoken::decode::<Claims>(
-        &token,
+        token,
         &DecodingKey::from_secret(&KEY),
         &Validation::default(),
     )
@@ -15,8 +15,7 @@ pub fn decode(token: &str) -> jsonwebtoken::errors::Result<TokenData<Claims>> {
 
 pub fn generate(user_id: Uuid, now: i64) -> Result<String, Error> {
     let claims = Claims::new(user_id, now);
-    let token = jsonwebtoken::encode(&Header::default(), &claims, &EncodingKey::from_secret(&KEY));
-    token
+    jsonwebtoken::encode(&Header::default(), &claims, &EncodingKey::from_secret(&KEY))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -30,6 +29,7 @@ pub struct Claims {
     // ---
     pub user_id: Uuid,
 }
+
 impl Claims {
     pub fn new(user_id: Uuid, now: i64) -> Self {
         Claims {

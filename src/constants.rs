@@ -1,5 +1,3 @@
-// pub const MESSAGE_INVALID_TOKEN: &str = "Invalid token, please login again";
-// pub const EMPTY: &str = "";
 pub const AUTHORIZATION: &str = "Authorization";
 
 pub const BIND: &str = "0.0.0.0:8080";
