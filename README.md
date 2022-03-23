@@ -13,7 +13,7 @@ Realworld App using `Rust`, `actix-web`, and `diesel`.
   ```
 
 ```zsh
-$ docker-compose up -d
+$ docker compose up -d
 ```
 
 ```zsh
