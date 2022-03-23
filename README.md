@@ -4,36 +4,47 @@ Realworld App using `Rust`, `actix-web`, and `diesel`.
 
 ## Getting Started
 
-```zsh
-$ cp .env.example .env
-$ cp secret.key.example secret.key
-```
-
 <details>
   <summary>Docker</summary>
   
   ```zsh
-  $ docker-compose up -d
+  $ cp .env.example .env
+  $ cp secret.key.example secret.key
   ```
+
+```zsh
+$ docker-compose up -d
+```
+
+```zsh
+$ curl http://localhost:8080/api/healthcheck
+# => OK
+```
+
 </details>
 
 <details>
   <summary>Local</summary>
   
-  ```zsh
-  # start postgres
-  $ brew services start postgres
-  # start app
-  $ disel setup
-  $ cargo run
-  ```
+```zsh
+$ cp .env.example .env
+$ cp secret.key.example secret.key
+```
 
-</details>
+```zsh
+# start postgres
+$ brew services start postgres
+# start app
+$ disel setup
+$ cargo run
+```
 
 ```zsh
 $ curl http://localhost:8080/api/healthcheck
   # => OK
 ```
+
+  </details>
 
 ## E2E Test
 
