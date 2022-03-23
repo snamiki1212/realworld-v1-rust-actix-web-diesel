@@ -19,3 +19,5 @@ services:
       POSTGRES_DB: realworld-rust-actix-web
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
+volumes:
+  .:
