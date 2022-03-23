@@ -64,7 +64,12 @@ where
     actix_web::dev::forward_ready!(service);
 
     fn call(&self, mut req: ServiceRequest) -> Self::Future {
-        if should_skip_verification(&req) || verify_and_insert_auth_user(&mut req) {
+        let is_verified = if should_skip_verification(&req) {
+            true
+        } else {
+            verify_and_insert_auth_user(&mut req)
+        };
+        if is_verified {
             let fut = self.service.call(req);
             Box::pin(async move {
                 let res = fut.await?;
