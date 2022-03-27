@@ -5,7 +5,9 @@ use crate::error::AppError;
 use crate::middleware::state::AppState;
 use crate::utils::token;
 use actix_web::HttpMessage;
+use actix_web::middleware::ErrorHandlerResponse;
 use actix_web::{
+    body::EitherBody,
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
     http::{
         header::{HeaderName, HeaderValue},
@@ -36,7 +38,7 @@ where
     S::Future: 'static,
     B: 'static,
 {
-    type Response = ServiceResponse<B>;
+    type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
     type InitError = ();
     type Transform = AuthenticationMiddleware<S>;
@@ -57,7 +59,7 @@ where
     S::Future: 'static,
     B: 'static,
 {
-    type Response = ServiceResponse<B>;
+    type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
 
@@ -72,21 +74,20 @@ where
         if is_verified {
             let fut = self.service.call(req);
             Box::pin(async move {
-                let res = fut.await?;
+                let res = fut.await?.map_into_left_body();
                 Ok(res)
             })
         } else {
-            std::panic!("crush it"); // TODO:
+            Box::pin(async move {
+                let (req, _res) = req.into_parts();
+                let res = HttpResponse::Unauthorized().finish().map_into_right_body();
+                let srv = ServiceResponse::new(req, res);
+                Ok(srv)
+            })
         }
-        // else {
-        //     Box::pin(async move {
-        //         let resp = HttpResponse::Unauthorized()
-        //             .message_body(constants::error_msg::UNAUTHRIZED)
-        //             .unwrap(); // TODO:
-        //         Ok(req.into_response(resp))
-        //     })
-        // }
     }
+
+    
 }
 
 fn should_skip_verification(req: &ServiceRequest) -> bool {
