@@ -238,13 +238,14 @@ pub fn fetch_article(
         },
     )?;
 
-    let favorited_article_ids =
-        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
+    let is_favorited = {
+        let favorited_article_ids =
+            favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
 
-    let is_favorited = favorited_article_ids
-        .to_owned()
-        .into_iter()
-        .any(|_id| _id == article.id);
+        favorited_article_ids
+            .into_iter()
+            .any(|favarited_article_id| favarited_article_id == article.id)
+    };
 
     let favorite_info = FavoriteInfo {
         is_favorited,

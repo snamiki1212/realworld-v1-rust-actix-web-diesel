@@ -55,18 +55,18 @@ pub fn unfavorite(
             author_id: params.me.id,
         },
     )?;
-    let item = fetch_article(
-        conn,
-        &FetchArticle {
-            article_id: article.id,
-            me: params.me.to_owned(),
-        },
-    )?;
     let _ = Favorite::unfavorite(
         conn,
         &UnfavoriteAction {
             user_id: params.me.id,
             article_id: article.id,
+        },
+    )?;
+    let item = fetch_article(
+        conn,
+        &FetchArticle {
+            article_id: article.id,
+            me: params.me.to_owned(),
         },
     )?;
     Ok(item)
@@ -93,7 +93,7 @@ pub fn fetch_favorited_article_ids_by_user_id(
     use diesel::prelude::*;
     let favorited_article_ids = favorites::table
         .filter(favorites::user_id.eq(user_id))
-        .select(favorites::user_id)
+        .select(favorites::article_id)
         .get_results::<Uuid>(conn)?;
     Ok(favorited_article_ids)
 }

@@ -21,7 +21,7 @@ pub async fn favorite(
         &conn,
         &service::FavoriteService {
             me: auth_user,
-            article_title_slug: article_title_slug,
+            article_title_slug,
         },
     )?;
     let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
