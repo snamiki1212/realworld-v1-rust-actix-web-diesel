@@ -1,11 +1,9 @@
-use super::model::{Comment, DeleteCommentAction};
 use super::{request, response, service};
 use crate::error::AppError;
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
 use crate::utils::uuid;
 use actix_web::{web, HttpRequest, HttpResponse};
-use diesel::QueryDsl;
 
 type ArticleIdSlug = String;
 type CommentIdSlug = String;

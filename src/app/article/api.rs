@@ -71,7 +71,7 @@ pub async fn feed(
 
 pub async fn show(
     state: web::Data<AppState>,
-    req: HttpRequest,
+    _req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
 ) -> Result<HttpResponse, AppError> {
     let conn = state.get_conn()?;

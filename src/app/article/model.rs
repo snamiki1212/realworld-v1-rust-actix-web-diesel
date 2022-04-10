@@ -57,7 +57,6 @@ impl Article {
         conn: &PgConnection,
         params: &FetchBySlugAndAuthorId,
     ) -> Result<Self, AppError> {
-        use crate::schema::articles;
         use crate::schema::articles::dsl::*;
         let item = articles
             .filter(slug.eq_all(params.slug.to_owned()))

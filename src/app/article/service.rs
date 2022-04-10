@@ -297,7 +297,6 @@ pub fn fetch_article_by_slug(
     Ok((article, profile, favorite_info, tags_list))
 }
 
-use crate::schema::articles::dsl::*;
 use crate::schema::follows;
 use crate::schema::follows::dsl::*;
 pub struct FetchFollowedArticlesSerivce {

@@ -1,11 +1,9 @@
 use crate::app::user::model::User;
 use crate::constants;
 use crate::error::AppError;
-// use crate::middleware;
 use crate::middleware::state::AppState;
 use crate::utils::token;
 use actix_web::HttpMessage;
-use actix_web::middleware::ErrorHandlerResponse;
 use actix_web::{
     body::EitherBody,
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
@@ -86,8 +84,6 @@ where
             })
         }
     }
-
-    
 }
 
 fn should_skip_verification(req: &ServiceRequest) -> bool {
