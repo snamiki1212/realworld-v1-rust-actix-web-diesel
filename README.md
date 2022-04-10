@@ -7,10 +7,10 @@ Realworld App using `Rust`, `actix-web`, and `diesel`.
 <details>
   <summary>Docker</summary>
   
-  ```zsh
-  $ cp .env.example .env
-  $ cp secret.key.example secret.key
-  ```
+```zsh
+$ cp .env.example .env
+$ cp secret.key.example secret.key
+```
 
 ```zsh
 $ docker compose up -d
@@ -34,14 +34,15 @@ $ cp secret.key.example secret.key
 ```zsh
 # start postgres
 $ brew services start postgres
+
 # start app
-$ disel setup
+$ diesel setup
 $ cargo run
 ```
 
 ```zsh
 $ curl http://localhost:8080/api/healthcheck
-  # => OK
+# => OK
 ```
 
   </details>
