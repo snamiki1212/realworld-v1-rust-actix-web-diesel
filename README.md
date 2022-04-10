@@ -49,6 +49,8 @@ $ curl http://localhost:8080/api/healthcheck
 
 ## E2E Test
 
+Running API test using POSTMAN scripts here: [realworld/api at main · gothinkster/realworld · GitHub](https://github.com/gothinkster/realworld/tree/main/api).
+
 ```zsh
 # run e2e
 $ APIURL=http://localhost:8080/api zsh e2e/run-api-tests.sh
