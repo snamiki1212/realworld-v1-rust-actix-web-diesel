@@ -17,14 +17,18 @@ mod utils;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     println!("start conduit server...");
-    std::env::set_var("RUST_LOG", "actix_web=info");
+    std::env::set_var("RUST_LOG", "actix_web=trace");
     env_logger::init();
-    HttpServer::new(move || {
-        let logger = Logger::default();
+
+    let state = {
         let pool = utils::db::establish_connection();
+        middleware::state::AppState { pool }
+    };
+
+    HttpServer::new(move || {
         App::new()
-            .wrap(logger)
-            .app_data(middleware::state::AppState { pool })
+            .wrap(Logger::default())
+            .app_data(actix_web::web::Data::new(state.clone()))
             .wrap(middleware::cors::cors())
             .wrap(middleware::auth::Authentication)
             .configure(routes::api)
