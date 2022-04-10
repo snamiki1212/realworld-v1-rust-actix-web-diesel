@@ -154,7 +154,9 @@ pub fn fetch_articles_list(
                 .into_iter()
                 .map(|(article, _)| article)
                 .collect::<Vec<_>>();
-            let tags_list = Tag::belonging_to(&articles_list).load::<Tag>(conn)?;
+            let tags_list = Tag::belonging_to(&articles_list)
+                .order(tags::name.asc())
+                .load::<Tag>(conn)?;
             let tags_list: Vec<Vec<Tag>> = tags_list.grouped_by(&articles_list);
             tags_list
         };
