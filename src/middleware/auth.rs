@@ -1,11 +1,9 @@
 use crate::app::user::model::User;
 use crate::constants;
 use crate::error::AppError;
-// use crate::middleware;
 use crate::middleware::state::AppState;
 use crate::utils::token;
 use actix_web::HttpMessage;
-use actix_web::middleware::ErrorHandlerResponse;
 use actix_web::{
     body::EitherBody,
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
@@ -61,6 +59,8 @@ where
 {
     type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
+
+    #[allow(clippy::type_complexity)] // TODO: want to remove allowness to skip and refactor somehow
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
 
     actix_web::dev::forward_ready!(service);
@@ -86,8 +86,6 @@ where
             })
         }
     }
-
-    
 }
 
 fn should_skip_verification(req: &ServiceRequest) -> bool {
@@ -122,7 +120,7 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
             if authen_str.starts_with(TOKEN_IDENTIFIER) {
                 info!("Parsing token...");
                 let token = authen_str[6..authen_str.len()].trim();
-                match token::decode(&token) {
+                match token::decode(token) {
                     Ok(token_data) => {
                         let claims = token_data.claims;
                         let user_id = claims.user_id;
@@ -164,9 +162,9 @@ pub fn access_auth_user(req: &HttpRequest) -> Result<User, AppError> {
     let auth_user = req.extensions();
     let auth_user = auth_user.get::<User>();
     let auth_user = auth_user.map(|user| user.to_owned()); // TODO: avoid copy
-    let auth_user = auth_user.ok_or(AppError::Unauthorized(
-        json!({"error": "Unauthrized user. Need auth token on header."}),
-    ))?;
+    let auth_user = auth_user.ok_or_else(|| {
+        AppError::Unauthorized(json!({"error": "Unauthrized user. Need auth token on header."}))
+    })?;
 
     Ok(auth_user)
 }

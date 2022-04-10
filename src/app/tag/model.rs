@@ -1,7 +1,6 @@
 use crate::app::article::model::Article;
 use crate::error::AppError;
 use crate::schema::tags;
-use crate::schema::*;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
 use diesel::Insertable;
@@ -25,11 +24,11 @@ impl Tag {
         conn: &PgConnection,
         _article_id: Uuid,
     ) -> Result<Vec<Self>, AppError> {
-        use crate::schema::tags;
+        use crate::schema::tags as schema_tags;
         use crate::schema::tags::dsl::*;
         use diesel::prelude::*;
         let list = tags
-            .filter(tags::article_id.eq(_article_id))
+            .filter(schema_tags::article_id.eq(_article_id))
             .get_results::<Self>(conn)?;
         Ok(list)
     }
@@ -43,7 +42,6 @@ impl Tag {
     }
 
     pub fn create_list(conn: &PgConnection, records: Vec<NewTag>) -> Result<Vec<Self>, AppError> {
-        use crate::diesel::RunQueryDsl;
         use crate::schema::tags::dsl::*;
         // TODO: validate record params are valid.
         let tags_list = diesel::insert_into(tags)

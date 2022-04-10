@@ -32,8 +32,8 @@ pub async fn index(
             tag: params.tag.clone(),
             author: params.author.clone(),
             favorited: params.favorited.clone(),
-            offset: offset,
-            limit: limit,
+            offset,
+            limit,
         },
     )?;
 
@@ -60,8 +60,8 @@ pub async fn feed(
         &conn,
         &service::FetchFollowedArticlesSerivce {
             me: auth_user,
-            offset: offset,
-            limit: limit,
+            offset,
+            limit,
         },
     )?;
 
@@ -71,7 +71,7 @@ pub async fn feed(
 
 pub async fn show(
     state: web::Data<AppState>,
-    req: HttpRequest,
+    _req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
 ) -> Result<HttpResponse, AppError> {
     let conn = state.get_conn()?;
@@ -151,5 +151,5 @@ pub async fn delete(
             author_id: auth_user.id,
         },
     )?;
-    Ok(HttpResponse::Ok().json({}))
+    Ok(HttpResponse::Ok().json(()))
 }

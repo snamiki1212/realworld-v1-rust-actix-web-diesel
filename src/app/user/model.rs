@@ -95,7 +95,7 @@ impl User {
         let followee = users.filter(username.eq(_username)).first::<User>(conn)?;
 
         let _ = Follow::create_follow(
-            &conn,
+            conn,
             &NewFollow {
                 follower_id: self.id,
                 followee_id: followee.id,

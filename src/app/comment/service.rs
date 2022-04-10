@@ -6,6 +6,7 @@ use crate::app::profile::service::{
 };
 use crate::app::user::model::User;
 use crate::error::AppError;
+// use crate::schema::follows;
 use diesel::pg::PgConnection;
 use uuid::Uuid;
 
@@ -31,7 +32,7 @@ pub fn create(
         },
     )?;
     let comment = Comment::create(
-        &conn,
+        conn,
         &CreateComment {
             body: body.to_string(),
             author_id: author.id,
@@ -39,7 +40,7 @@ pub fn create(
         },
     )?;
     let profile = fetch_profile_by_id(
-        &conn,
+        conn,
         &FetchProfileById {
             id: author.id,
             user: author.to_owned(),
@@ -54,7 +55,6 @@ pub fn fetch_comments_list(
 ) -> Result<Vec<(Comment, Profile)>, AppError> {
     use crate::schema::comments;
     use crate::schema::comments::dsl::*;
-    use crate::schema::follows;
     use crate::schema::users;
     use diesel::prelude::*;
     let _comments = comments
@@ -66,13 +66,7 @@ pub fn fetch_comments_list(
         .iter()
         .map(|(_comment, _user)| {
             // TODO: avoid N+1. Write one query to fetch all data somehow.
-            let profile = conver_user_to_profile(
-                conn,
-                &ConverUserToProfile {
-                    user: _user,
-                    me: me,
-                },
-            );
+            let profile = conver_user_to_profile(conn, &ConverUserToProfile { user: _user, me });
             (_comment.to_owned(), profile)
         })
         .collect::<Vec<(Comment, Profile)>>();
@@ -85,10 +79,7 @@ pub struct DeleteCommentService {
     pub author_id: Uuid,
     pub comment_id: Uuid,
 }
-pub fn delete_comment(
-    conn: &PgConnection,
-    params: &DeleteCommentService,
-) -> Result<(), AppError> {
+pub fn delete_comment(conn: &PgConnection, params: &DeleteCommentService) -> Result<(), AppError> {
     let article = Article::fetch_by_slug_and_author_id(
         conn,
         &FetchBySlugAndAuthorId {
@@ -97,7 +88,7 @@ pub fn delete_comment(
         },
     )?;
     let _ = Comment::delete(
-        &conn,
+        conn,
         &DeleteCommentAction {
             comment_id: params.comment_id,
             article_id: article.id,

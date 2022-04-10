@@ -17,7 +17,7 @@ pub async fn show(
     let profile = service::fetch_by_name(
         &conn,
         &service::FetchProfileByName {
-            me: auth_user.to_owned(),
+            me: auth_user,
             username: _username,
         },
     )?;

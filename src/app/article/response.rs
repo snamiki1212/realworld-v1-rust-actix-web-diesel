@@ -67,8 +67,8 @@ impl From<Item> for MultipleArticlesResponse {
             })
             .collect();
         Self {
-            articles_count: articles_count,
-            articles: articles,
+            articles_count,
+            articles,
         }
     }
 }
