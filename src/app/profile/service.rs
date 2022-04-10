@@ -13,9 +13,9 @@ pub fn fetch_by_name(
     params: &FetchProfileByName,
 ) -> Result<Profile, AppError> {
     let FetchProfileByName { me, username } = params;
-    let followee = User::find_by_username(&conn, username)?;
+    let followee = User::find_by_username(conn, username)?;
     let profile = fetch_profile_by_id(
-        &conn,
+        conn,
         &FetchProfileById {
             user: me.to_owned(),
             id: followee.id,
@@ -33,7 +33,7 @@ pub fn fetch_profile_by_id(
     params: &FetchProfileById,
 ) -> Result<Profile, AppError> {
     let FetchProfileById { user, id } = params;
-    let is_following = user.is_following(&conn, id);
+    let is_following = user.is_following(conn, id);
     let profile = Profile {
         username: user.username.to_owned(),
         bio: user.bio.to_owned(),
@@ -52,11 +52,11 @@ pub fn conver_user_to_profile(conn: &PgConnection, params: &ConverUserToProfile)
         Some(me) => me.is_following(conn, &params.user.id),
         None => false,
     };
-    let profile = Profile {
+    
+    Profile {
         username: params.user.username.to_owned(),
         bio: params.user.bio.to_owned(),
         image: params.user.image.to_owned(),
         following,
-    };
-    profile
+    }
 }

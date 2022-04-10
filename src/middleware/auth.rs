@@ -118,7 +118,7 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
             if authen_str.starts_with(TOKEN_IDENTIFIER) {
                 info!("Parsing token...");
                 let token = authen_str[6..authen_str.len()].trim();
-                match token::decode(&token) {
+                match token::decode(token) {
                     Ok(token_data) => {
                         let claims = token_data.claims;
                         let user_id = claims.user_id;

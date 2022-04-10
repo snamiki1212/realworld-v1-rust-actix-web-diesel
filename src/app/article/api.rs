@@ -151,5 +151,5 @@ pub async fn delete(
             author_id: auth_user.id,
         },
     )?;
-    Ok(HttpResponse::Ok().json({}))
+    Ok(HttpResponse::Ok().json(()))
 }

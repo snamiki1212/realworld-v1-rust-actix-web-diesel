@@ -174,7 +174,9 @@ pub fn fetch_articles_list(
         let favorites_count_list = favorites_count_list?;
 
         let article_and_profile_list = {
-            let article_and_profile_list = article_and_user_list
+            
+
+            article_and_user_list
                 .into_iter()
                 .map(|(article, user)| {
                     let profile = Profile {
@@ -197,17 +199,15 @@ pub fn fetch_articles_list(
                         },
                     )
                 })
-                .collect::<Vec<_>>();
-
-            article_and_profile_list
+                .collect::<Vec<_>>()
         };
 
-        let articles_list = article_and_profile_list
+        
+
+        article_and_profile_list
             .into_iter()
             .zip(tags_list)
-            .collect::<Vec<_>>();
-
-        articles_list
+            .collect::<Vec<_>>()
     };
 
     Ok((articles_list, articles_count))
@@ -229,7 +229,7 @@ pub fn fetch_article(
         .get_result::<(Article, User)>(conn)?;
 
     let profile = profile::service::fetch_profile_by_id(
-        &conn,
+        conn,
         &FetchProfileById {
             user: me.to_owned(),
             id: author.id,
@@ -399,12 +399,12 @@ pub fn fetch_following_articles(
                 .collect::<Vec<_>>()
         };
 
-        let list = article_and_profile_list
+        
+
+        article_and_profile_list
             .into_iter()
             .zip(tags_list)
-            .collect::<Vec<_>>();
-
-        list
+            .collect::<Vec<_>>()
     };
 
     let articles_count = query
@@ -438,7 +438,7 @@ pub fn update_article(
         },
     )?;
 
-    let tag_list = Tag::fetch_list_by_article_id(&conn, article.id)?;
+    let tag_list = Tag::fetch_list_by_article_id(conn, article.id)?;
 
     let profile = profile::service::fetch_profile_by_id(
         conn,
@@ -452,7 +452,7 @@ pub fn update_article(
         favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
 
     let is_favorited = favorited_article_ids
-        .to_owned()
+        
         .into_iter()
         .any(|_id| _id == article.id);
 

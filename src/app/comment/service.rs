@@ -32,7 +32,7 @@ pub fn create(
         },
     )?;
     let comment = Comment::create(
-        &conn,
+        conn,
         &CreateComment {
             body: body.to_string(),
             author_id: author.id,
@@ -40,7 +40,7 @@ pub fn create(
         },
     )?;
     let profile = fetch_profile_by_id(
-        &conn,
+        conn,
         &FetchProfileById {
             id: author.id,
             user: author.to_owned(),
@@ -88,7 +88,7 @@ pub fn delete_comment(conn: &PgConnection, params: &DeleteCommentService) -> Res
         },
     )?;
     let _ = Comment::delete(
-        &conn,
+        conn,
         &DeleteCommentAction {
             comment_id: params.comment_id,
             article_id: article.id,
