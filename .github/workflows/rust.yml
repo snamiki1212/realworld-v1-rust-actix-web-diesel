@@ -17,11 +17,8 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v2
 
-      - name: Create secrey.key
-        run: cp secret.key.example secret.key
-
-      - name: Create .env
-        run: cp .env.example .env
+      - name: Ready env file
+        run: sh ./scripts/copy-env.sh
 
       - name: Build
         run: cargo build --verbose
@@ -46,11 +43,8 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v2
 
-      - name: Create secrey.key
-        run: cp secret.key.example secret.key
-
-      - name: Create .env
-        run: cp .env.example .env
+      - name: Ready env file
+        run: sh ./scripts/copy-env.sh
 
       - name: Build
         run: cargo build --verbose

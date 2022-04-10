@@ -6,11 +6,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Create secrey.key
-        run: cp secret.key.example secret.key
-
-      - name: Create .env
-        run: cp .env.example .env
+      - name: Ready env file
+        run: sh ./scripts/copy-env.sh
 
       - name: Install Clippy
         run: rustup component add clippy
