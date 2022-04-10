@@ -162,11 +162,9 @@ pub fn fetch_articles_list(
         let article_ids_list = article_and_user_list
             .clone()
             .into_iter()
-            .map(|(article, _)| article.id)
-            .collect::<Vec<_>>();
+            .map(|(article, _)| article.id);
 
         let favorites_count_list: Result<Vec<_>, _> = article_ids_list
-            .into_iter()
             .map(|article_id| {
                 favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
             })
@@ -174,8 +172,6 @@ pub fn fetch_articles_list(
         let favorites_count_list = favorites_count_list?;
 
         let article_and_profile_list = {
-            
-
             article_and_user_list
                 .into_iter()
                 .map(|(article, user)| {
@@ -201,8 +197,6 @@ pub fn fetch_articles_list(
                 })
                 .collect::<Vec<_>>()
         };
-
-        
 
         article_and_profile_list
             .into_iter()
@@ -350,11 +344,9 @@ pub fn fetch_following_articles(
             let article_ids_list = article_and_user_list
                 .clone()
                 .into_iter()
-                .map(|(article, _)| article.id)
-                .collect::<Vec<_>>();
+                .map(|(article, _)| article.id);
 
             let favorites_count_list: Result<Vec<_>, _> = article_ids_list
-                .into_iter()
                 .map(|article_id| {
                     favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
                 })
@@ -398,8 +390,6 @@ pub fn fetch_following_articles(
                 })
                 .collect::<Vec<_>>()
         };
-
-        
 
         article_and_profile_list
             .into_iter()
@@ -452,7 +442,6 @@ pub fn update_article(
         favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
 
     let is_favorited = favorited_article_ids
-        
         .into_iter()
         .any(|_id| _id == article.id);
 
