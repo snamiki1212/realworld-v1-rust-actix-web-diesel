@@ -35,7 +35,7 @@ impl Article {
 
     pub fn update(
         conn: &PgConnection,
-        article_title_slug: &String,
+        article_title_slug: &str,
         _author_id: &Uuid,
         record: &UpdateArticle,
     ) -> Result<Self, AppError> {

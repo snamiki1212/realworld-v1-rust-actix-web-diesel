@@ -66,13 +66,7 @@ pub fn fetch_comments_list(
         .iter()
         .map(|(_comment, _user)| {
             // TODO: avoid N+1. Write one query to fetch all data somehow.
-            let profile = conver_user_to_profile(
-                conn,
-                &ConverUserToProfile {
-                    user: _user,
-                    me: me,
-                },
-            );
+            let profile = conver_user_to_profile(conn, &ConverUserToProfile { user: _user, me });
             (_comment.to_owned(), profile)
         })
         .collect::<Vec<(Comment, Profile)>>();

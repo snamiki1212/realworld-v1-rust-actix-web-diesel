@@ -32,8 +32,8 @@ pub async fn index(
             tag: params.tag.clone(),
             author: params.author.clone(),
             favorited: params.favorited.clone(),
-            offset: offset,
-            limit: limit,
+            offset,
+            limit,
         },
     )?;
 
@@ -60,8 +60,8 @@ pub async fn feed(
         &conn,
         &service::FetchFollowedArticlesSerivce {
             me: auth_user,
-            offset: offset,
-            limit: limit,
+            offset,
+            limit,
         },
     )?;
 

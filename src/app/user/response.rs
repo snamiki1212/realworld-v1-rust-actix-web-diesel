@@ -12,7 +12,7 @@ impl From<(User, String)> for UserResponse {
         Self {
             user: AuthUser {
                 email: user.email,
-                token: token,
+                token,
                 username: user.username,
                 bio: user.bio,
                 image: user.image,
