@@ -37,7 +37,7 @@ $ brew services start postgres
 
 # start app
 $ diesel setup
-$ cargo run
+$ cargo watch
 ```
 
 ```zsh
