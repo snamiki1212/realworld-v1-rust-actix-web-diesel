@@ -358,8 +358,8 @@ pub fn fetch_following_articles(
 
             let is_favorited_by_me = |article: &Article| {
                 favorited_article_ids
-                    .to_owned()
-                    .into_iter()
+                    .iter()
+                    .copied()
                     .any(|_id| _id == article.id)
             };
 

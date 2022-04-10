@@ -8,8 +8,8 @@ Realworld App using `Rust`, `actix-web`, and `diesel`.
   <summary>Docker</summary>
   
 ```zsh
-$ cp .env.example .env
-$ cp secret.key.example secret.key
+# ready
+$ sh ./scripts/copy-env.sh
 ```
 
 ```zsh
@@ -27,8 +27,8 @@ $ curl http://localhost:8080/api/healthcheck
   <summary>Local</summary>
   
 ```zsh
-$ cp .env.example .env
-$ cp secret.key.example secret.key
+# ready
+$ sh ./scripts/copy-env.sh
 ```
 
 ```zsh
@@ -37,7 +37,7 @@ $ brew services start postgres
 
 # start app
 $ diesel setup
-$ cargo run
+$ cargo watch
 ```
 
 ```zsh
