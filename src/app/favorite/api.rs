@@ -3,7 +3,7 @@ use super::{
     service::{self, UnfavoriteService},
 };
 use crate::middleware::state::AppState;
-use crate::utils::uuid;
+// use crate::utils::uuid;
 use crate::{error::AppError, middleware::auth};
 use actix_web::{web, HttpRequest, HttpResponse};
 

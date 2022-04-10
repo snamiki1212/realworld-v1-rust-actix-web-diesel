@@ -2,6 +2,7 @@ use crate::app::article::model::Article;
 use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::comments;
+use crate::schema::comments::dsl::*;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
 use serde::{Deserialize, Serialize};
@@ -37,8 +38,6 @@ impl Comment {
     }
 
     pub fn delete(conn: &PgConnection, params: &DeleteCommentAction) -> Result<(), AppError> {
-        use crate::schema::comments;
-        use crate::schema::comments::dsl::*;
         use diesel::prelude::*;
         let _ = diesel::delete(comments)
             .filter(comments::id.eq(params.comment_id))

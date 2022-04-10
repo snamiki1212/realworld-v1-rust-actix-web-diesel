@@ -28,8 +28,6 @@ impl Favorite {
     }
 
     pub fn unfavorite(conn: &PgConnection, params: &UnfavoriteAction) -> Result<usize, AppError> {
-        use crate::schema::favorites;
-        use crate::schema::favorites::dsl::*;
         let item = diesel::delete(favorites::table)
             .filter(favorites::user_id.eq_all(params.user_id))
             .filter(favorites::article_id.eq_all(params.article_id))

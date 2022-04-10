@@ -43,7 +43,6 @@ impl Tag {
     }
 
     pub fn create_list(conn: &PgConnection, records: Vec<NewTag>) -> Result<Vec<Self>, AppError> {
-        use crate::diesel::RunQueryDsl;
         use crate::schema::tags::dsl::*;
         // TODO: validate record params are valid.
         let tags_list = diesel::insert_into(tags)

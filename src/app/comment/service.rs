@@ -6,6 +6,7 @@ use crate::app::profile::service::{
 };
 use crate::app::user::model::User;
 use crate::error::AppError;
+// use crate::schema::follows;
 use diesel::pg::PgConnection;
 use uuid::Uuid;
 
@@ -54,7 +55,6 @@ pub fn fetch_comments_list(
 ) -> Result<Vec<(Comment, Profile)>, AppError> {
     use crate::schema::comments;
     use crate::schema::comments::dsl::*;
-    use crate::schema::follows;
     use crate::schema::users;
     use diesel::prelude::*;
     let _comments = comments
@@ -85,10 +85,7 @@ pub struct DeleteCommentService {
     pub author_id: Uuid,
     pub comment_id: Uuid,
 }
-pub fn delete_comment(
-    conn: &PgConnection,
-    params: &DeleteCommentService,
-) -> Result<(), AppError> {
+pub fn delete_comment(conn: &PgConnection, params: &DeleteCommentService) -> Result<(), AppError> {
     let article = Article::fetch_by_slug_and_author_id(
         conn,
         &FetchBySlugAndAuthorId {
