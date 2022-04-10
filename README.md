@@ -29,7 +29,7 @@ $ curl http://localhost:8080/api/healthcheck
 ```zsh
 # ready
 $ sh ./scripts/copy-env.sh
-````
+```
 
 ```zsh
 # start postgres
