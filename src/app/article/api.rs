@@ -1,8 +1,8 @@
-use super::model::Article;
-use super::service;
 use super::{
+    model::{Article, DeleteArticle},
     request,
     response::{MultipleArticlesResponse, SingleArticleResponse},
+    service,
 };
 use crate::error::AppError;
 use crate::middleware::auth;
@@ -146,9 +146,9 @@ pub async fn delete(
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let article_title_slug = path.into_inner();
-    let _ = service::delete_article(
+    let _ = Article::delete(
         &conn,
-        &service::DeleteArticle {
+        &DeleteArticle {
             slug: article_title_slug,
             author_id: auth_user.id,
         },

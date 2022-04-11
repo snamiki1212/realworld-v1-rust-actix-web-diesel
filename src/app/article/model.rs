@@ -74,6 +74,21 @@ impl Article {
             .load::<Uuid>(conn)
             .is_ok()
     }
+
+    pub fn delete(conn: &PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
+        use crate::schema::articles::dsl::*;
+        use diesel::prelude::*;
+
+        let _ = diesel::delete(
+            articles
+                .filter(slug.eq(&params.slug))
+                .filter(author_id.eq(params.author_id)),
+        )
+        .execute(conn)?;
+        // NOTE: references tag rows are deleted automatically by DELETE CASCADE
+
+        Ok(())
+    }
 }
 
 #[derive(Insertable, Clone)]
@@ -103,4 +118,9 @@ pub struct FetchBySlugAndAuthorId {
 pub struct IsFavoritedBy {
     pub article_id: Uuid,
     pub user_id: Uuid,
+}
+
+pub struct DeleteArticle {
+    pub slug: String,
+    pub author_id: Uuid,
 }
