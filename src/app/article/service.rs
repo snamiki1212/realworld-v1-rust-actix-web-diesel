@@ -160,17 +160,20 @@ pub fn fetch_articles_list(
             tags_list
         };
 
-        let article_ids_list = article_and_user_list
-            .clone()
-            .into_iter()
-            .map(|(article, _)| article.id);
+        let favorites_count_list = {
+            let article_ids_list = article_and_user_list
+                .clone()
+                .into_iter()
+                .map(|(article, _)| article.id);
 
-        let favorites_count_list: Result<Vec<_>, _> = article_ids_list
-            .map(|article_id| {
-                favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
-            })
-            .collect();
-        let favorites_count_list = favorites_count_list?;
+            let favorites_count_list: Result<Vec<_>, _> = article_ids_list
+                .map(|article_id| {
+                    favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
+                })
+                .collect();
+
+            favorites_count_list?
+        };
 
         let article_and_profile_list = {
             article_and_user_list
