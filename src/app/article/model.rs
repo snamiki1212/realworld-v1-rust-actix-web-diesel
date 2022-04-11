@@ -25,7 +25,7 @@ pub struct Article {
 }
 
 impl Article {
-    pub fn create(conn: &PgConnection, record: &NewArticle) -> Result<Self, AppError> {
+    pub fn create(conn: &PgConnection, record: &CreateArticle) -> Result<Self, AppError> {
         let article = diesel::insert_into(articles::table)
             .values(record)
             .get_result::<Article>(conn)?;
@@ -68,7 +68,7 @@ impl Article {
 
 #[derive(Insertable, Clone)]
 #[table_name = "articles"]
-pub struct NewArticle {
+pub struct CreateArticle {
     pub author_id: Uuid,
     pub slug: String,
     pub title: String,

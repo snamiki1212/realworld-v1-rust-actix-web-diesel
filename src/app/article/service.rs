@@ -1,4 +1,4 @@
-use crate::app::article::model::{Article, NewArticle, UpdateArticle};
+use crate::app::article::model::{Article, CreateArticle, UpdateArticle};
 use crate::app::favorite;
 use crate::app::favorite::model::FavoriteInfo;
 use crate::app::follow::model::Follow;
@@ -15,7 +15,6 @@ use diesel::prelude::*;
 use uuid::Uuid;
 
 pub struct CreateArticleSerivce {
-    pub author_id: Uuid,
     pub slug: String,
     pub title: String,
     pub description: String,
@@ -29,12 +28,12 @@ pub fn create(
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let article = Article::create(
         conn,
-        &NewArticle {
-            author_id: params.author_id,
-            slug: params.slug.to_owned(),
-            title: params.title.to_owned(),
-            description: params.description.to_owned(),
-            body: params.body.to_owned(),
+        &CreateArticle {
+            author_id: params.me.id,
+            slug: params.slug.clone(),
+            title: params.title.clone(),
+            description: params.description.clone(),
+            body: params.body.clone(),
         },
     )?;
     let tag_list = create_tag_list(conn, &params.tag_list, &article)?;
@@ -46,18 +45,20 @@ pub fn create(
         },
     )?;
 
-    let favorites_count = favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
-
-    let favorited_article_ids =
-        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
-
-    let is_favorited = favorited_article_ids
-        .into_iter()
-        .any(|_id| _id == article.id);
-
-    let favorite_info = FavoriteInfo {
-        is_favorited,
-        favorites_count,
+    let favorite_info = {
+        let is_favorited = {
+            let favorited_article_ids =
+                favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
+            favorited_article_ids
+                .into_iter()
+                .any(|_id| _id == article.id)
+        };
+        let favorites_count =
+            favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
+        FavoriteInfo {
+            is_favorited,
+            favorites_count,
+        }
     };
 
     Ok((article, profile, favorite_info, tag_list))
@@ -230,18 +231,20 @@ pub fn fetch_article(
         },
     )?;
 
-    let is_favorited = {
-        let favorited_article_ids =
-            favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
-
-        favorited_article_ids
-            .into_iter()
-            .any(|favarited_article_id| favarited_article_id == article.id)
-    };
-
-    let favorite_info = FavoriteInfo {
-        is_favorited,
-        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?,
+    let favorite_info = {
+        let is_favorited = {
+            let favorited_article_ids =
+                favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
+            favorited_article_ids
+                .into_iter()
+                .any(|favarited_article_id| favarited_article_id == article.id)
+        };
+        let favorites_count =
+            favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
+        FavoriteInfo {
+            is_favorited,
+            favorites_count,
+        }
     };
 
     let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
@@ -271,16 +274,18 @@ pub fn fetch_article_by_slug(
         },
     )?;
 
-    let favorited_article_ids =
-        favorite::service::fetch_favorited_article_ids_by_user_id(conn, author.id)?;
-
-    let is_favorited = favorited_article_ids
-        .into_iter()
-        .any(|_id| _id == article.id);
-
-    let favorite_info = FavoriteInfo {
-        is_favorited,
-        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?,
+    let favorite_info = {
+        let favorited_article_ids =
+            favorite::service::fetch_favorited_article_ids_by_user_id(conn, author.id)?;
+        let is_favorited = favorited_article_ids
+            .into_iter()
+            .any(|_id| _id == article.id);
+        let favorites_count =
+            favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
+        FavoriteInfo {
+            is_favorited,
+            favorites_count,
+        }
     };
 
     let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
@@ -438,16 +443,18 @@ pub fn update_article(
         },
     )?;
 
-    let favorited_article_ids =
-        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
-
-    let is_favorited = favorited_article_ids
-        .into_iter()
-        .any(|_id| _id == article.id);
-
-    let favorite_info = FavoriteInfo {
-        is_favorited,
-        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?,
+    let favorite_info = {
+        let favorited_article_ids =
+            favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
+        let is_favorited = favorited_article_ids
+            .into_iter()
+            .any(|_id| _id == article.id);
+        let favorites_count =
+            favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
+        FavoriteInfo {
+            is_favorited,
+            favorites_count,
+        }
     };
 
     Ok((article, profile, favorite_info, tag_list))
