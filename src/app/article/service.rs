@@ -5,7 +5,7 @@ use crate::app::follow::model::Follow;
 use crate::app::profile;
 use crate::app::profile::model::Profile;
 use crate::app::profile::service::FetchProfileById;
-use crate::app::tag::model::{NewTag, Tag};
+use crate::app::tag::model::{CreateTag, Tag};
 use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::articles::dsl::*;
@@ -46,13 +46,13 @@ pub fn create(
     )?;
 
     let favorite_info = {
-        let is_favorited = {
-            let favorited_article_ids =
-                favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
-            favorited_article_ids
-                .into_iter()
-                .any(|_id| _id == article.id)
-        };
+        let is_favorited = is_favorited_by(
+            conn,
+            &IsFavoritedBy {
+                article_id: article.id,
+                user_id: params.me.id,
+            },
+        );
         let favorites_count =
             favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
         FavoriteInfo {
@@ -74,7 +74,7 @@ fn create_tag_list(
         .map(|tag_list| {
             let records = tag_list
                 .iter()
-                .map(|tag| NewTag {
+                .map(|tag| CreateTag {
                     name: tag,
                     article_id: &article.id,
                 })
@@ -232,13 +232,13 @@ pub fn fetch_article(
     )?;
 
     let favorite_info = {
-        let is_favorited = {
-            let favorited_article_ids =
-                favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
-            favorited_article_ids
-                .into_iter()
-                .any(|favarited_article_id| favarited_article_id == article.id)
-        };
+        let is_favorited = is_favorited_by(
+            conn,
+            &IsFavoritedBy {
+                article_id: article.id,
+                user_id: params.me.id,
+            },
+        );
         let favorites_count =
             favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
         FavoriteInfo {
@@ -275,11 +275,13 @@ pub fn fetch_article_by_slug(
     )?;
 
     let favorite_info = {
-        let favorited_article_ids =
-            favorite::service::fetch_favorited_article_ids_by_user_id(conn, author.id)?;
-        let is_favorited = favorited_article_ids
-            .into_iter()
-            .any(|_id| _id == article.id);
+        let is_favorited = is_favorited_by(
+            conn,
+            &IsFavoritedBy {
+                article_id: article.id,
+                user_id: author.id,
+            },
+        );
         let favorites_count =
             favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
         FavoriteInfo {
@@ -444,11 +446,13 @@ pub fn update_article(
     )?;
 
     let favorite_info = {
-        let favorited_article_ids =
-            favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
-        let is_favorited = favorited_article_ids
-            .into_iter()
-            .any(|_id| _id == article.id);
+        let is_favorited = is_favorited_by(
+            conn,
+            &IsFavoritedBy {
+                article_id: article.id,
+                user_id: params.me.id,
+            },
+        );
         let favorites_count =
             favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
         FavoriteInfo {
@@ -477,4 +481,17 @@ pub fn delete_article(conn: &PgConnection, params: &DeleteArticle) -> Result<(),
     // NOTE: references tag rows are deleted automatically by DELETE CASCADE
 
     Ok(())
+}
+
+pub struct IsFavoritedBy {
+    pub article_id: Uuid,
+    pub user_id: Uuid,
+}
+pub fn is_favorited_by(conn: &PgConnection, params: &IsFavoritedBy) -> bool {
+    articles::table
+        .select(articles::id)
+        .filter(articles::id.eq(params.user_id))
+        .inner_join(users::table.on(users::id.eq(params.user_id)))
+        .load::<Uuid>(conn)
+        .is_ok()
 }
