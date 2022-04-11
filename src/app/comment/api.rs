@@ -1,4 +1,8 @@
-use super::{request, response, service};
+use super::{
+    request,
+    response::{MultipleCommentsResponse, SingleCommentResponse},
+    service,
+};
 use crate::error::AppError;
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
@@ -12,7 +16,7 @@ pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> Result<HttpR
     let auth_user = auth::access_auth_user(&req).ok();
     let conn = state.get_conn()?;
     let list = service::fetch_comments_list(&conn, &auth_user)?;
-    let res = response::MultipleCommentsResponse::from(list);
+    let res = MultipleCommentsResponse::from(list);
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -33,7 +37,7 @@ pub async fn create(
             author: auth_user,
         },
     )?;
-    let res = response::SingleCommentResponse::from((comment, profile));
+    let res = SingleCommentResponse::from((comment, profile));
     Ok(HttpResponse::Ok().json(res))
 }
 

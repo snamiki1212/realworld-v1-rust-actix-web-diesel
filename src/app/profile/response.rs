@@ -16,12 +16,12 @@ pub struct ProfileContent {
 
 impl From<ProfileModel> for ProfileResponse {
     fn from(profile_model: ProfileModel) -> Self {
-        let inner = ProfileContent {
+        let profile = ProfileContent {
             username: profile_model.username,
             bio: profile_model.bio,
             image: profile_model.image,
             following: profile_model.following,
         };
-        ProfileResponse { profile: inner }
+        ProfileResponse { profile }
     }
 }

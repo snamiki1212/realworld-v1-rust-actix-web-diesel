@@ -1,6 +1,9 @@
 use super::model::Article;
 use super::service;
-use super::{request, response};
+use super::{
+    request,
+    response::{MultipleArticlesResponse, SingleArticleResponse},
+};
 use crate::error::AppError;
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
@@ -37,7 +40,7 @@ pub async fn index(
         },
     )?;
 
-    let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
+    let res = MultipleArticlesResponse::from((articles_list, articles_count));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -65,7 +68,7 @@ pub async fn feed(
         },
     )?;
 
-    let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
+    let res = MultipleArticlesResponse::from((articles_list, articles_count));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -78,7 +81,7 @@ pub async fn show(
     let article_title_slug = path.into_inner();
     let (article, profile, favorite_info, tags_list) =
         service::fetch_article_by_slug(&conn, &service::FetchArticleBySlug { article_title_slug })?;
-    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
+    let res = SingleArticleResponse::from((article, profile, favorite_info, tags_list));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -101,7 +104,7 @@ pub async fn create(
             me: auth_user,
         },
     )?;
-    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tag_list));
+    let res = SingleArticleResponse::from((article, profile, favorite_info, tag_list));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -132,7 +135,7 @@ pub async fn update(
         },
     )?;
 
-    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tag_list));
+    let res = SingleArticleResponse::from((article, profile, favorite_info, tag_list));
     Ok(HttpResponse::Ok().json(res))
 }
 

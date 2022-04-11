@@ -12,6 +12,8 @@ pub struct FavoriteService {
     pub me: User,
     pub article_title_slug: String,
 }
+
+// TODO: move to User model
 pub fn favorite(
     conn: &PgConnection,
     params: &FavoriteService,
@@ -44,6 +46,8 @@ pub struct UnfavoriteService {
     pub me: User,
     pub article_title_slug: String,
 }
+
+// TODO: move to User model
 pub fn unfavorite(
     conn: &PgConnection,
     params: &UnfavoriteService,

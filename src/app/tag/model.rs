@@ -33,7 +33,7 @@ impl Tag {
         Ok(list)
     }
 
-    pub fn list(conn: &PgConnection) -> Result<Vec<Self>, AppError> {
+    pub fn fetch_list(conn: &PgConnection) -> Result<Vec<Self>, AppError> {
         use crate::schema;
         use diesel::prelude::*;
         use schema::tags::dsl::*;
