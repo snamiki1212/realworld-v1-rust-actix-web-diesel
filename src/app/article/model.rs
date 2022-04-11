@@ -64,6 +64,16 @@ impl Article {
             .first::<Self>(conn)?;
         Ok(item)
     }
+
+    pub fn is_favorited_by(conn: &PgConnection, params: &IsFavoritedBy) -> bool {
+        use crate::schema::users;
+        articles::table
+            .select(articles::id)
+            .filter(articles::id.eq(params.user_id))
+            .inner_join(users::table.on(users::id.eq(params.user_id)))
+            .load::<Uuid>(conn)
+            .is_ok()
+    }
 }
 
 #[derive(Insertable, Clone)]
@@ -88,4 +98,9 @@ pub struct UpdateArticle {
 pub struct FetchBySlugAndAuthorId {
     pub slug: String,
     pub author_id: Uuid,
+}
+
+pub struct IsFavoritedBy {
+    pub article_id: Uuid,
+    pub user_id: Uuid,
 }

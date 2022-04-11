@@ -1,4 +1,4 @@
-use crate::app::article::model::{Article, CreateArticle, UpdateArticle};
+use crate::app::article::model::{Article, CreateArticle, IsFavoritedBy, UpdateArticle};
 use crate::app::favorite;
 use crate::app::favorite::model::FavoriteInfo;
 use crate::app::follow::model::Follow;
@@ -46,7 +46,7 @@ pub fn create(
     )?;
 
     let favorite_info = {
-        let is_favorited = is_favorited_by(
+        let is_favorited = Article::is_favorited_by(
             conn,
             &IsFavoritedBy {
                 article_id: article.id,
@@ -232,7 +232,7 @@ pub fn fetch_article(
     )?;
 
     let favorite_info = {
-        let is_favorited = is_favorited_by(
+        let is_favorited = Article::is_favorited_by(
             conn,
             &IsFavoritedBy {
                 article_id: article.id,
@@ -275,7 +275,7 @@ pub fn fetch_article_by_slug(
     )?;
 
     let favorite_info = {
-        let is_favorited = is_favorited_by(
+        let is_favorited = Article::is_favorited_by(
             conn,
             &IsFavoritedBy {
                 article_id: article.id,
@@ -446,7 +446,7 @@ pub fn update_article(
     )?;
 
     let favorite_info = {
-        let is_favorited = is_favorited_by(
+        let is_favorited = Article::is_favorited_by(
             conn,
             &IsFavoritedBy {
                 article_id: article.id,
@@ -481,17 +481,4 @@ pub fn delete_article(conn: &PgConnection, params: &DeleteArticle) -> Result<(),
     // NOTE: references tag rows are deleted automatically by DELETE CASCADE
 
     Ok(())
-}
-
-pub struct IsFavoritedBy {
-    pub article_id: Uuid,
-    pub user_id: Uuid,
-}
-pub fn is_favorited_by(conn: &PgConnection, params: &IsFavoritedBy) -> bool {
-    articles::table
-        .select(articles::id)
-        .filter(articles::id.eq(params.user_id))
-        .inner_join(users::table.on(users::id.eq(params.user_id)))
-        .load::<Uuid>(conn)
-        .is_ok()
 }
