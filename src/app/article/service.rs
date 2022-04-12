@@ -1,5 +1,4 @@
 use crate::app::article::model::{Article, CreateArticle, UpdateArticle};
-use crate::app::favorite;
 use crate::app::favorite::model::FavoriteInfo;
 use crate::app::follow::model::Follow;
 use crate::app::profile;

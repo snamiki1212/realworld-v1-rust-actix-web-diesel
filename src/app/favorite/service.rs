@@ -6,7 +6,6 @@ use crate::app::tag::model::Tag;
 use crate::app::user::model::User;
 use crate::error::AppError;
 use diesel::pg::PgConnection;
-use uuid::Uuid;
 
 pub struct FavoriteService {
     pub me: User,
