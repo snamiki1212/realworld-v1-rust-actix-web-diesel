@@ -204,10 +204,8 @@ pub struct FetchArticle {
 }
 pub fn fetch_article(
     conn: &PgConnection,
-    params: &FetchArticle,
+    FetchArticle { article_id, me }: &FetchArticle,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
-    use diesel::prelude::*;
-    let FetchArticle { article_id, me } = params;
     let (article, author) = articles
         .inner_join(users::table)
         .filter(articles::id.eq(article_id))
@@ -222,7 +220,7 @@ pub fn fetch_article(
     )?;
 
     let favorite_info = {
-        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id);
+        let is_favorited = article.is_favorited_by_user_id(conn, &me.id);
         let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,

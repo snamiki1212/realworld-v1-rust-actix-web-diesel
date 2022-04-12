@@ -83,11 +83,11 @@ impl Article {
 
 impl Article {
     pub fn is_favorited_by_user_id(&self, conn: &PgConnection, user_id: &Uuid) -> bool {
-        use crate::schema::users;
-        articles::table
-            .select(articles::id)
-            .filter(articles::id.eq(self.id))
-            .inner_join(users::table.on(users::id.eq(user_id)))
+        use crate::schema::favorites;
+        favorites::table
+            .select(favorites::id)
+            .filter(favorites::article_id.eq(self.id))
+            .filter(favorites::user_id.eq(user_id))
             .load::<Uuid>(conn)
             .is_ok()
     }
