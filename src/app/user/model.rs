@@ -144,6 +144,15 @@ impl User {
         let token = token::generate(self.id, now)?;
         Ok(token)
     }
+
+    pub fn fetch_favorited_article_ids(&self, conn: &PgConnection) -> Result<Vec<Uuid>, AppError> {
+        use crate::schema::favorites;
+        let favorited_article_ids = favorites::table
+            .filter(favorites::user_id.eq(self.id))
+            .select(favorites::article_id)
+            .get_results::<Uuid>(conn)?;
+        Ok(favorited_article_ids)
+    }
 }
 
 #[derive(Insertable, Debug, Deserialize)]

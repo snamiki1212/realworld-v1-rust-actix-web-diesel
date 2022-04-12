@@ -335,8 +335,7 @@ pub fn fetch_following_articles(
                 favorites_count_list?
             };
 
-            let favorited_article_ids =
-                favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
+            let favorited_article_ids = params.me.fetch_favorited_article_ids(conn)?;
 
             let is_favorited_by_me = |article: &Article| {
                 favorited_article_ids

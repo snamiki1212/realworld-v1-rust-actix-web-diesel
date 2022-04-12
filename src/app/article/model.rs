@@ -94,7 +94,6 @@ impl Article {
 
     pub fn fetch_favorites_count(&self, conn: &PgConnection) -> Result<i64, AppError> {
         use crate::schema::favorites;
-        use diesel::prelude::*;
         let favorites_count = favorites::table
             .filter(favorites::article_id.eq_all(self.id))
             .select(diesel::dsl::count(favorites::created_at))
