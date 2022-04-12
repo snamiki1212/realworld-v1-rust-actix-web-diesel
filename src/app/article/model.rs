@@ -65,12 +65,12 @@ impl Article {
         Ok(item)
     }
 
-    pub fn is_favorited_by(conn: &PgConnection, params: &IsFavoritedBy) -> bool {
+    pub fn is_favorited_by(conn: &PgConnection, IsFavoritedBy { article_id, user_id }: &IsFavoritedBy) -> bool {
         use crate::schema::users;
         articles::table
             .select(articles::id)
-            .filter(articles::id.eq(params.user_id))
-            .inner_join(users::table.on(users::id.eq(params.user_id)))
+            .filter(articles::id.eq(article_id))
+            .inner_join(users::table.on(users::id.eq(user_id)))
             .load::<Uuid>(conn)
             .is_ok()
     }
