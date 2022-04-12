@@ -86,8 +86,8 @@ impl Article {
         use crate::schema::favorites;
         favorites::table
             .select(favorites::id)
-            .filter(favorites::article_id.eq(self.id))
-            .filter(favorites::user_id.eq(user_id))
+            .filter(favorites::article_id.eq_all(self.id))
+            .filter(favorites::user_id.eq_all(user_id))
             .load::<Uuid>(conn)
             .is_ok()
     }
