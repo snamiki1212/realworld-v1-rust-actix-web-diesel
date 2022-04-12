@@ -1,4 +1,4 @@
-use crate::app::article::model::{Article, CreateArticle, IsFavoritedBy, UpdateArticle};
+use crate::app::article::model::{Article, CreateArticle, UpdateArticle};
 use crate::app::favorite;
 use crate::app::favorite::model::FavoriteInfo;
 use crate::app::follow::model::Follow;
@@ -47,8 +47,7 @@ pub fn create(
 
     let favorite_info = {
         let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id);
-        let favorites_count =
-            favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
+        let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,
             favorites_count,
@@ -155,15 +154,10 @@ pub fn fetch_articles_list(
         };
 
         let favorites_count_list = {
-            let article_ids_list = article_and_user_list
+            let favorites_count_list: Result<Vec<_>, _> = article_and_user_list
                 .clone()
                 .into_iter()
-                .map(|(article, _)| article.id);
-
-            let favorites_count_list: Result<Vec<_>, _> = article_ids_list
-                .map(|article_id| {
-                    favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
-                })
+                .map(|(article, _)| article.fetch_favorites_count(conn))
                 .collect();
 
             favorites_count_list?
@@ -230,8 +224,7 @@ pub fn fetch_article(
 
     let favorite_info = {
         let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id);
-        let favorites_count =
-            favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
+        let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,
             favorites_count,
@@ -265,17 +258,16 @@ pub fn fetch_article_by_slug(
         },
     )?;
 
+    let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
+
     let favorite_info = {
         let is_favorited = article.is_favorited_by_user_id(conn, &author.id);
-        let favorites_count =
-            favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
+        let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,
             favorites_count,
         }
     };
-
-    let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
 
     Ok((article, profile, favorite_info, tags_list))
 }
@@ -333,17 +325,15 @@ pub fn fetch_following_articles(
                 .filter(follows::followee_id.eq_any(user_ids_list))
                 .get_results::<Follow>(conn)?;
 
-            let article_ids_list = article_and_user_list
-                .clone()
-                .into_iter()
-                .map(|(article, _)| article.id);
+            let favorites_count_list = {
+                let favorites_count_list: Result<Vec<_>, _> = article_and_user_list
+                    .clone()
+                    .into_iter()
+                    .map(|(article, _)| article.fetch_favorites_count(conn))
+                    .collect();
 
-            let favorites_count_list: Result<Vec<_>, _> = article_ids_list
-                .map(|article_id| {
-                    favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
-                })
-                .collect();
-            let favorites_count_list = favorites_count_list?;
+                favorites_count_list?
+            };
 
             let favorited_article_ids =
                 favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
@@ -432,8 +422,7 @@ pub fn update_article(
 
     let favorite_info = {
         let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id);
-        let favorites_count =
-            favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
+        let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,
             favorites_count,

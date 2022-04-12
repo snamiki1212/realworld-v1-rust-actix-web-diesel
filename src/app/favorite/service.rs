@@ -75,19 +75,6 @@ pub fn unfavorite(
     Ok(item)
 }
 
-pub fn fetch_favorites_count_by_article_id(
-    conn: &PgConnection,
-    _article_id: Uuid,
-) -> Result<i64, AppError> {
-    use crate::schema::favorites;
-    use diesel::prelude::*;
-    let favorites_count = favorites::table
-        .filter(favorites::article_id.eq_all(_article_id))
-        .select(diesel::dsl::count(favorites::created_at))
-        .first::<i64>(conn)?;
-    Ok(favorites_count)
-}
-
 pub fn fetch_favorited_article_ids_by_user_id(
     conn: &PgConnection,
     user_id: Uuid,

@@ -91,6 +91,16 @@ impl Article {
             .load::<Uuid>(conn)
             .is_ok()
     }
+
+    pub fn fetch_favorites_count(&self, conn: &PgConnection) -> Result<i64, AppError> {
+        use crate::schema::favorites;
+        use diesel::prelude::*;
+        let favorites_count = favorites::table
+            .filter(favorites::article_id.eq_all(self.id))
+            .select(diesel::dsl::count(favorites::created_at))
+            .first::<i64>(conn)?;
+        Ok(favorites_count)
+    }
 }
 
 #[derive(Insertable, Clone)]
@@ -115,11 +125,6 @@ pub struct UpdateArticle {
 pub struct FetchBySlugAndAuthorId {
     pub slug: String,
     pub author_id: Uuid,
-}
-
-pub struct IsFavoritedBy {
-    pub article_id: Uuid,
-    pub user_id: Uuid,
 }
 
 pub struct DeleteArticle {
