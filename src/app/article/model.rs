@@ -65,16 +65,6 @@ impl Article {
         Ok(item)
     }
 
-    pub fn is_favorited_by(conn: &PgConnection, IsFavoritedBy { article_id, user_id }: &IsFavoritedBy) -> bool {
-        use crate::schema::users;
-        articles::table
-            .select(articles::id)
-            .filter(articles::id.eq(article_id))
-            .inner_join(users::table.on(users::id.eq(user_id)))
-            .load::<Uuid>(conn)
-            .is_ok()
-    }
-
     pub fn delete(conn: &PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
         use crate::schema::articles::dsl::*;
         use diesel::prelude::*;
@@ -88,6 +78,18 @@ impl Article {
         // NOTE: references tag rows are deleted automatically by DELETE CASCADE
 
         Ok(())
+    }
+}
+
+impl Article {
+    pub fn is_favorited_by_user_id(&self, conn: &PgConnection, user_id: &Uuid) -> bool {
+        use crate::schema::users;
+        articles::table
+            .select(articles::id)
+            .filter(articles::id.eq(self.id))
+            .inner_join(users::table.on(users::id.eq(user_id)))
+            .load::<Uuid>(conn)
+            .is_ok()
     }
 }
 

@@ -1,6 +1,6 @@
 use crate::app::article::model::{Article, FetchBySlugAndAuthorId};
 use crate::app::article::service::{fetch_article, FetchArticle};
-use crate::app::favorite::model::{Favorite, FavoriteInfo, FavorteAction, UnfavoriteAction};
+use crate::app::favorite::model::{CreateFavorite, DeleteFavorite, Favorite, FavoriteInfo};
 use crate::app::profile::model::Profile;
 use crate::app::tag::model::Tag;
 use crate::app::user::model::User;
@@ -25,9 +25,9 @@ pub fn favorite(
             author_id: params.me.id,
         },
     )?;
-    let _ = Favorite::favorite(
+    let _ = Favorite::create(
         conn,
-        &FavorteAction {
+        &CreateFavorite {
             user_id: params.me.id,
             article_id: article.id,
         },
@@ -47,7 +47,6 @@ pub struct UnfavoriteService {
     pub article_title_slug: String,
 }
 
-// TODO: move to User model
 pub fn unfavorite(
     conn: &PgConnection,
     params: &UnfavoriteService,
@@ -59,9 +58,9 @@ pub fn unfavorite(
             author_id: params.me.id,
         },
     )?;
-    let _ = Favorite::unfavorite(
+    let _ = Favorite::delete(
         conn,
-        &UnfavoriteAction {
+        &DeleteFavorite {
             user_id: params.me.id,
             article_id: article.id,
         },

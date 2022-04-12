@@ -46,13 +46,7 @@ pub fn create(
     )?;
 
     let favorite_info = {
-        let is_favorited = Article::is_favorited_by(
-            conn,
-            &IsFavoritedBy {
-                article_id: article.id,
-                user_id: params.me.id,
-            },
-        );
+        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id);
         let favorites_count =
             favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
         FavoriteInfo {
@@ -235,13 +229,7 @@ pub fn fetch_article(
     )?;
 
     let favorite_info = {
-        let is_favorited = Article::is_favorited_by(
-            conn,
-            &IsFavoritedBy {
-                article_id: article.id,
-                user_id: params.me.id,
-            },
-        );
+        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id);
         let favorites_count =
             favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
         FavoriteInfo {
@@ -278,13 +266,7 @@ pub fn fetch_article_by_slug(
     )?;
 
     let favorite_info = {
-        let is_favorited = Article::is_favorited_by(
-            conn,
-            &IsFavoritedBy {
-                article_id: article.id,
-                user_id: author.id,
-            },
-        );
+        let is_favorited = article.is_favorited_by_user_id(conn, &author.id);
         let favorites_count =
             favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
         FavoriteInfo {
@@ -449,13 +431,7 @@ pub fn update_article(
     )?;
 
     let favorite_info = {
-        let is_favorited = Article::is_favorited_by(
-            conn,
-            &IsFavoritedBy {
-                article_id: article.id,
-                user_id: params.me.id,
-            },
-        );
+        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id);
         let favorites_count =
             favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
         FavoriteInfo {
