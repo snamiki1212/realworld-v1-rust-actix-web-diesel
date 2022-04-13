@@ -1,7 +1,6 @@
 use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::articles;
-use crate::schema::articles::dsl::*;
 use crate::utils::converter;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
@@ -40,7 +39,7 @@ impl Article {
         record: &UpdateArticle,
     ) -> Result<Self, AppError> {
         let article = diesel::update(
-            articles
+            articles::table
                 .filter(articles::slug.eq(article_title_slug))
                 .filter(articles::author_id.eq_all(_author_id)),
         )
@@ -57,22 +56,18 @@ impl Article {
         conn: &PgConnection,
         params: &FetchBySlugAndAuthorId,
     ) -> Result<Self, AppError> {
-        use crate::schema::articles::dsl::*;
-        let item = articles
-            .filter(slug.eq_all(params.slug.to_owned()))
-            .filter(author_id.eq_all(params.author_id))
+        let item = articles::table
+            .filter(articles::slug.eq_all(params.slug.to_owned()))
+            .filter(articles::author_id.eq_all(params.author_id))
             .first::<Self>(conn)?;
         Ok(item)
     }
 
     pub fn delete(conn: &PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
-        use crate::schema::articles::dsl::*;
-        use diesel::prelude::*;
-
         let _ = diesel::delete(
-            articles
-                .filter(slug.eq(&params.slug))
-                .filter(author_id.eq(params.author_id)),
+            articles::table
+                .filter(articles::slug.eq(&params.slug))
+                .filter(articles::author_id.eq(params.author_id)),
         )
         .execute(conn)?;
         // NOTE: references tag rows are deleted automatically by DELETE CASCADE
@@ -82,14 +77,19 @@ impl Article {
 }
 
 impl Article {
-    pub fn is_favorited_by_user_id(&self, conn: &PgConnection, user_id: &Uuid) -> bool {
+    pub fn is_favorited_by_user_id(
+        &self,
+        conn: &PgConnection,
+        user_id: &Uuid,
+    ) -> Result<bool, AppError> {
         use crate::schema::favorites;
-        favorites::table
-            .select(favorites::id)
+        let count = favorites::table
+            .select(diesel::dsl::count(favorites::id))
             .filter(favorites::article_id.eq_all(self.id))
             .filter(favorites::user_id.eq_all(user_id))
-            .load::<Uuid>(conn)
-            .is_ok()
+            .first::<i64>(conn)?;
+
+        Ok(count >= 1)
     }
 
     pub fn fetch_favorites_count(&self, conn: &PgConnection) -> Result<i64, AppError> {

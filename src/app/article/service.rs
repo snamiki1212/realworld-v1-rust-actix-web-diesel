@@ -45,7 +45,7 @@ pub fn create(
     )?;
 
     let favorite_info = {
-        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id);
+        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id)?;
         let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,
@@ -220,7 +220,7 @@ pub fn fetch_article(
     )?;
 
     let favorite_info = {
-        let is_favorited = article.is_favorited_by_user_id(conn, &me.id);
+        let is_favorited = article.is_favorited_by_user_id(conn, &me.id)?;
         let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,
@@ -258,7 +258,7 @@ pub fn fetch_article_by_slug(
     let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
 
     let favorite_info = {
-        let is_favorited = article.is_favorited_by_user_id(conn, &author.id);
+        let is_favorited = article.is_favorited_by_user_id(conn, &author.id)?;
         let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,
@@ -417,7 +417,7 @@ pub fn update_article(
     )?;
 
     let favorite_info = {
-        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id);
+        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id)?;
         let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,
