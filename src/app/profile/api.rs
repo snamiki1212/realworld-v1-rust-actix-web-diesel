@@ -1,7 +1,8 @@
+use super::response::ProfileResponse;
 use super::service;
+use crate::error::AppError;
 use crate::middleware::auth::access_auth_user;
 use crate::middleware::state::AppState;
-use crate::{app::profile, error::AppError};
 use actix_web::{web, HttpRequest, HttpResponse};
 
 type UsernameSlug = String;
@@ -21,7 +22,7 @@ pub async fn show(
             username: _username,
         },
     )?;
-    let res = profile::response::ProfileResponse::from(profile);
+    let res = ProfileResponse::from(profile);
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -34,7 +35,7 @@ pub async fn follow(
     let conn = state.get_conn()?;
     let username = path.into_inner();
     let profile = auth_user.follow(&conn, &username)?;
-    let res = profile::response::ProfileResponse::from(profile);
+    let res = ProfileResponse::from(profile);
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -47,6 +48,6 @@ pub async fn unfollow(
     let conn = state.get_conn()?;
     let username = path.into_inner();
     let profile = auth_user.unfollow(&conn, &username)?;
-    let res = profile::response::ProfileResponse::from(profile);
+    let res = ProfileResponse::from(profile);
     Ok(HttpResponse::Ok().json(res))
 }

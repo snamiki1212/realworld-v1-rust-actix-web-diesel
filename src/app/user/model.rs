@@ -43,7 +43,6 @@ impl User {
             password: &hashed_password,
         };
 
-        // TODO: move to model or service
         let user = diesel::insert_into(users::table)
             .values(&record)
             .get_result::<User>(conn)?;
@@ -144,6 +143,15 @@ impl User {
         let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nanosecond -> second
         let token = token::generate(self.id, now)?;
         Ok(token)
+    }
+
+    pub fn fetch_favorited_article_ids(&self, conn: &PgConnection) -> Result<Vec<Uuid>, AppError> {
+        use crate::schema::favorites;
+        let favorited_article_ids = favorites::table
+            .filter(favorites::user_id.eq(self.id))
+            .select(favorites::article_id)
+            .get_results::<Uuid>(conn)?;
+        Ok(favorited_article_ids)
     }
 }
 

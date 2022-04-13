@@ -1,9 +1,8 @@
 use super::{
-    response,
+    response::SingleArticleResponse,
     service::{self, UnfavoriteService},
 };
 use crate::middleware::state::AppState;
-// use crate::utils::uuid;
 use crate::{error::AppError, middleware::auth};
 use actix_web::{web, HttpRequest, HttpResponse};
 
@@ -24,7 +23,7 @@ pub async fn favorite(
             article_title_slug,
         },
     )?;
-    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
+    let res = SingleArticleResponse::from((article, profile, favorite_info, tags_list));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -43,6 +42,6 @@ pub async fn unfavorite(
             article_title_slug,
         },
     )?;
-    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
+    let res = SingleArticleResponse::from((article, profile, favorite_info, tags_list));
     Ok(HttpResponse::Ok().json(res))
 }

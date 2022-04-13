@@ -33,7 +33,7 @@ impl Tag {
         Ok(list)
     }
 
-    pub fn list(conn: &PgConnection) -> Result<Vec<Self>, AppError> {
+    pub fn fetch_list(conn: &PgConnection) -> Result<Vec<Self>, AppError> {
         use crate::schema;
         use diesel::prelude::*;
         use schema::tags::dsl::*;
@@ -41,7 +41,10 @@ impl Tag {
         Ok(list)
     }
 
-    pub fn create_list(conn: &PgConnection, records: Vec<NewTag>) -> Result<Vec<Self>, AppError> {
+    pub fn create_list(
+        conn: &PgConnection,
+        records: Vec<CreateTag>,
+    ) -> Result<Vec<Self>, AppError> {
         use crate::schema::tags::dsl::*;
         // TODO: validate record params are valid.
         let tags_list = diesel::insert_into(tags)
@@ -54,7 +57,7 @@ impl Tag {
 
 #[derive(Insertable)]
 #[table_name = "tags"]
-pub struct NewTag<'a> {
+pub struct CreateTag<'a> {
     pub name: &'a str,
     pub article_id: &'a Uuid,
 }

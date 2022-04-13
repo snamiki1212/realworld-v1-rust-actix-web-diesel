@@ -1,6 +1,9 @@
-use super::model::Article;
-use super::service;
-use super::{request, response};
+use super::{
+    model::{Article, DeleteArticle},
+    request,
+    response::{MultipleArticlesResponse, SingleArticleResponse},
+    service,
+};
 use crate::error::AppError;
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
@@ -37,7 +40,7 @@ pub async fn index(
         },
     )?;
 
-    let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
+    let res = MultipleArticlesResponse::from((articles_list, articles_count));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -65,7 +68,7 @@ pub async fn feed(
         },
     )?;
 
-    let res = response::MultipleArticlesResponse::from((articles_list, articles_count));
+    let res = MultipleArticlesResponse::from((articles_list, articles_count));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -78,7 +81,7 @@ pub async fn show(
     let article_title_slug = path.into_inner();
     let (article, profile, favorite_info, tags_list) =
         service::fetch_article_by_slug(&conn, &service::FetchArticleBySlug { article_title_slug })?;
-    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tags_list));
+    let res = SingleArticleResponse::from((article, profile, favorite_info, tags_list));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -92,7 +95,6 @@ pub async fn create(
     let (article, profile, favorite_info, tag_list) = service::create(
         &conn,
         &service::CreateArticleSerivce {
-            author_id: auth_user.id,
             title: form.article.title.clone(),
             slug: Article::convert_title_to_slug(&form.article.title),
             description: form.article.description.clone(),
@@ -101,7 +103,7 @@ pub async fn create(
             me: auth_user,
         },
     )?;
-    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tag_list));
+    let res = SingleArticleResponse::from((article, profile, favorite_info, tag_list));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -132,7 +134,7 @@ pub async fn update(
         },
     )?;
 
-    let res = response::SingleArticleResponse::from((article, profile, favorite_info, tag_list));
+    let res = SingleArticleResponse::from((article, profile, favorite_info, tag_list));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -144,9 +146,9 @@ pub async fn delete(
     let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
     let article_title_slug = path.into_inner();
-    let _ = service::delete_article(
+    let _ = Article::delete(
         &conn,
-        &service::DeleteArticle {
+        &DeleteArticle {
             slug: article_title_slug,
             author_id: auth_user.id,
         },

@@ -20,17 +20,23 @@ pub struct Favorite {
 }
 
 impl Favorite {
-    pub fn favorite(conn: &PgConnection, record: &FavorteAction) -> Result<usize, AppError> {
+    pub fn create(conn: &PgConnection, record: &CreateFavorite) -> Result<usize, AppError> {
         let item = diesel::insert_into(favorites::table)
             .values(record)
             .execute(conn)?;
         Ok(item)
     }
 
-    pub fn unfavorite(conn: &PgConnection, params: &UnfavoriteAction) -> Result<usize, AppError> {
+    pub fn delete(
+        conn: &PgConnection,
+        DeleteFavorite {
+            user_id,
+            article_id,
+        }: &DeleteFavorite,
+    ) -> Result<usize, AppError> {
         let item = diesel::delete(favorites::table)
-            .filter(favorites::user_id.eq_all(params.user_id))
-            .filter(favorites::article_id.eq_all(params.article_id))
+            .filter(favorites::user_id.eq_all(user_id))
+            .filter(favorites::article_id.eq_all(article_id))
             .execute(conn)?;
         Ok(item)
     }
@@ -38,12 +44,12 @@ impl Favorite {
 
 #[derive(Insertable)]
 #[table_name = "favorites"]
-pub struct FavorteAction {
+pub struct CreateFavorite {
     pub user_id: Uuid,
     pub article_id: Uuid,
 }
 
-pub struct UnfavoriteAction {
+pub struct DeleteFavorite {
     pub user_id: Uuid,
     pub article_id: Uuid,
 }

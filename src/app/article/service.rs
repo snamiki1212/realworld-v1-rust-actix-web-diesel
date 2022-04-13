@@ -1,11 +1,10 @@
-use crate::app::article::model::{Article, NewArticle, UpdateArticle};
-use crate::app::favorite;
+use crate::app::article::model::{Article, CreateArticle, UpdateArticle};
 use crate::app::favorite::model::FavoriteInfo;
 use crate::app::follow::model::Follow;
 use crate::app::profile;
 use crate::app::profile::model::Profile;
 use crate::app::profile::service::FetchProfileById;
-use crate::app::tag::model::{NewTag, Tag};
+use crate::app::tag::model::{CreateTag, Tag};
 use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::articles::dsl::*;
@@ -15,7 +14,6 @@ use diesel::prelude::*;
 use uuid::Uuid;
 
 pub struct CreateArticleSerivce {
-    pub author_id: Uuid,
     pub slug: String,
     pub title: String,
     pub description: String,
@@ -29,12 +27,12 @@ pub fn create(
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let article = Article::create(
         conn,
-        &NewArticle {
-            author_id: params.author_id,
-            slug: params.slug.to_owned(),
-            title: params.title.to_owned(),
-            description: params.description.to_owned(),
-            body: params.body.to_owned(),
+        &CreateArticle {
+            author_id: params.me.id,
+            slug: params.slug.clone(),
+            title: params.title.clone(),
+            description: params.description.clone(),
+            body: params.body.clone(),
         },
     )?;
     let tag_list = create_tag_list(conn, &params.tag_list, &article)?;
@@ -46,18 +44,13 @@ pub fn create(
         },
     )?;
 
-    let favorites_count = favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?;
-
-    let favorited_article_ids =
-        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
-
-    let is_favorited = favorited_article_ids
-        .into_iter()
-        .any(|_id| _id == article.id);
-
-    let favorite_info = FavoriteInfo {
-        is_favorited,
-        favorites_count,
+    let favorite_info = {
+        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id)?;
+        let favorites_count = article.fetch_favorites_count(conn)?;
+        FavoriteInfo {
+            is_favorited,
+            favorites_count,
+        }
     };
 
     Ok((article, profile, favorite_info, tag_list))
@@ -73,7 +66,7 @@ fn create_tag_list(
         .map(|tag_list| {
             let records = tag_list
                 .iter()
-                .map(|tag| NewTag {
+                .map(|tag| CreateTag {
                     name: tag,
                     article_id: &article.id,
                 })
@@ -159,17 +152,15 @@ pub fn fetch_articles_list(
             tags_list
         };
 
-        let article_ids_list = article_and_user_list
-            .clone()
-            .into_iter()
-            .map(|(article, _)| article.id);
+        let favorites_count_list = {
+            let favorites_count_list: Result<Vec<_>, _> = article_and_user_list
+                .clone()
+                .into_iter()
+                .map(|(article, _)| article.fetch_favorites_count(conn))
+                .collect();
 
-        let favorites_count_list: Result<Vec<_>, _> = article_ids_list
-            .map(|article_id| {
-                favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
-            })
-            .collect();
-        let favorites_count_list = favorites_count_list?;
+            favorites_count_list?
+        };
 
         let article_and_profile_list = {
             article_and_user_list
@@ -213,10 +204,8 @@ pub struct FetchArticle {
 }
 pub fn fetch_article(
     conn: &PgConnection,
-    params: &FetchArticle,
+    FetchArticle { article_id, me }: &FetchArticle,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
-    use diesel::prelude::*;
-    let FetchArticle { article_id, me } = params;
     let (article, author) = articles
         .inner_join(users::table)
         .filter(articles::id.eq(article_id))
@@ -230,18 +219,13 @@ pub fn fetch_article(
         },
     )?;
 
-    let is_favorited = {
-        let favorited_article_ids =
-            favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
-
-        favorited_article_ids
-            .into_iter()
-            .any(|favarited_article_id| favarited_article_id == article.id)
-    };
-
-    let favorite_info = FavoriteInfo {
-        is_favorited,
-        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?,
+    let favorite_info = {
+        let is_favorited = article.is_favorited_by_user_id(conn, &me.id)?;
+        let favorites_count = article.fetch_favorites_count(conn)?;
+        FavoriteInfo {
+            is_favorited,
+            favorites_count,
+        }
     };
 
     let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
@@ -271,19 +255,16 @@ pub fn fetch_article_by_slug(
         },
     )?;
 
-    let favorited_article_ids =
-        favorite::service::fetch_favorited_article_ids_by_user_id(conn, author.id)?;
-
-    let is_favorited = favorited_article_ids
-        .into_iter()
-        .any(|_id| _id == article.id);
-
-    let favorite_info = FavoriteInfo {
-        is_favorited,
-        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?,
-    };
-
     let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
+
+    let favorite_info = {
+        let is_favorited = article.is_favorited_by_user_id(conn, &author.id)?;
+        let favorites_count = article.fetch_favorites_count(conn)?;
+        FavoriteInfo {
+            is_favorited,
+            favorites_count,
+        }
+    };
 
     Ok((article, profile, favorite_info, tags_list))
 }
@@ -341,20 +322,17 @@ pub fn fetch_following_articles(
                 .filter(follows::followee_id.eq_any(user_ids_list))
                 .get_results::<Follow>(conn)?;
 
-            let article_ids_list = article_and_user_list
-                .clone()
-                .into_iter()
-                .map(|(article, _)| article.id);
+            let favorites_count_list = {
+                let favorites_count_list: Result<Vec<_>, _> = article_and_user_list
+                    .clone()
+                    .into_iter()
+                    .map(|(article, _)| article.fetch_favorites_count(conn))
+                    .collect();
 
-            let favorites_count_list: Result<Vec<_>, _> = article_ids_list
-                .map(|article_id| {
-                    favorite::service::fetch_favorites_count_by_article_id(conn, article_id)
-                })
-                .collect();
-            let favorites_count_list = favorites_count_list?;
+                favorites_count_list?
+            };
 
-            let favorited_article_ids =
-                favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
+            let favorited_article_ids = params.me.fetch_favorited_article_ids(conn)?;
 
             let is_favorited_by_me = |article: &Article| {
                 favorited_article_ids
@@ -438,36 +416,14 @@ pub fn update_article(
         },
     )?;
 
-    let favorited_article_ids =
-        favorite::service::fetch_favorited_article_ids_by_user_id(conn, params.me.id)?;
-
-    let is_favorited = favorited_article_ids
-        .into_iter()
-        .any(|_id| _id == article.id);
-
-    let favorite_info = FavoriteInfo {
-        is_favorited,
-        favorites_count: favorite::service::fetch_favorites_count_by_article_id(conn, article.id)?,
+    let favorite_info = {
+        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id)?;
+        let favorites_count = article.fetch_favorites_count(conn)?;
+        FavoriteInfo {
+            is_favorited,
+            favorites_count,
+        }
     };
 
     Ok((article, profile, favorite_info, tag_list))
-}
-
-pub struct DeleteArticle {
-    pub slug: String,
-    pub author_id: Uuid,
-}
-pub fn delete_article(conn: &PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
-    use crate::schema::articles::dsl::*;
-    use diesel::prelude::*;
-
-    let _ = diesel::delete(
-        articles
-            .filter(slug.eq(&params.slug))
-            .filter(author_id.eq(params.author_id)),
-    )
-    .execute(conn)?;
-    // NOTE: references tag rows are deleted automatically by DELETE CASCADE
-
-    Ok(())
 }
