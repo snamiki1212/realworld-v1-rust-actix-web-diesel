@@ -11,9 +11,11 @@ pub struct FetchProfileByName {
 
 pub fn fetch_by_name(
     conn: &PgConnection,
-    params: &FetchProfileByName,
+    FetchProfileByName {
+        current_user,
+        username,
+    }: &FetchProfileByName,
 ) -> Result<Profile, AppError> {
-    let FetchProfileByName { current_user, username } = params;
     let followee = User::find_by_username(conn, username)?;
     let profile = fetch_profile_by_id(
         conn,
