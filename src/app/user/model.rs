@@ -1,4 +1,4 @@
-use crate::app::follow::model::{DeleteFollow, Follow, NewFollow};
+use crate::app::follow::model::{CreateFollow, DeleteFollow, Follow};
 use crate::app::profile::model::Profile;
 use crate::error::AppError;
 use crate::schema::users;
@@ -73,7 +73,7 @@ impl User {
     pub fn update(
         conn: &PgConnection,
         user_id: Uuid,
-        changeset: UpdatableUser,
+        changeset: UpdateUser,
     ) -> Result<Self, AppError> {
         let target = users.filter(id.eq(user_id));
         let user = diesel::update(target)
@@ -95,7 +95,7 @@ impl User {
 
         let _ = Follow::create_follow(
             conn,
-            &NewFollow {
+            &CreateFollow {
                 follower_id: self.id,
                 followee_id: followee.id,
             },
@@ -165,7 +165,7 @@ pub struct SignupUser<'a> {
 
 #[derive(AsChangeset, Debug, Deserialize, Clone)]
 #[table_name = "users"]
-pub struct UpdatableUser {
+pub struct UpdateUser {
     pub email: Option<String>,
     pub username: Option<String>,
     pub password: Option<String>,

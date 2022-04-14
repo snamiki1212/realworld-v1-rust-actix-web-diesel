@@ -17,7 +17,7 @@ pub struct Follow {
 }
 
 impl Follow {
-    pub fn create_follow(conn: &PgConnection, params: &NewFollow) -> Result<(), AppError> {
+    pub fn create_follow(conn: &PgConnection, params: &CreateFollow) -> Result<(), AppError> {
         use diesel::prelude::*;
         let _ = diesel::insert_into(follows::table)
             .values(params)
@@ -40,7 +40,7 @@ impl Follow {
 
 #[derive(Insertable)]
 #[table_name = "follows"]
-pub struct NewFollow {
+pub struct CreateFollow {
     pub follower_id: Uuid,
     pub followee_id: Uuid,
 }

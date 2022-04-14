@@ -55,14 +55,14 @@ pub async fn feed(
     req: HttpRequest,
     params: web::Query<FeedQueryParameter>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
     let (articles_list, articles_count) = service::fetch_following_articles(
         &conn,
         &service::FetchFollowedArticlesSerivce {
-            me: auth_user,
+            current_user,
             offset,
             limit,
         },
@@ -74,7 +74,6 @@ pub async fn feed(
 
 pub async fn show(
     state: web::Data<AppState>,
-    _req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
 ) -> Result<HttpResponse, AppError> {
     let conn = state.get_conn()?;
@@ -90,8 +89,8 @@ pub async fn create(
     req: HttpRequest,
     form: web::Json<request::CreateArticleRequest>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let (article, profile, favorite_info, tag_list) = service::create(
         &conn,
         &service::CreateArticleSerivce {
@@ -100,7 +99,7 @@ pub async fn create(
             description: form.article.description.clone(),
             body: form.article.body.clone(),
             tag_list: form.article.tag_list.to_owned(),
-            me: auth_user,
+            current_user,
         },
     )?;
     let res = SingleArticleResponse::from((article, profile, favorite_info, tag_list));
@@ -113,8 +112,8 @@ pub async fn update(
     path: web::Path<ArticleTitleSlug>,
     form: web::Json<request::UpdateArticleRequest>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
     let article_slug = &form
         .article
@@ -125,7 +124,7 @@ pub async fn update(
     let (article, profile, favorite_info, tag_list) = service::update_article(
         &conn,
         &service::UpdateArticleService {
-            me: auth_user,
+            current_user,
             article_title_slug,
             slug: article_slug.to_owned(),
             title: form.article.title.clone(),
@@ -143,14 +142,14 @@ pub async fn delete(
     req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
     let _ = Article::delete(
         &conn,
         &DeleteArticle {
             slug: article_title_slug,
-            author_id: auth_user.id,
+            author_id: current_user.id,
         },
     )?;
     Ok(HttpResponse::Ok().json(()))

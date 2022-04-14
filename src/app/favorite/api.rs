@@ -13,13 +13,13 @@ pub async fn favorite(
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
     let (article, profile, favorite_info, tags_list) = service::favorite(
         &conn,
         &service::FavoriteService {
-            me: auth_user,
+            current_user,
             article_title_slug,
         },
     )?;
@@ -32,13 +32,13 @@ pub async fn unfavorite(
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::access_auth_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
     let (article, profile, favorite_info, tags_list) = service::unfavorite(
         &conn,
         &UnfavoriteService {
-            me: auth_user,
+            current_user,
             article_title_slug,
         },
     )?;

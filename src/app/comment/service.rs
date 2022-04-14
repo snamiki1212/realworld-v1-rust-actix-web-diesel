@@ -51,27 +51,31 @@ pub fn create(
 
 pub fn fetch_comments_list(
     conn: &PgConnection,
-    me: &Option<User>,
+    current_user: &Option<User>,
 ) -> Result<Vec<(Comment, Profile)>, AppError> {
-    use crate::schema::comments;
-    use crate::schema::comments::dsl::*;
-    use crate::schema::users;
-    use diesel::prelude::*;
-    let _comments = comments
-        .inner_join(users::table)
-        .filter(comments::article_id.eq(article_id))
-        .get_results::<(Comment, User)>(conn)?;
+    let comments = {
+        use crate::schema::comments;
+        // use crate::schema::comments::dsl::*;
+        use crate::schema::users;
+        use diesel::prelude::*;
+        comments::table
+            .inner_join(users::table)
+            // .filter(comments::article_id.eq(article_id))
+            .get_results::<(Comment, User)>(conn)?
+    };
 
-    let _comments = _comments
+    let comments = comments
         .iter()
-        .map(|(_comment, _user)| {
+        .map(|(comment, user)| {
             // TODO: avoid N+1. Write one query to fetch all data somehow.
-            let profile = conver_user_to_profile(conn, &ConverUserToProfile { user: _user, me });
-            (_comment.to_owned(), profile)
+            let profile = conver_user_to_profile(conn, &ConverUserToProfile { user, current_user });
+
+            // TODO: avoid copy
+            (comment.to_owned(), profile)
         })
         .collect::<Vec<(Comment, Profile)>>();
 
-    Ok(_comments)
+    Ok(comments)
 }
 
 pub struct DeleteCommentService {
