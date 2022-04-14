@@ -1,4 +1,4 @@
-use super::model::{UpdatableUser, User};
+use super::model::{UpdateUser, User};
 use super::{request, response::UserResponse};
 use crate::error::AppError;
 use crate::middleware::auth;
@@ -47,7 +47,7 @@ pub async fn update(
     let user = User::update(
         &conn,
         current_user.id,
-        UpdatableUser {
+        UpdateUser {
             email: form.user.email.clone(),
             username: form.user.username.clone(),
             password: form.user.password.clone(),
