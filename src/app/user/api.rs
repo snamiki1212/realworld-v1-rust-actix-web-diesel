@@ -42,11 +42,11 @@ pub async fn update(
     req: HttpRequest,
     form: web::Json<request::Update>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::get_current_user(&req)?;
+    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
     let user = User::update(
         &conn,
-        auth_user.id,
+        current_user.id,
         UpdatableUser {
             email: form.user.email.clone(),
             username: form.user.username.clone(),

@@ -11,13 +11,13 @@ pub async fn show(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::get_current_user(&req)?;
+    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
     let _username = path.into_inner();
     let profile = service::fetch_by_name(
         &conn,
         &service::FetchProfileByName {
-            current_user: auth_user,
+            current_user,
             username: _username,
         },
     )?;
@@ -30,10 +30,10 @@ pub async fn follow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::get_current_user(&req)?;
+    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
     let username = path.into_inner();
-    let profile = auth_user.follow(&conn, &username)?;
+    let profile = current_user.follow(&conn, &username)?;
     let res = ProfileResponse::from(profile);
     Ok(HttpResponse::Ok().json(res))
 }
@@ -43,10 +43,10 @@ pub async fn unfollow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::get_current_user(&req)?;
+    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
     let username = path.into_inner();
-    let profile = auth_user.unfollow(&conn, &username)?;
+    let profile = current_user.unfollow(&conn, &username)?;
     let res = ProfileResponse::from(profile);
     Ok(HttpResponse::Ok().json(res))
 }
