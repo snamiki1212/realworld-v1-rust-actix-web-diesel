@@ -13,12 +13,12 @@ pub fn fetch_by_name(
     conn: &PgConnection,
     params: &FetchProfileByName,
 ) -> Result<Profile, AppError> {
-    let FetchProfileByName { current_user: me, username } = params;
+    let FetchProfileByName { current_user, username } = params;
     let followee = User::find_by_username(conn, username)?;
     let profile = fetch_profile_by_id(
         conn,
         &FetchProfileById {
-            user: me.to_owned(),
+            user: current_user.to_owned(),
             id: followee.id,
         },
     )?;

@@ -204,7 +204,7 @@ pub struct FetchArticle {
 }
 pub fn fetch_article(
     conn: &PgConnection,
-    FetchArticle { article_id, current_user: me }: &FetchArticle,
+    FetchArticle { article_id, current_user }: &FetchArticle,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let (article, author) = articles
         .inner_join(users::table)
@@ -214,13 +214,13 @@ pub fn fetch_article(
     let profile = profile::service::fetch_profile_by_id(
         conn,
         &FetchProfileById {
-            user: me.to_owned(),
+            user: current_user.to_owned(),
             id: author.id,
         },
     )?;
 
     let favorite_info = {
-        let is_favorited = article.is_favorited_by_user_id(conn, &me.id)?;
+        let is_favorited = article.is_favorited_by_user_id(conn, &current_user.id)?;
         let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,
