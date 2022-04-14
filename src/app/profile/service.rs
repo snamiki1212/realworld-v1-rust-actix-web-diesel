@@ -5,7 +5,7 @@ use diesel::pg::PgConnection;
 use uuid::Uuid;
 
 pub struct FetchProfileByName {
-    pub me: User,
+    pub current_user: User,
     pub username: String,
 }
 
@@ -13,7 +13,7 @@ pub fn fetch_by_name(
     conn: &PgConnection,
     params: &FetchProfileByName,
 ) -> Result<Profile, AppError> {
-    let FetchProfileByName { me, username } = params;
+    let FetchProfileByName { current_user: me, username } = params;
     let followee = User::find_by_username(conn, username)?;
     let profile = fetch_profile_by_id(
         conn,
@@ -46,11 +46,11 @@ pub fn fetch_profile_by_id(
 
 pub struct ConverUserToProfile<'a> {
     pub user: &'a User,
-    pub me: &'a Option<User>,
+    pub current_user: &'a Option<User>,
 }
 
 pub fn conver_user_to_profile(conn: &PgConnection, params: &ConverUserToProfile) -> Profile {
-    let following = match params.me.as_ref() {
+    let following = match params.current_user.as_ref() {
         Some(me) => me.is_following(conn, &params.user.id),
         None => false,
     };

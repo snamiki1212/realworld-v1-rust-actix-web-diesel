@@ -1,7 +1,7 @@
 use super::response::ProfileResponse;
 use super::service;
 use crate::error::AppError;
-use crate::middleware::auth::access_auth_user;
+use crate::middleware::auth::get_current_user;
 use crate::middleware::state::AppState;
 use actix_web::{web, HttpRequest, HttpResponse};
 
@@ -12,13 +12,13 @@ pub async fn show(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = access_auth_user(&req)?;
+    let auth_user = get_current_user(&req)?;
     let conn = state.get_conn()?;
     let _username = path.into_inner();
     let profile = service::fetch_by_name(
         &conn,
         &service::FetchProfileByName {
-            me: auth_user,
+            current_user: auth_user,
             username: _username,
         },
     )?;
@@ -31,7 +31,7 @@ pub async fn follow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = access_auth_user(&req)?;
+    let auth_user = get_current_user(&req)?;
     let conn = state.get_conn()?;
     let username = path.into_inner();
     let profile = auth_user.follow(&conn, &username)?;
@@ -44,7 +44,7 @@ pub async fn unfollow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = access_auth_user(&req)?;
+    let auth_user = get_current_user(&req)?;
     let conn = state.get_conn()?;
     let username = path.into_inner();
     let profile = auth_user.unfollow(&conn, &username)?;

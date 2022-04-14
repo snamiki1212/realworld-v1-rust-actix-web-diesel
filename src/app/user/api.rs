@@ -31,7 +31,7 @@ pub async fn signup(
 }
 
 pub async fn me(req: HttpRequest) -> Result<HttpResponse, AppError> {
-    let user = auth::access_auth_user(&req)?;
+    let user = auth::get_current_user(&req)?;
     let token = user.generate_token()?;
     let res = UserResponse::from((user, token));
     Ok(HttpResponse::Ok().json(res))
@@ -42,7 +42,7 @@ pub async fn update(
     req: HttpRequest,
     form: web::Json<request::Update>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::access_auth_user(&req)?;
+    let auth_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
     let user = User::update(
         &conn,

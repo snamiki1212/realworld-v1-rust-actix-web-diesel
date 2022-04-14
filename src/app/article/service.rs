@@ -19,7 +19,7 @@ pub struct CreateArticleSerivce {
     pub description: String,
     pub body: String,
     pub tag_list: Option<Vec<String>>,
-    pub me: User,
+    pub current_user: User,
 }
 pub fn create(
     conn: &PgConnection,
@@ -28,7 +28,7 @@ pub fn create(
     let article = Article::create(
         conn,
         &CreateArticle {
-            author_id: params.me.id,
+            author_id: params.current_user.id,
             slug: params.slug.clone(),
             title: params.title.clone(),
             description: params.description.clone(),
@@ -39,13 +39,13 @@ pub fn create(
     let profile = profile::service::fetch_profile_by_id(
         conn,
         &FetchProfileById {
-            user: params.me.to_owned(),
+            user: params.current_user.to_owned(),
             id: article.author_id,
         },
     )?;
 
     let favorite_info = {
-        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id)?;
+        let is_favorited = article.is_favorited_by_user_id(conn, &params.current_user.id)?;
         let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,
@@ -200,11 +200,11 @@ pub fn fetch_articles_list(
 
 pub struct FetchArticle {
     pub article_id: Uuid,
-    pub me: User,
+    pub current_user: User,
 }
 pub fn fetch_article(
     conn: &PgConnection,
-    FetchArticle { article_id, me }: &FetchArticle,
+    FetchArticle { article_id, current_user: me }: &FetchArticle,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let (article, author) = articles
         .inner_join(users::table)
@@ -272,7 +272,7 @@ pub fn fetch_article_by_slug(
 use crate::schema::follows;
 use crate::schema::follows::dsl::*;
 pub struct FetchFollowedArticlesSerivce {
-    pub me: User,
+    pub current_user: User,
     pub offset: i64,
     pub limit: i64,
 }
@@ -282,7 +282,7 @@ pub fn fetch_following_articles(
 ) -> Result<(ArticlesList, ArticlesCount), AppError> {
     let query = {
         let following_user_ids = follows
-            .filter(follows::follower_id.eq(params.me.id))
+            .filter(follows::follower_id.eq(params.current_user.id))
             .select(follows::followee_id)
             .get_results::<Uuid>(conn)?;
 
@@ -318,7 +318,7 @@ pub fn fetch_following_articles(
                 .collect::<Vec<_>>();
 
             let follows_list = follows::table
-                .filter(follows::follower_id.eq(params.me.id))
+                .filter(follows::follower_id.eq(params.current_user.id))
                 .filter(follows::followee_id.eq_any(user_ids_list))
                 .get_results::<Follow>(conn)?;
 
@@ -332,7 +332,7 @@ pub fn fetch_following_articles(
                 favorites_count_list?
             };
 
-            let favorited_article_ids = params.me.fetch_favorited_article_ids(conn)?;
+            let favorited_article_ids = params.current_user.fetch_favorited_article_ids(conn)?;
 
             let is_favorited_by_me = |article: &Article| {
                 favorited_article_ids
@@ -383,7 +383,7 @@ pub fn fetch_following_articles(
 }
 
 pub struct UpdateArticleService {
-    pub me: User,
+    pub current_user: User,
     pub article_title_slug: String,
     pub slug: Option<String>,
     pub title: Option<String>,
@@ -397,7 +397,7 @@ pub fn update_article(
     let article = Article::update(
         conn,
         &params.article_title_slug,
-        &params.me.id,
+        &params.current_user.id,
         &UpdateArticle {
             slug: params.slug.to_owned(),
             title: params.title.to_owned(),
@@ -411,13 +411,13 @@ pub fn update_article(
     let profile = profile::service::fetch_profile_by_id(
         conn,
         &FetchProfileById {
-            user: params.me.to_owned(),
+            user: params.current_user.to_owned(),
             id: article.author_id,
         },
     )?;
 
     let favorite_info = {
-        let is_favorited = article.is_favorited_by_user_id(conn, &params.me.id)?;
+        let is_favorited = article.is_favorited_by_user_id(conn, &params.current_user.id)?;
         let favorites_count = article.fetch_favorites_count(conn)?;
         FavoriteInfo {
             is_favorited,

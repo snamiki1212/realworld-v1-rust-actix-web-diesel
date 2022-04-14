@@ -8,7 +8,7 @@ use crate::error::AppError;
 use diesel::pg::PgConnection;
 
 pub struct FavoriteService {
-    pub me: User,
+    pub current_user: User,
     pub article_title_slug: String,
 }
 
@@ -21,13 +21,13 @@ pub fn favorite(
         conn,
         &FetchBySlugAndAuthorId {
             slug: params.article_title_slug.to_owned(),
-            author_id: params.me.id,
+            author_id: params.current_user.id,
         },
     )?;
     let _ = Favorite::create(
         conn,
         &CreateFavorite {
-            user_id: params.me.id,
+            user_id: params.current_user.id,
             article_id: article.id,
         },
     )?;
@@ -35,14 +35,14 @@ pub fn favorite(
         conn,
         &FetchArticle {
             article_id: article.id,
-            me: params.me.to_owned(),
+            current_user: params.current_user.to_owned(),
         },
     )?;
     Ok(item)
 }
 
 pub struct UnfavoriteService {
-    pub me: User,
+    pub current_user: User,
     pub article_title_slug: String,
 }
 
@@ -54,13 +54,13 @@ pub fn unfavorite(
         conn,
         &FetchBySlugAndAuthorId {
             slug: params.article_title_slug.to_owned(),
-            author_id: params.me.id,
+            author_id: params.current_user.id,
         },
     )?;
     let _ = Favorite::delete(
         conn,
         &DeleteFavorite {
-            user_id: params.me.id,
+            user_id: params.current_user.id,
             article_id: article.id,
         },
     )?;
@@ -68,7 +68,7 @@ pub fn unfavorite(
         conn,
         &FetchArticle {
             article_id: article.id,
-            me: params.me.to_owned(),
+            current_user: params.current_user.to_owned(),
         },
     )?;
     Ok(item)

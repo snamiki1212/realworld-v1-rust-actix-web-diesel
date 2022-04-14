@@ -13,7 +13,7 @@ type ArticleIdSlug = String;
 type CommentIdSlug = String;
 
 pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::access_auth_user(&req).ok();
+    let auth_user = auth::get_current_user(&req).ok();
     let conn = state.get_conn()?;
     let list = service::fetch_comments_list(&conn, &auth_user)?;
     let res = MultipleCommentsResponse::from(list);
@@ -26,7 +26,7 @@ pub async fn create(
     path: web::Path<ArticleIdSlug>,
     form: web::Json<request::CreateCommentRequest>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::access_auth_user(&req)?;
+    let auth_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
     let article_title_slug = path.into_inner();
     let (comment, profile) = service::create(
@@ -46,7 +46,7 @@ pub async fn delete(
     req: HttpRequest,
     path: web::Path<(ArticleIdSlug, CommentIdSlug)>,
 ) -> Result<HttpResponse, AppError> {
-    let auth_user = auth::access_auth_user(&req)?;
+    let auth_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
     let (article_title_slug, comment_id) = path.into_inner();
     let comment_id = uuid::parse(&comment_id)?;

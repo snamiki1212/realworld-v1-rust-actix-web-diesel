@@ -158,15 +158,15 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
     false
 }
 
-pub fn access_auth_user(req: &HttpRequest) -> Result<User, AppError> {
-    let auth_user = req.extensions();
-    let auth_user = auth_user.get::<User>();
-    let auth_user = auth_user.map(|user| user.to_owned()); // TODO: avoid copy
-    let auth_user = auth_user.ok_or_else(|| {
+pub fn get_current_user(req: &HttpRequest) -> Result<User, AppError> {
+    let user = req.extensions();
+    let user = user.get::<User>();
+    let user = user.map(|user| user.to_owned()); // TODO: avoid copy
+    let user = user.ok_or_else(|| {
         AppError::Unauthorized(json!({"error": "Unauthrized user. Need auth token on header."}))
     })?;
 
-    Ok(auth_user)
+    Ok(user)
 }
 
 struct IgnoreAuthRoute {
