@@ -11,8 +11,8 @@ pub async fn show(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let _username = path.into_inner();
     let profile = service::fetch_by_name(
         &conn,
@@ -30,8 +30,8 @@ pub async fn follow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let username = path.into_inner();
     let profile = current_user.follow(&conn, &username)?;
     let res = ProfileResponse::from(profile);
@@ -43,8 +43,8 @@ pub async fn unfollow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let username = path.into_inner();
     let profile = current_user.unfollow(&conn, &username)?;
     let res = ProfileResponse::from(profile);

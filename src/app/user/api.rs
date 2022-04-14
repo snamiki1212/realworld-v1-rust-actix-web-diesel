@@ -42,8 +42,8 @@ pub async fn update(
     req: HttpRequest,
     form: web::Json<request::Update>,
 ) -> Result<HttpResponse, AppError> {
-    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let user = User::update(
         &conn,
         current_user.id,

@@ -13,8 +13,8 @@ type ArticleIdSlug = String;
 type CommentIdSlug = String;
 
 pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> Result<HttpResponse, AppError> {
-    let current_user = auth::get_current_user(&req).ok();
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req).ok();
     let list = service::fetch_comments_list(&conn, &current_user)?;
     let res = MultipleCommentsResponse::from(list);
     Ok(HttpResponse::Ok().json(res))
@@ -26,8 +26,8 @@ pub async fn create(
     path: web::Path<ArticleIdSlug>,
     form: web::Json<request::CreateCommentRequest>,
 ) -> Result<HttpResponse, AppError> {
-    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
     let (comment, profile) = service::create(
         &conn,
@@ -46,8 +46,8 @@ pub async fn delete(
     req: HttpRequest,
     path: web::Path<(ArticleIdSlug, CommentIdSlug)>,
 ) -> Result<HttpResponse, AppError> {
-    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let (article_title_slug, comment_id) = path.into_inner();
     let comment_id = uuid::parse(&comment_id)?;
     let _ = service::delete_comment(

@@ -55,8 +55,8 @@ pub async fn feed(
     req: HttpRequest,
     params: web::Query<FeedQueryParameter>,
 ) -> Result<HttpResponse, AppError> {
-    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
     let (articles_list, articles_count) = service::fetch_following_articles(
@@ -90,8 +90,8 @@ pub async fn create(
     req: HttpRequest,
     form: web::Json<request::CreateArticleRequest>,
 ) -> Result<HttpResponse, AppError> {
-    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let (article, profile, favorite_info, tag_list) = service::create(
         &conn,
         &service::CreateArticleSerivce {
@@ -113,8 +113,8 @@ pub async fn update(
     path: web::Path<ArticleTitleSlug>,
     form: web::Json<request::UpdateArticleRequest>,
 ) -> Result<HttpResponse, AppError> {
-    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
     let article_slug = &form
         .article
@@ -143,8 +143,8 @@ pub async fn delete(
     req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
 ) -> Result<HttpResponse, AppError> {
-    let current_user = auth::get_current_user(&req)?;
     let conn = state.get_conn()?;
+    let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
     let _ = Article::delete(
         &conn,
