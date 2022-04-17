@@ -153,6 +153,21 @@ impl User {
             .get_results::<Uuid>(conn)?;
         Ok(favorited_article_ids)
     }
+
+    pub fn fetch_profile(
+        &self,
+        conn: &PgConnection,
+        folowee_id: &Uuid,
+    ) -> Result<Profile, AppError> {
+        let is_following = &self.is_following(conn, folowee_id);
+        let profile = Profile {
+            username: self.username.to_owned(),
+            bio: self.bio.to_owned(),
+            image: self.image.to_owned(),
+            following: is_following.to_owned(),
+        };
+        Ok(profile)
+    }
 }
 
 #[derive(Insertable, Debug, Deserialize)]

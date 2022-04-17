@@ -1,9 +1,7 @@
-use super::model::{Comment, CreateComment, DeleteCommentAction};
+use super::model::{Comment, CreateComment, DeleteComment};
 use crate::app::article::model::{Article, FetchBySlugAndAuthorId};
 use crate::app::profile::model::Profile;
-use crate::app::profile::service::{
-    conver_user_to_profile, fetch_profile_by_id, ConverUserToProfile, FetchProfileById,
-};
+use crate::app::profile::service::{conver_user_to_profile, ConverUserToProfile};
 use crate::app::user::model::User;
 use crate::error::AppError;
 // use crate::schema::follows;
@@ -39,13 +37,7 @@ pub fn create(
             article_id: article.id.to_owned(),
         },
     )?;
-    let profile = fetch_profile_by_id(
-        conn,
-        &FetchProfileById {
-            id: author.id,
-            user: author.to_owned(),
-        },
-    )?;
+    let profile = author.fetch_profile(conn, &author.id)?;
     Ok((comment, profile))
 }
 
@@ -83,6 +75,7 @@ pub struct DeleteCommentService {
     pub author_id: Uuid,
     pub comment_id: Uuid,
 }
+
 pub fn delete_comment(conn: &PgConnection, params: &DeleteCommentService) -> Result<(), AppError> {
     let article = Article::fetch_by_slug_and_author_id(
         conn,
@@ -93,7 +86,7 @@ pub fn delete_comment(conn: &PgConnection, params: &DeleteCommentService) -> Res
     )?;
     let _ = Comment::delete(
         conn,
-        &DeleteCommentAction {
+        &DeleteComment {
             comment_id: params.comment_id,
             article_id: article.id,
             author_id: params.author_id,

@@ -98,7 +98,7 @@ pub async fn create(
             slug: Article::convert_title_to_slug(&form.article.title),
             description: form.article.description.clone(),
             body: form.article.body.clone(),
-            tag_list: form.article.tag_list.to_owned(),
+            tag_name_list: form.article.tag_list.to_owned(),
             current_user,
         },
     )?;

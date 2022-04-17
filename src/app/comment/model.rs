@@ -21,13 +21,6 @@ pub struct Comment {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Insertable, Clone)]
-#[table_name = "comments"]
-pub struct CreateComment {
-    pub body: String,
-    pub author_id: Uuid,
-    pub article_id: Uuid,
-}
 impl Comment {
     pub fn create(conn: &PgConnection, record: &CreateComment) -> Result<Self, AppError> {
         use diesel::prelude::*;
@@ -37,7 +30,7 @@ impl Comment {
         Ok(new_comment)
     }
 
-    pub fn delete(conn: &PgConnection, params: &DeleteCommentAction) -> Result<(), AppError> {
+    pub fn delete(conn: &PgConnection, params: &DeleteComment) -> Result<(), AppError> {
         use diesel::prelude::*;
         let _ = diesel::delete(comments)
             .filter(comments::id.eq(params.comment_id))
@@ -48,8 +41,16 @@ impl Comment {
     }
 }
 
-pub struct DeleteCommentAction {
+pub struct DeleteComment {
     pub comment_id: Uuid,
     pub article_id: Uuid,
     pub author_id: Uuid,
+}
+
+#[derive(Insertable, Clone)]
+#[table_name = "comments"]
+pub struct CreateComment {
+    pub body: String,
+    pub author_id: Uuid,
+    pub article_id: Uuid,
 }

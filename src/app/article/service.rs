@@ -1,9 +1,7 @@
 use crate::app::article::model::{Article, CreateArticle, UpdateArticle};
 use crate::app::favorite::model::FavoriteInfo;
 use crate::app::follow::model::Follow;
-use crate::app::profile;
 use crate::app::profile::model::Profile;
-use crate::app::profile::service::FetchProfileById;
 use crate::app::tag::model::{CreateTag, Tag};
 use crate::app::user::model::User;
 use crate::error::AppError;
@@ -18,7 +16,7 @@ pub struct CreateArticleSerivce {
     pub title: String,
     pub description: String,
     pub body: String,
-    pub tag_list: Option<Vec<String>>,
+    pub tag_name_list: Option<Vec<String>>,
     pub current_user: User,
 }
 pub fn create(
@@ -35,14 +33,11 @@ pub fn create(
             body: params.body.clone(),
         },
     )?;
-    let tag_list = create_tag_list(conn, &params.tag_list, &article)?;
-    let profile = profile::service::fetch_profile_by_id(
-        conn,
-        &FetchProfileById {
-            user: params.current_user.to_owned(),
-            id: article.author_id,
-        },
-    )?;
+    let tag_list = create_tag_list(conn, &params.tag_name_list, &article.id)?;
+
+    let profile = params
+        .current_user
+        .fetch_profile(conn, &article.author_id)?;
 
     let favorite_info = {
         let is_favorited = article.is_favorited_by_user_id(conn, &params.current_user.id)?;
@@ -58,18 +53,15 @@ pub fn create(
 
 fn create_tag_list(
     conn: &PgConnection,
-    tag_list: &Option<Vec<String>>,
-    article: &Article,
+    tag_name_list: &Option<Vec<String>>,
+    article_id: &Uuid,
 ) -> Result<Vec<Tag>, AppError> {
-    let list = tag_list
+    let list = tag_name_list
         .as_ref()
-        .map(|tag_list| {
-            let records = tag_list
+        .map(|tag_name_list| {
+            let records = tag_name_list
                 .iter()
-                .map(|tag| CreateTag {
-                    name: tag,
-                    article_id: &article.id,
-                })
+                .map(|name| CreateTag { name, article_id })
                 .collect();
             Tag::create_list(conn, records)
         })
@@ -204,20 +196,17 @@ pub struct FetchArticle {
 }
 pub fn fetch_article(
     conn: &PgConnection,
-    FetchArticle { article_id, current_user }: &FetchArticle,
+    FetchArticle {
+        article_id,
+        current_user,
+    }: &FetchArticle,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let (article, author) = articles
         .inner_join(users::table)
         .filter(articles::id.eq(article_id))
         .get_result::<(Article, User)>(conn)?;
 
-    let profile = profile::service::fetch_profile_by_id(
-        conn,
-        &FetchProfileById {
-            user: current_user.to_owned(),
-            id: author.id,
-        },
-    )?;
+    let profile = current_user.fetch_profile(conn, &author.id)?;
 
     let favorite_info = {
         let is_favorited = article.is_favorited_by_user_id(conn, &current_user.id)?;
@@ -247,13 +236,7 @@ pub fn fetch_article_by_slug(
         .filter(articles::slug.eq(article_title_slug))
         .get_result::<(Article, User)>(conn)?;
 
-    let profile = profile::service::fetch_profile_by_id(
-        conn,
-        &FetchProfileById {
-            user: author.to_owned(),
-            id: author.id,
-        },
-    )?;
+    let profile = author.fetch_profile(conn, &author.id)?;
 
     let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
 
@@ -408,13 +391,9 @@ pub fn update_article(
 
     let tag_list = Tag::fetch_list_by_article_id(conn, article.id)?;
 
-    let profile = profile::service::fetch_profile_by_id(
-        conn,
-        &FetchProfileById {
-            user: params.current_user.to_owned(),
-            id: article.author_id,
-        },
-    )?;
+    let profile = params
+        .current_user
+        .fetch_profile(conn, &article.author_id)?;
 
     let favorite_info = {
         let is_favorited = article.is_favorited_by_user_id(conn, &params.current_user.id)?;
