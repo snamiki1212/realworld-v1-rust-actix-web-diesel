@@ -1,9 +1,7 @@
 use super::model::{Comment, CreateComment, DeleteComment};
 use crate::app::article::model::{Article, FetchBySlugAndAuthorId};
 use crate::app::profile::model::Profile;
-use crate::app::profile::service::{
-    conver_user_to_profile, fetch_profile_by_id, ConverUserToProfile, FetchProfileById,
-};
+use crate::app::profile::service::{conver_user_to_profile, ConverUserToProfile};
 use crate::app::user::model::User;
 use crate::error::AppError;
 // use crate::schema::follows;
@@ -39,13 +37,7 @@ pub fn create(
             article_id: article.id.to_owned(),
         },
     )?;
-    let profile = fetch_profile_by_id(
-        conn,
-        &FetchProfileById {
-            id: author.id,
-            user: author.to_owned(),
-        },
-    )?;
+    let profile = author.fetch_profile(conn, &author.id)?;
     Ok((comment, profile))
 }
 

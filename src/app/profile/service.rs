@@ -2,7 +2,6 @@ use super::model::Profile;
 use crate::app::user::model::User;
 use crate::error::AppError;
 use diesel::pg::PgConnection;
-use uuid::Uuid;
 
 pub struct FetchProfileByName {
     pub current_user: User,
@@ -16,32 +15,9 @@ pub fn fetch_by_name(
         username,
     }: &FetchProfileByName,
 ) -> Result<Profile, AppError> {
-    let followee = User::find_by_username(conn, username)?;
-    let profile = fetch_profile_by_id(
-        conn,
-        &FetchProfileById {
-            user: current_user.to_owned(),
-            id: followee.id,
-        },
-    )?;
-    Ok(profile)
-}
-
-pub struct FetchProfileById {
-    pub user: User,
-    pub id: Uuid,
-}
-pub fn fetch_profile_by_id(
-    conn: &PgConnection,
-    params: &FetchProfileById,
-) -> Result<Profile, AppError> {
-    let FetchProfileById { user, id } = params;
-    let is_following = user.is_following(conn, id);
-    let profile = Profile {
-        username: user.username.to_owned(),
-        bio: user.bio.to_owned(),
-        image: user.image.to_owned(),
-        following: is_following,
+    let profile = {
+        let followee = User::find_by_username(conn, username)?;
+        current_user.fetch_profile(conn, &followee.id)?
     };
     Ok(profile)
 }

@@ -36,13 +36,10 @@ pub fn create(
         },
     )?;
     let tag_list = create_tag_list(conn, &params.tag_name_list, &article.id)?;
-    let profile = profile::service::fetch_profile_by_id(
-        conn,
-        &FetchProfileById {
-            user: params.current_user.to_owned(),
-            id: article.author_id,
-        },
-    )?;
+
+    let profile = params
+        .current_user
+        .fetch_profile(conn, &article.author_id)?;
 
     let favorite_info = {
         let is_favorited = article.is_favorited_by_user_id(conn, &params.current_user.id)?;
@@ -211,13 +208,7 @@ pub fn fetch_article(
         .filter(articles::id.eq(article_id))
         .get_result::<(Article, User)>(conn)?;
 
-    let profile = profile::service::fetch_profile_by_id(
-        conn,
-        &FetchProfileById {
-            user: current_user.to_owned(),
-            id: author.id,
-        },
-    )?;
+    let profile = current_user.fetch_profile(conn, &author.id)?;
 
     let favorite_info = {
         let is_favorited = article.is_favorited_by_user_id(conn, &current_user.id)?;
@@ -247,13 +238,7 @@ pub fn fetch_article_by_slug(
         .filter(articles::slug.eq(article_title_slug))
         .get_result::<(Article, User)>(conn)?;
 
-    let profile = profile::service::fetch_profile_by_id(
-        conn,
-        &FetchProfileById {
-            user: author.to_owned(),
-            id: author.id,
-        },
-    )?;
+    let profile = author.fetch_profile(conn, &author.id)?;
 
     let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
 
@@ -408,13 +393,9 @@ pub fn update_article(
 
     let tag_list = Tag::fetch_list_by_article_id(conn, article.id)?;
 
-    let profile = profile::service::fetch_profile_by_id(
-        conn,
-        &FetchProfileById {
-            user: params.current_user.to_owned(),
-            id: article.author_id,
-        },
-    )?;
+    let profile = params
+        .current_user
+        .fetch_profile(conn, &article.author_id)?;
 
     let favorite_info = {
         let is_favorited = article.is_favorited_by_user_id(conn, &params.current_user.id)?;
