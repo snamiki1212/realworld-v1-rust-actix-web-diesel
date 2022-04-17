@@ -1,4 +1,4 @@
-use super::model::{Comment, CreateComment, DeleteCommentAction};
+use super::model::{Comment, CreateComment, DeleteComment};
 use crate::app::article::model::{Article, FetchBySlugAndAuthorId};
 use crate::app::profile::model::Profile;
 use crate::app::profile::service::{
@@ -83,6 +83,7 @@ pub struct DeleteCommentService {
     pub author_id: Uuid,
     pub comment_id: Uuid,
 }
+
 pub fn delete_comment(conn: &PgConnection, params: &DeleteCommentService) -> Result<(), AppError> {
     let article = Article::fetch_by_slug_and_author_id(
         conn,
@@ -93,7 +94,7 @@ pub fn delete_comment(conn: &PgConnection, params: &DeleteCommentService) -> Res
     )?;
     let _ = Comment::delete(
         conn,
-        &DeleteCommentAction {
+        &DeleteComment {
             comment_id: params.comment_id,
             article_id: article.id,
             author_id: params.author_id,
