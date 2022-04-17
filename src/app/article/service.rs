@@ -18,7 +18,7 @@ pub struct CreateArticleSerivce {
     pub title: String,
     pub description: String,
     pub body: String,
-    pub tag_list: Option<Vec<String>>,
+    pub tag_name_list: Option<Vec<String>>,
     pub current_user: User,
 }
 pub fn create(
@@ -35,7 +35,7 @@ pub fn create(
             body: params.body.clone(),
         },
     )?;
-    let tag_list = create_tag_list(conn, &params.tag_list, &article)?;
+    let tag_list = create_tag_list(conn, &params.tag_name_list, &article.id)?;
     let profile = profile::service::fetch_profile_by_id(
         conn,
         &FetchProfileById {
@@ -58,18 +58,15 @@ pub fn create(
 
 fn create_tag_list(
     conn: &PgConnection,
-    tag_list: &Option<Vec<String>>,
-    article: &Article,
+    tag_name_list: &Option<Vec<String>>,
+    article_id: &Uuid,
 ) -> Result<Vec<Tag>, AppError> {
-    let list = tag_list
+    let list = tag_name_list
         .as_ref()
-        .map(|tag_list| {
-            let records = tag_list
+        .map(|tag_name_list| {
+            let records = tag_name_list
                 .iter()
-                .map(|tag| CreateTag {
-                    name: tag,
-                    article_id: &article.id,
-                })
+                .map(|name| CreateTag { name, article_id })
                 .collect();
             Tag::create_list(conn, records)
         })
@@ -204,7 +201,10 @@ pub struct FetchArticle {
 }
 pub fn fetch_article(
     conn: &PgConnection,
-    FetchArticle { article_id, current_user }: &FetchArticle,
+    FetchArticle {
+        article_id,
+        current_user,
+    }: &FetchArticle,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let (article, author) = articles
         .inner_join(users::table)
