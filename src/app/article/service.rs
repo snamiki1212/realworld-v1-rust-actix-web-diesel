@@ -1,9 +1,7 @@
 use crate::app::article::model::{Article, CreateArticle, UpdateArticle};
 use crate::app::favorite::model::FavoriteInfo;
 use crate::app::follow::model::Follow;
-use crate::app::profile;
 use crate::app::profile::model::Profile;
-use crate::app::profile::service::FetchProfileById;
 use crate::app::tag::model::{CreateTag, Tag};
 use crate::app::user::model::User;
 use crate::error::AppError;

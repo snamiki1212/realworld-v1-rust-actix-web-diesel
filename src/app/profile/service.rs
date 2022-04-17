@@ -29,7 +29,7 @@ pub struct ConverUserToProfile<'a> {
 
 pub fn conver_user_to_profile(conn: &PgConnection, params: &ConverUserToProfile) -> Profile {
     let following = match params.current_user.as_ref() {
-        Some(me) => me.is_following(conn, &params.user.id),
+        Some(current_user) => current_user.is_following(conn, &params.user.id),
         None => false,
     };
 
