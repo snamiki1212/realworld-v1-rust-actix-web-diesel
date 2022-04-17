@@ -26,7 +26,6 @@ impl Tag {
     ) -> Result<Vec<Self>, AppError> {
         use crate::schema::tags as schema_tags;
         use crate::schema::tags::dsl::*;
-        use diesel::prelude::*;
         let list = tags
             .filter(schema_tags::article_id.eq(_article_id))
             .get_results::<Self>(conn)?;
@@ -34,10 +33,7 @@ impl Tag {
     }
 
     pub fn fetch_list(conn: &PgConnection) -> Result<Vec<Self>, AppError> {
-        use crate::schema;
-        use diesel::prelude::*;
-        use schema::tags::dsl::*;
-        let list = tags.load::<Self>(conn)?;
+        let list = tags::table.load::<Self>(conn)?;
         Ok(list)
     }
 
@@ -45,12 +41,9 @@ impl Tag {
         conn: &PgConnection,
         records: Vec<CreateTag>,
     ) -> Result<Vec<Self>, AppError> {
-        use crate::schema::tags::dsl::*;
-        // TODO: validate record params are valid.
-        let tags_list = diesel::insert_into(tags)
+        let tags_list = diesel::insert_into(tags::table)
             .values(records)
             .get_results::<Tag>(conn)?;
-
         Ok(tags_list)
     }
 }
