@@ -256,12 +256,8 @@ pub fn fetch_following_articles(
     params: &FetchFollowedArticlesSerivce,
 ) -> Result<(ArticlesList, ArticlesCount), AppError> {
     let query = {
-        let following_user_ids = follows
-            .filter(follows::follower_id.eq(params.current_user.id))
-            .select(follows::followee_id)
-            .get_results::<Uuid>(conn)?;
-
-        articles.filter(articles::author_id.eq_any(following_user_ids))
+        let ids = Follow::fetch_folowee_id_list_by_follower_id(conn, &params.current_user.id)?;
+        articles.filter(articles::author_id.eq_any(ids))
     };
 
     let articles_list = {

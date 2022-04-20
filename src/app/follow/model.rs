@@ -36,6 +36,18 @@ impl Follow {
         .execute(conn)?;
         Ok(())
     }
+
+    pub fn fetch_folowee_id_list_by_follower_id(
+        conn: &PgConnection,
+        _follower_id: &Uuid,
+    ) -> Result<Vec<Uuid>, AppError> {
+        use diesel::prelude::*;
+        let result = follows::table
+            .filter(follows::follower_id.eq(_follower_id))
+            .select(follows::followee_id)
+            .get_results::<Uuid>(conn)?;
+        Ok(result)
+    }
 }
 
 #[derive(Insertable)]
