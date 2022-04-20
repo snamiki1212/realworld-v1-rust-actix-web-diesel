@@ -272,13 +272,13 @@ pub fn fetch_following_articles(
                 .get_results::<Follow>(conn)?;
 
             let favorites_count_list = {
-                let favorites_count_list: Result<Vec<_>, _> = article_and_user_list
+                let list: Result<Vec<_>, _> = article_and_user_list
                     .clone()
                     .into_iter()
                     .map(|(article, _)| article.fetch_favorites_count(conn))
                     .collect();
 
-                favorites_count_list?
+                list?
             };
 
             let favorited_article_ids = params.current_user.fetch_favorited_article_ids(conn)?;
@@ -291,24 +291,21 @@ pub fn fetch_following_articles(
             };
 
             let follows_list = follows_list.into_iter();
+
             article_and_user_list
                 .into_iter()
-                .map(|(article, user)| {
-                    let following = follows_list.clone().any(|item| item.followee_id == user.id);
-                    let profile = Profile {
-                        username: user.username,
-                        bio: user.bio,
-                        image: user.image,
-                        following: following.to_owned(),
-                    };
-                    let is_favorited = is_favorited_by_me(&article);
-                    (article, profile, is_favorited)
-                })
                 .zip(favorites_count_list)
-                .map(|((article, profile, is_favorited), favorites_count)| {
+                .map(|((article, user), favorites_count)| {
+                    let following = follows_list.clone().any(|item| item.followee_id == user.id);
+                    let is_favorited = is_favorited_by_me(&article);
                     (
                         article,
-                        profile,
+                        Profile {
+                            username: user.username,
+                            bio: user.bio,
+                            image: user.image,
+                            following: following.to_owned(),
+                        },
                         FavoriteInfo {
                             is_favorited,
                             favorites_count,
