@@ -65,7 +65,7 @@ impl User {
         Ok((user, token))
     }
 
-    pub fn find_by_id(conn: &PgConnection, _id: Uuid) -> Result<Self, AppError> {
+    pub fn find(conn: &PgConnection, _id: Uuid) -> Result<Self, AppError> {
         let user = users.find(_id).first(conn)?;
         Ok(user)
     }
@@ -93,7 +93,7 @@ impl User {
     pub fn follow(&self, conn: &PgConnection, _username: &str) -> Result<Profile, AppError> {
         let followee = users.filter(username.eq(_username)).first::<User>(conn)?;
 
-        let _ = Follow::create_follow(
+        let _ = Follow::create(
             conn,
             &CreateFollow {
                 follower_id: self.id,
@@ -112,7 +112,7 @@ impl User {
     pub fn unfollow(&self, conn: &PgConnection, _username: &str) -> Result<Profile, AppError> {
         let followee = users.filter(username.eq(_username)).first::<User>(conn)?;
 
-        let _ = Follow::delete_follow(
+        let _ = Follow::delete(
             conn,
             &DeleteFollow {
                 followee_id: followee.id,

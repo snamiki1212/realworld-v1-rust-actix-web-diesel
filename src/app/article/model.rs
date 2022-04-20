@@ -63,6 +63,40 @@ impl Article {
         Ok(item)
     }
 
+    pub fn fetch_by_slug_with_author(
+        conn: &PgConnection,
+        slug: &str,
+    ) -> Result<(Self, User), AppError> {
+        use crate::schema::users;
+        let result = articles::table
+            .inner_join(users::table)
+            .filter(articles::slug.eq(slug))
+            .get_result::<(Self, User)>(conn)?;
+        Ok(result)
+    }
+
+    pub fn fetch_ids_by_author_name(
+        conn: &PgConnection,
+        name: &str,
+    ) -> Result<Vec<Uuid>, AppError> {
+        use crate::schema::users;
+        let ids = users::table
+            .inner_join(articles::table)
+            .filter(users::username.eq(name))
+            .select(articles::id)
+            .load::<Uuid>(conn)?;
+        Ok(ids)
+    }
+
+    pub fn find_with_author(conn: &PgConnection, id: &Uuid) -> Result<(Self, User), AppError> {
+        use crate::schema::users;
+        let result = articles::table
+            .inner_join(users::table)
+            .filter(articles::id.eq(id))
+            .get_result::<(Article, User)>(conn)?;
+        Ok(result)
+    }
+
     pub fn delete(conn: &PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
         let _ = diesel::delete(
             articles::table

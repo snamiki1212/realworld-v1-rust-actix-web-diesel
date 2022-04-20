@@ -40,6 +40,19 @@ impl Favorite {
             .execute(conn)?;
         Ok(item)
     }
+
+    pub fn fetch_favorited_article_ids_by_username(
+        conn: &PgConnection,
+        username: &str,
+    ) -> Result<Vec<Uuid>, AppError> {
+        use crate::schema::users;
+        let ids = favorites::table
+            .inner_join(users::table)
+            .filter(users::username.eq(username))
+            .select(favorites::article_id)
+            .load::<Uuid>(conn)?;
+        Ok(ids)
+    }
 }
 
 #[derive(Insertable)]
