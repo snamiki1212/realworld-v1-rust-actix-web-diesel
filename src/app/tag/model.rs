@@ -37,6 +37,14 @@ impl Tag {
         Ok(list)
     }
 
+    pub fn fetch_ids_by_name(conn: &PgConnection, tag_name: &str) -> Result<Vec<Uuid>, AppError> {
+        let ids = tags::table
+            .filter(tags::name.eq(tag_name))
+            .select(tags::article_id)
+            .load::<Uuid>(conn)?;
+        Ok(ids)
+    }
+
     pub fn create_list(
         conn: &PgConnection,
         records: Vec<CreateTag>,
