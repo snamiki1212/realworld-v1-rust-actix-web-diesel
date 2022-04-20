@@ -75,6 +75,19 @@ impl Article {
         Ok(result)
     }
 
+    pub fn fetch_ids_by_author_name(
+        conn: &PgConnection,
+        name: &str,
+    ) -> Result<Vec<Uuid>, AppError> {
+        use crate::schema::users;
+        let ids = users::table
+            .inner_join(articles::table)
+            .filter(users::username.eq(name))
+            .select(articles::id)
+            .load::<Uuid>(conn)?;
+        Ok(ids)
+    }
+
     pub fn find_with_author(conn: &PgConnection, id: &Uuid) -> Result<(Self, User), AppError> {
         use crate::schema::users;
         let result = articles::table

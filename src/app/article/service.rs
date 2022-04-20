@@ -95,13 +95,9 @@ pub fn fetch_articles_list(
         }
 
         if let Some(author_name) = &params.author {
-            let article_ids_by_author = users::table
-                .inner_join(articles::table)
-                .filter(users::username.eq(author_name))
-                .select(articles::id)
-                .load::<Uuid>(conn)
+            let ids = Article::fetch_ids_by_author_name(conn, author_name)
                 .expect("could not fetch authors id."); // TODO: use ? or error handling
-            query = query.filter(articles::id.eq_any(article_ids_by_author));
+            query = query.filter(articles::id.eq_any(ids));
         }
 
         if let Some(favorited_username) = &params.favorited {
