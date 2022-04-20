@@ -6,7 +6,7 @@ use crate::app::tag::model::{CreateTag, Tag};
 use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::articles::dsl::*;
-use crate::schema::{articles, favorites, tags, users};
+use crate::schema::{articles, tags, users};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use uuid::Uuid;
@@ -233,13 +233,13 @@ pub fn fetch_following_articles(
     conn: &PgConnection,
     params: &FetchFollowedArticlesSerivce,
 ) -> Result<(ArticlesList, ArticlesCount), AppError> {
-    let query = {
+    let create_query = {
         let ids = Follow::fetch_folowee_id_list_by_follower_id(conn, &params.current_user.id)?;
         articles.filter(articles::author_id.eq_any(ids))
     };
 
     let articles_list = {
-        let article_and_user_list = query
+        let article_and_user_list = create_query
             .to_owned()
             .inner_join(users::table)
             .limit(params.limit)
@@ -259,69 +259,64 @@ pub fn fetch_following_articles(
             tags_list
         };
 
-        let article_and_profile_list = {
+        let follows_list = {
             let user_ids_list = article_and_user_list
                 .clone() // TODO: avoid clone
                 .into_iter()
                 .map(|(_, user)| user.id)
                 .collect::<Vec<_>>();
 
-            let follows_list = follows::table
+            let list = follows::table
                 .filter(follows::follower_id.eq(params.current_user.id))
                 .filter(follows::followee_id.eq_any(user_ids_list))
                 .get_results::<Follow>(conn)?;
 
-            let favorites_count_list = {
-                let list: Result<Vec<_>, _> = article_and_user_list
-                    .clone()
-                    .into_iter()
-                    .map(|(article, _)| article.fetch_favorites_count(conn))
-                    .collect();
-
-                list?
-            };
-
-            let favorited_article_ids = params.current_user.fetch_favorited_article_ids(conn)?;
-
-            let is_favorited_by_me = |article: &Article| {
-                favorited_article_ids
-                    .iter()
-                    .copied()
-                    .any(|_id| _id == article.id)
-            };
-
-            let follows_list = follows_list.into_iter();
-
-            article_and_user_list
-                .into_iter()
-                .zip(favorites_count_list)
-                .map(|((article, user), favorites_count)| {
-                    let following = follows_list.clone().any(|item| item.followee_id == user.id);
-                    let is_favorited = is_favorited_by_me(&article);
-                    (
-                        article,
-                        Profile {
-                            username: user.username,
-                            bio: user.bio,
-                            image: user.image,
-                            following: following.to_owned(),
-                        },
-                        FavoriteInfo {
-                            is_favorited,
-                            favorites_count,
-                        },
-                    )
-                })
-                .collect::<Vec<_>>()
+            list.into_iter()
         };
 
-        article_and_profile_list
+        let favorites_count_list = {
+            let list: Result<Vec<_>, _> = article_and_user_list
+                .clone()
+                .into_iter()
+                .map(|(article, _)| article.fetch_favorites_count(conn))
+                .collect();
+
+            list?
+        };
+
+        let favorited_article_ids = params.current_user.fetch_favorited_article_ids(conn)?;
+        let is_favorited_by_me = |article: &Article| {
+            favorited_article_ids
+                .iter()
+                .copied()
+                .any(|_id| _id == article.id)
+        };
+
+        article_and_user_list
             .into_iter()
+            .zip(favorites_count_list)
+            .map(|((article, user), favorites_count)| {
+                let following = follows_list.clone().any(|item| item.followee_id == user.id);
+                let is_favorited = is_favorited_by_me(&article);
+                (
+                    article,
+                    Profile {
+                        username: user.username,
+                        bio: user.bio,
+                        image: user.image,
+                        following: following.to_owned(),
+                    },
+                    FavoriteInfo {
+                        is_favorited,
+                        favorites_count,
+                    },
+                )
+            })
             .zip(tags_list)
             .collect::<Vec<_>>()
     };
 
-    let articles_count = query
+    let articles_count = create_query
         .select(diesel::dsl::count(articles::id))
         .first::<i64>(conn)?;
 
