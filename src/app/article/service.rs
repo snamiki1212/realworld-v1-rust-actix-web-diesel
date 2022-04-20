@@ -85,7 +85,7 @@ pub fn fetch_articles_list(
     params: FetchArticlesList,
 ) -> Result<(ArticlesList, ArticlesCount), AppError> {
     use diesel::prelude::*;
-    let query = || {
+    let create_query = || {
         let mut query = articles::table.inner_join(users::table).into_boxed();
 
         if let Some(tag_name) = &params.tag {
@@ -110,16 +110,15 @@ pub fn fetch_articles_list(
         query
     };
 
-    let articles_count = query()
+    let articles_count = create_query()
         .select(diesel::dsl::count(articles::id))
         .first::<i64>(conn)?;
 
-    let articles_list = {
-        let article_and_user_list =
-            query()
-                .offset(params.offset)
-                .limit(params.limit)
-                .load::<(Article, User)>(conn)?;
+    let list = {
+        let article_and_user_list = create_query()
+            .offset(params.offset)
+            .limit(params.limit)
+            .load::<(Article, User)>(conn)?;
 
         let tags_list = {
             let articles_list = article_and_user_list
@@ -135,49 +134,38 @@ pub fn fetch_articles_list(
         };
 
         let favorites_count_list = {
-            let favorites_count_list: Result<Vec<_>, _> = article_and_user_list
+            let list: Result<Vec<_>, _> = article_and_user_list
                 .clone()
                 .into_iter()
                 .map(|(article, _)| article.fetch_favorites_count(conn))
                 .collect();
 
-            favorites_count_list?
+            list?
         };
 
-        let article_and_profile_list = {
-            article_and_user_list
-                .into_iter()
-                .map(|(article, user)| {
-                    let profile = Profile {
+        article_and_user_list
+            .into_iter()
+            .zip(favorites_count_list)
+            .map(|((article, user), favorites_count)| {
+                (
+                    article,
+                    Profile {
                         username: user.username,
                         bio: user.bio,
                         image: user.image,
                         following: false, // NOTE: because not authz
-                    };
-                    let is_favorited = false; // NOTE: because not authz
-                    (article, profile, is_favorited)
-                })
-                .zip(favorites_count_list)
-                .map(|((article, profile, is_favorited), favorites_count)| {
-                    (
-                        article,
-                        profile,
-                        FavoriteInfo {
-                            is_favorited,
-                            favorites_count,
-                        },
-                    )
-                })
-                .collect::<Vec<_>>()
-        };
-
-        article_and_profile_list
-            .into_iter()
+                    },
+                    FavoriteInfo {
+                        is_favorited: false, // NOTE: because not authz
+                        favorites_count,
+                    },
+                )
+            })
             .zip(tags_list)
             .collect::<Vec<_>>()
     };
 
-    Ok((articles_list, articles_count))
+    Ok((list, articles_count))
 }
 
 pub struct FetchArticle {
