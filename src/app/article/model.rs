@@ -63,6 +63,18 @@ impl Article {
         Ok(item)
     }
 
+    pub fn fetch_by_slug_with_author(
+        conn: &PgConnection,
+        slug: &str,
+    ) -> Result<(Self, User), AppError> {
+        use crate::schema::users;
+        let result = articles::table
+            .inner_join(users::table)
+            .filter(articles::slug.eq(slug))
+            .get_result::<(Self, User)>(conn)?;
+        Ok(result)
+    }
+
     pub fn delete(conn: &PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
         let _ = diesel::delete(
             articles::table

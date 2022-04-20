@@ -229,12 +229,7 @@ pub fn fetch_article_by_slug(
     conn: &PgConnection,
     params: &FetchArticleBySlug,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
-    use diesel::prelude::*;
-    let FetchArticleBySlug { article_title_slug } = params;
-    let (article, author) = articles
-        .inner_join(users::table)
-        .filter(articles::slug.eq(article_title_slug))
-        .get_result::<(Article, User)>(conn)?;
+    let (article, author) = Article::fetch_by_slug_with_author(conn, &params.article_title_slug)?;
 
     let profile = author.fetch_profile(conn, &author.id)?;
 
