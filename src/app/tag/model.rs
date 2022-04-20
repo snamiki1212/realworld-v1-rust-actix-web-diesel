@@ -20,7 +20,7 @@ pub struct Tag {
 }
 
 impl Tag {
-    pub fn fetch_list_by_article_id(
+    pub fn fetch_by_article_id(
         conn: &PgConnection,
         _article_id: Uuid,
     ) -> Result<Vec<Self>, AppError> {
@@ -32,7 +32,7 @@ impl Tag {
         Ok(list)
     }
 
-    pub fn fetch_list(conn: &PgConnection) -> Result<Vec<Self>, AppError> {
+    pub fn fetch(conn: &PgConnection) -> Result<Vec<Self>, AppError> {
         let list = tags::table.load::<Self>(conn)?;
         Ok(list)
     }

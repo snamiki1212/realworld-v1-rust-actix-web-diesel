@@ -377,7 +377,7 @@ pub fn update_article(
         },
     )?;
 
-    let tag_list = Tag::fetch_list_by_article_id(conn, article.id)?;
+    let tag_list = Tag::fetch_by_article_id(conn, article.id)?;
 
     let profile = params
         .current_user
