@@ -17,7 +17,7 @@ pub struct Follow {
 }
 
 impl Follow {
-    pub fn create_follow(conn: &PgConnection, params: &CreateFollow) -> Result<(), AppError> {
+    pub fn create(conn: &PgConnection, params: &CreateFollow) -> Result<(), AppError> {
         use diesel::prelude::*;
         let _ = diesel::insert_into(follows::table)
             .values(params)
@@ -25,7 +25,7 @@ impl Follow {
         Ok(())
     }
 
-    pub fn delete_follow(conn: &PgConnection, params: &DeleteFollow) -> Result<(), AppError> {
+    pub fn delete(conn: &PgConnection, params: &DeleteFollow) -> Result<(), AppError> {
         use crate::schema::follows::dsl::*;
         use diesel::prelude::*;
         let _ = diesel::delete(
@@ -37,7 +37,7 @@ impl Follow {
         Ok(())
     }
 
-    pub fn fetch_folowee_id_list_by_follower_id(
+    pub fn fetch_folowee_ids_by_follower_id(
         conn: &PgConnection,
         _follower_id: &Uuid,
     ) -> Result<Vec<Uuid>, AppError> {

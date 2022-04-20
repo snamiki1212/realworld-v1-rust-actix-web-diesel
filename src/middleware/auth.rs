@@ -100,7 +100,7 @@ fn should_skip_verification(req: &ServiceRequest) -> bool {
 }
 
 fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> Result<User, AppError> {
-    let user = User::find_by_id(conn, user_id)?;
+    let user = User::find(conn, user_id)?;
     Ok(user)
 }
 
