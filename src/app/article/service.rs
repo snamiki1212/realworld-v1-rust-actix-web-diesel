@@ -1,5 +1,5 @@
 use crate::app::article::model::{Article, CreateArticle, UpdateArticle};
-use crate::app::favorite::model::FavoriteInfo;
+use crate::app::favorite::model::{Favorite, FavoriteInfo};
 use crate::app::follow::model::Follow;
 use crate::app::profile::model::Profile;
 use crate::app::tag::model::{CreateTag, Tag};
@@ -100,14 +100,11 @@ pub fn fetch_articles_list(
             query = query.filter(articles::id.eq_any(ids));
         }
 
-        if let Some(favorited_username) = &params.favorited {
-            let favorited_article_ids = favorites::table
-                .inner_join(users::table)
-                .filter(users::username.eq(favorited_username))
-                .select(favorites::article_id)
-                .load::<Uuid>(conn)
+        if let Some(username) = &params.favorited {
+            let ids = Favorite::fetch_favorited_article_ids_by_username(conn, username)
                 .expect("could not fetch favorited articles id."); // TODO: use ? or error handling
-            query = query.filter(articles::id.eq_any(favorited_article_ids));
+
+            query = query.filter(articles::id.eq_any(ids));
         }
 
         query
