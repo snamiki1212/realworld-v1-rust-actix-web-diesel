@@ -201,10 +201,7 @@ pub fn fetch_article(
         current_user,
     }: &FetchArticle,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
-    let (article, author) = articles
-        .inner_join(users::table)
-        .filter(articles::id.eq(article_id))
-        .get_result::<(Article, User)>(conn)?;
+    let (article, author) = Article::find_with_author(conn, article_id)?;
 
     let profile = current_user.fetch_profile(conn, &author.id)?;
 

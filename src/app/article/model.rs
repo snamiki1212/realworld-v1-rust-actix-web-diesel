@@ -75,6 +75,15 @@ impl Article {
         Ok(result)
     }
 
+    pub fn find_with_author(conn: &PgConnection, id: &Uuid) -> Result<(Self, User), AppError> {
+        use crate::schema::users;
+        let result = articles::table
+            .inner_join(users::table)
+            .filter(articles::id.eq(id))
+            .get_result::<(Article, User)>(conn)?;
+        Ok(result)
+    }
+
     pub fn delete(conn: &PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
         let _ = diesel::delete(
             articles::table
