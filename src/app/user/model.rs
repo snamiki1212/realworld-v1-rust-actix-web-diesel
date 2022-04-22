@@ -63,8 +63,8 @@ impl User {
         Ok((user, token))
     }
 
-    pub fn find(conn: &PgConnection, _id: Uuid) -> Result<Self, AppError> {
-        let user = users::table.find(_id).first(conn)?;
+    pub fn find(conn: &PgConnection, id: Uuid) -> Result<Self, AppError> {
+        let user = users::table.find(id).first(conn)?;
         Ok(user)
     }
 
