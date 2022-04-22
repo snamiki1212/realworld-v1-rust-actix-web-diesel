@@ -22,12 +22,10 @@ pub struct Tag {
 impl Tag {
     pub fn fetch_by_article_id(
         conn: &PgConnection,
-        _article_id: Uuid,
+        article_id: Uuid,
     ) -> Result<Vec<Self>, AppError> {
-        use crate::schema::tags as schema_tags;
-        use crate::schema::tags::dsl::*;
-        let list = tags
-            .filter(schema_tags::article_id.eq(_article_id))
+        let list = tags::table
+            .filter(tags::article_id.eq(article_id))
             .get_results::<Self>(conn)?;
         Ok(list)
     }
