@@ -2,8 +2,6 @@ use crate::app::follow::model::{CreateFollow, DeleteFollow, Follow};
 use crate::app::profile::model::Profile;
 use crate::error::AppError;
 use crate::schema::users;
-use crate::schema::users::dsl::*;
-use crate::schema::users::*;
 use crate::utils::{hasher, token};
 use chrono::prelude::*;
 use chrono::NaiveDateTime;
@@ -56,8 +54,8 @@ impl User {
         _email: &str,
         naive_password: &str,
     ) -> Result<(User, Token), AppError> {
-        let user = users
-            .filter(email.eq(_email))
+        let user = users::table
+            .filter(users::email.eq(_email))
             .limit(1)
             .first::<User>(conn)?;
         let _ = hasher::verify(&naive_password, &user.password)?;
@@ -66,7 +64,7 @@ impl User {
     }
 
     pub fn find(conn: &PgConnection, _id: Uuid) -> Result<Self, AppError> {
-        let user = users.find(_id).first(conn)?;
+        let user = users::table.find(_id).first(conn)?;
         Ok(user)
     }
 
@@ -75,7 +73,7 @@ impl User {
         user_id: Uuid,
         changeset: UpdateUser,
     ) -> Result<Self, AppError> {
-        let target = users.filter(id.eq(user_id));
+        let target = users::table.filter(users::id.eq(user_id));
         let user = diesel::update(target)
             .set(changeset)
             .get_result::<User>(conn)?;
@@ -83,15 +81,17 @@ impl User {
     }
 
     pub fn find_by_username(conn: &PgConnection, _username: &str) -> Result<Self, AppError> {
-        let user = users
-            .filter(username.eq(_username))
+        let user = users::table
+            .filter(users::username.eq(_username))
             .limit(1)
             .first::<User>(conn)?;
         Ok(user)
     }
 
     pub fn follow(&self, conn: &PgConnection, _username: &str) -> Result<Profile, AppError> {
-        let followee = users.filter(username.eq(_username)).first::<User>(conn)?;
+        let followee = users::table
+            .filter(users::username.eq(_username))
+            .first::<User>(conn)?;
 
         let _ = Follow::create(
             conn,
@@ -110,7 +110,9 @@ impl User {
     }
 
     pub fn unfollow(&self, conn: &PgConnection, _username: &str) -> Result<Profile, AppError> {
-        let followee = users.filter(username.eq(_username)).first::<User>(conn)?;
+        let followee = users::table
+            .filter(users::username.eq(_username))
+            .first::<User>(conn)?;
 
         let _ = Follow::delete(
             conn,
