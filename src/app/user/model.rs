@@ -130,11 +130,11 @@ impl User {
         })
     }
 
-    pub fn is_following(&self, conn: &PgConnection, _followee_id: &Uuid) -> bool {
-        use crate::schema::follows::dsl::*;
-        let follow = follows
-            .filter(followee_id.eq(_followee_id))
-            .filter(follower_id.eq(self.id))
+    pub fn is_following(&self, conn: &PgConnection, followee_id: &Uuid) -> bool {
+        use crate::schema::follows;
+        let follow = follows::table
+            .filter(follows::followee_id.eq(followee_id))
+            .filter(follows::follower_id.eq(self.id))
             .get_result::<Follow>(conn);
         follow.is_ok()
     }
