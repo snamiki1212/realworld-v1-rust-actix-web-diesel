@@ -2,9 +2,9 @@ use crate::app::article::model::Article;
 use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::comments;
-use crate::schema::comments::dsl::*;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
+use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -23,7 +23,6 @@ pub struct Comment {
 
 impl Comment {
     pub fn create(conn: &PgConnection, record: &CreateComment) -> Result<Self, AppError> {
-        use diesel::prelude::*;
         let new_comment = diesel::insert_into(comments::table)
             .values(record)
             .get_result::<Comment>(conn)?;
@@ -31,8 +30,7 @@ impl Comment {
     }
 
     pub fn delete(conn: &PgConnection, params: &DeleteComment) -> Result<(), AppError> {
-        use diesel::prelude::*;
-        let _ = diesel::delete(comments)
+        let _ = diesel::delete(comments::table)
             .filter(comments::id.eq(params.comment_id))
             .filter(comments::author_id.eq(params.author_id))
             .filter(comments::article_id.eq(params.article_id))

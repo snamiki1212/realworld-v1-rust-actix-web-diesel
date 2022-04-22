@@ -2,8 +2,6 @@ use crate::app::follow::model::{CreateFollow, DeleteFollow, Follow};
 use crate::app::profile::model::Profile;
 use crate::error::AppError;
 use crate::schema::users;
-use crate::schema::users::dsl::*;
-use crate::schema::users::*;
 use crate::utils::{hasher, token};
 use chrono::prelude::*;
 use chrono::NaiveDateTime;
@@ -30,16 +28,16 @@ type Token = String;
 impl User {
     pub fn signup<'a>(
         conn: &PgConnection,
-        _email: &'a str,
-        _username: &'a str,
+        email: &'a str,
+        username: &'a str,
         naive_password: &'a str,
     ) -> Result<(User, Token), AppError> {
         use diesel::prelude::*;
         let hashed_password = hasher::hash_password(naive_password)?;
 
         let record = SignupUser {
-            email: _email,
-            username: _username,
+            email,
+            username,
             password: &hashed_password,
         };
 
@@ -53,11 +51,11 @@ impl User {
 
     pub fn signin(
         conn: &PgConnection,
-        _email: &str,
+        email: &str,
         naive_password: &str,
     ) -> Result<(User, Token), AppError> {
-        let user = users
-            .filter(email.eq(_email))
+        let user = users::table
+            .filter(users::email.eq(email))
             .limit(1)
             .first::<User>(conn)?;
         let _ = hasher::verify(&naive_password, &user.password)?;
@@ -65,8 +63,8 @@ impl User {
         Ok((user, token))
     }
 
-    pub fn find(conn: &PgConnection, _id: Uuid) -> Result<Self, AppError> {
-        let user = users.find(_id).first(conn)?;
+    pub fn find(conn: &PgConnection, id: Uuid) -> Result<Self, AppError> {
+        let user = users::table.find(id).first(conn)?;
         Ok(user)
     }
 
@@ -75,23 +73,25 @@ impl User {
         user_id: Uuid,
         changeset: UpdateUser,
     ) -> Result<Self, AppError> {
-        let target = users.filter(id.eq(user_id));
+        let target = users::table.filter(users::id.eq(user_id));
         let user = diesel::update(target)
             .set(changeset)
             .get_result::<User>(conn)?;
         Ok(user)
     }
 
-    pub fn find_by_username(conn: &PgConnection, _username: &str) -> Result<Self, AppError> {
-        let user = users
-            .filter(username.eq(_username))
+    pub fn find_by_username(conn: &PgConnection, username: &str) -> Result<Self, AppError> {
+        let user = users::table
+            .filter(users::username.eq(username))
             .limit(1)
             .first::<User>(conn)?;
         Ok(user)
     }
 
-    pub fn follow(&self, conn: &PgConnection, _username: &str) -> Result<Profile, AppError> {
-        let followee = users.filter(username.eq(_username)).first::<User>(conn)?;
+    pub fn follow(&self, conn: &PgConnection, username: &str) -> Result<Profile, AppError> {
+        let followee = users::table
+            .filter(users::username.eq(username))
+            .first::<User>(conn)?;
 
         let _ = Follow::create(
             conn,
@@ -109,8 +109,10 @@ impl User {
         })
     }
 
-    pub fn unfollow(&self, conn: &PgConnection, _username: &str) -> Result<Profile, AppError> {
-        let followee = users.filter(username.eq(_username)).first::<User>(conn)?;
+    pub fn unfollow(&self, conn: &PgConnection, username: &str) -> Result<Profile, AppError> {
+        let followee = users::table
+            .filter(users::username.eq(username))
+            .first::<User>(conn)?;
 
         let _ = Follow::delete(
             conn,
@@ -128,11 +130,11 @@ impl User {
         })
     }
 
-    pub fn is_following(&self, conn: &PgConnection, _followee_id: &Uuid) -> bool {
-        use crate::schema::follows::dsl::*;
-        let follow = follows
-            .filter(followee_id.eq(_followee_id))
-            .filter(follower_id.eq(self.id))
+    pub fn is_following(&self, conn: &PgConnection, followee_id: &Uuid) -> bool {
+        use crate::schema::follows;
+        let follow = follows::table
+            .filter(follows::followee_id.eq(followee_id))
+            .filter(follows::follower_id.eq(self.id))
             .get_result::<Follow>(conn);
         follow.is_ok()
     }

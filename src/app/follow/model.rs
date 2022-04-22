@@ -3,6 +3,7 @@ use crate::error::AppError;
 use crate::schema::follows;
 use chrono::NaiveDateTime;
 use diesel::pg::PgConnection;
+use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -18,7 +19,6 @@ pub struct Follow {
 
 impl Follow {
     pub fn create(conn: &PgConnection, params: &CreateFollow) -> Result<(), AppError> {
-        use diesel::prelude::*;
         let _ = diesel::insert_into(follows::table)
             .values(params)
             .execute(conn)?;
@@ -26,12 +26,10 @@ impl Follow {
     }
 
     pub fn delete(conn: &PgConnection, params: &DeleteFollow) -> Result<(), AppError> {
-        use crate::schema::follows::dsl::*;
-        use diesel::prelude::*;
         let _ = diesel::delete(
-            follows
-                .filter(followee_id.eq(params.followee_id))
-                .filter(follower_id.eq(params.follower_id)),
+            follows::table
+                .filter(follows::followee_id.eq(params.followee_id))
+                .filter(follows::follower_id.eq(params.follower_id)),
         )
         .execute(conn)?;
         Ok(())
@@ -39,11 +37,10 @@ impl Follow {
 
     pub fn fetch_folowee_ids_by_follower_id(
         conn: &PgConnection,
-        _follower_id: &Uuid,
+        follower_id: &Uuid,
     ) -> Result<Vec<Uuid>, AppError> {
-        use diesel::prelude::*;
         let result = follows::table
-            .filter(follows::follower_id.eq(_follower_id))
+            .filter(follows::follower_id.eq(follower_id))
             .select(follows::followee_id)
             .get_results::<Uuid>(conn)?;
         Ok(result)
