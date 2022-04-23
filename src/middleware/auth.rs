@@ -114,48 +114,62 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
         HeaderValue::from_static("true"),
     );
 
-    if let Some(authen_header) = req.headers().get(constants::AUTHORIZATION) {
-        info!("Parsing authorization header...");
-        if let Ok(authen_str) = authen_header.to_str() {
-            if authen_str.starts_with(TOKEN_IDENTIFIER) {
-                info!("Parsing token...");
-                let token = authen_str[6..authen_str.len()].trim();
-                match token::decode(token) {
-                    Ok(token_data) => {
-                        let claims = token_data.claims;
-                        let user_id = claims.user_id;
-                        if let Some(state) = req.app_data::<Data<AppState>>() {
-                            let conn = state.get_conn();
-                            match conn {
-                                Ok(conn) => {
-                                    match find_auth_user(&conn, user_id) {
-                                        Ok(user) => {
-                                            req.extensions_mut().insert(user);
-                                            return true;
-                                        }
-                                        Err(_err) => {
-                                            warn!("couldn't find auth user.");
-                                            return false;
-                                        }
-                                    };
-                                }
-                                Err(_err) => {
-                                    warn!("couldn't find auth user.");
-                                    return false;
-                                }
-                            }
-                        }
-                        return false;
-                    }
-                    _ => {
-                        error!("Invalid token");
-                        return false;
-                    }
-                }
-            }
+    let auth_header = match req.headers().get(constants::AUTHORIZATION) {
+        Some(auth_header) => auth_header,
+        None => return false,
+    };
+
+    info!("Parsing authorization header...");
+
+    let auth_str = match auth_header.to_str() {
+        Ok(auth_str) => auth_str,
+        _ => return false,
+    };
+
+    if !&auth_str.starts_with(TOKEN_IDENTIFIER) {
+        return false;
+    };
+
+    info!("Parsing token...");
+
+    let token = auth_str[6..auth_str.len()].trim();
+
+    let token_data = match token::decode(token) {
+        Ok(token_data) => token_data,
+        Err(_err) => {
+            error!("Invalid token");
+            return false;
         }
     };
-    false
+
+    let claims = token_data.claims;
+    let user_id = claims.user_id;
+
+    let state = match req.app_data::<Data<AppState>>() {
+        Some(state) => state,
+        None => return false,
+    };
+
+    let conn = state.get_conn();
+
+    let conn = match conn {
+        Ok(conn) => conn,
+        Err(_err) => {
+            warn!("couldn't find auth user.");
+            return false;
+        }
+    };
+
+    let user = match find_auth_user(&conn, user_id) {
+        Ok(user) => user,
+        Err(_err) => {
+            warn!("couldn't find auth user.");
+            return false;
+        }
+    };
+
+    req.extensions_mut().insert(user);
+    true
 }
 
 pub fn get_current_user(req: &HttpRequest) -> Result<User, AppError> {
