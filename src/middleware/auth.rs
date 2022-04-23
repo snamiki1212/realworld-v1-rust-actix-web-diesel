@@ -114,62 +114,53 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
         HeaderValue::from_static("true"),
     );
 
-    let auth_header = match req.headers().get(constants::AUTHORIZATION) {
-        Some(auth_header) => auth_header,
-        None => return false,
-    };
-
-    info!("Parsing authorization header...");
-
-    let auth_str = match auth_header.to_str() {
-        Ok(auth_str) => auth_str,
-        _ => return false,
-    };
-
-    if !&auth_str.starts_with(TOKEN_IDENTIFIER) {
-        return false;
-    };
-
-    info!("Parsing token...");
-
-    let token = auth_str[6..auth_str.len()].trim();
-
-    let token_data = match token::decode(token) {
-        Ok(token_data) => token_data,
-        Err(_err) => {
-            error!("Invalid token");
+    let user_id = match get_user_id(req) {
+        Ok(user_id) => user_id,
+        Err(err_msg) => {
+            info!("Cannot get user_id from req: {}", err_msg);
             return false;
         }
     };
 
-    let claims = token_data.claims;
-    let user_id = claims.user_id;
-
-    let state = match req.app_data::<Data<AppState>>() {
-        Some(state) => state,
-        None => return false,
-    };
-
-    let conn = state.get_conn();
-
-    let conn = match conn {
+    let conn = match req
+        .app_data::<Data<AppState>>()
+        .ok_or("Cannot get state.")
+        .and_then(|state| state.get_conn().map_err(|_err| "Cannot get db connection."))
+    {
         Ok(conn) => conn,
-        Err(_err) => {
-            warn!("couldn't find auth user.");
+        Err(err_msg) => {
+            info!("Cannot get db connection from req: {}", err_msg);
             return false;
         }
     };
 
-    let user = match find_auth_user(&conn, user_id) {
+    let user = match find_auth_user(&conn, user_id).map_err(|_err| "Cannot find auth user") {
         Ok(user) => user,
-        Err(_err) => {
-            warn!("couldn't find auth user.");
+        Err(err_msg) => {
+            info!("Cannot get user: {}", err_msg);
             return false;
         }
     };
 
     req.extensions_mut().insert(user);
     true
+}
+
+fn get_user_id(req: &ServiceRequest) -> Result<Uuid, &str> {
+    req.headers()
+        .get(constants::AUTHORIZATION)
+        .ok_or("Cannot find authrization key-value in req header")
+        .and_then(|auth_header| auth_header.to_str().map_err(|_err| "Cannot stringify"))
+        .and_then(|auth_str| {
+            if auth_str.starts_with(TOKEN_IDENTIFIER) {
+                Ok(auth_str)
+            } else {
+                Err("Invalid token convention")
+            }
+        })
+        .map(|auth_str| auth_str[6..auth_str.len()].trim())
+        .and_then(|token| token::decode(token).map_err(|_err| "Cannot decode token."))
+        .map(|token| token.claims.user_id)
 }
 
 pub fn get_current_user(req: &HttpRequest) -> Result<User, AppError> {
