@@ -114,36 +114,27 @@ fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
         HeaderValue::from_static("true"),
     );
 
-    let user_id = match get_user_id(req) {
-        Ok(user_id) => user_id,
-        Err(err_msg) => {
-            info!("Cannot get user_id from req: {}", err_msg);
-            return false;
-        }
-    };
-
-    let conn = match req
-        .app_data::<Data<AppState>>()
-        .ok_or("Cannot get state.")
-        .and_then(|state| state.get_conn().map_err(|_err| "Cannot get db connection."))
-    {
-        Ok(conn) => conn,
-        Err(err_msg) => {
-            info!("Cannot get db connection from req: {}", err_msg);
-            return false;
-        }
-    };
-
-    let user = match find_auth_user(&conn, user_id).map_err(|_err| "Cannot find auth user") {
+    let user = match fetch_user(req) {
         Ok(user) => user,
         Err(err_msg) => {
-            info!("Cannot get user: {}", err_msg);
+            info!("cannot fetch user {}", err_msg);
             return false;
         }
     };
 
     req.extensions_mut().insert(user);
     true
+}
+
+fn fetch_user(req: &ServiceRequest) -> Result<User, &str> {
+    let user_id = get_user_id(req)?;
+
+    let conn = req
+        .app_data::<Data<AppState>>()
+        .ok_or("Cannot get state.")
+        .and_then(|state| state.get_conn().map_err(|_err| "Cannot get db connection."))?;
+
+    find_auth_user(&conn, user_id).map_err(|_err| "Cannot find auth user")
 }
 
 fn get_user_id(req: &ServiceRequest) -> Result<Uuid, &str> {
