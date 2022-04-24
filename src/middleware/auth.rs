@@ -7,10 +7,7 @@ use actix_web::HttpMessage;
 use actix_web::{
     body::EitherBody,
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
-    http::{
-        header::{HeaderName, HeaderValue},
-        Method,
-    },
+    http::Method,
     web::Data,
     Error, HttpRequest, HttpResponse,
 };
@@ -66,10 +63,10 @@ where
     actix_web::dev::forward_ready!(service);
 
     fn call(&self, mut req: ServiceRequest) -> Self::Future {
-        let is_verified = if should_skip_verification(&req) {
+        let is_verified = if should_skip_auth(&req) {
             true
         } else {
-            verify_and_insert_auth_user(&mut req)
+            set_auth_user(&mut req)
         };
         if is_verified {
             let fut = self.service.call(req);
@@ -88,7 +85,7 @@ where
     }
 }
 
-fn should_skip_verification(req: &ServiceRequest) -> bool {
+fn should_skip_auth(req: &ServiceRequest) -> bool {
     let method = req.method();
     if Method::OPTIONS == *method {
         return true;
@@ -96,38 +93,26 @@ fn should_skip_verification(req: &ServiceRequest) -> bool {
 
     SKIP_AUTH_ROUTES
         .iter()
-        .any(|route| route.is_match_path_and_method(req.path(), req.method()))
+        .any(|route| route.matches_path_and_method(req.path(), req.method()))
 }
 
-fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> Result<User, AppError> {
-    let user = User::find(conn, user_id)?;
-    Ok(user)
-}
-
-// const TOKEN_IDENTIFIER: &str = "Bearer";
 const TOKEN_IDENTIFIER: &str = "Token";
 
-fn verify_and_insert_auth_user(req: &mut ServiceRequest) -> bool {
-    // TODO: Does it need?
-    req.headers_mut().append(
-        HeaderName::from_static("content-length"),
-        HeaderValue::from_static("true"),
-    );
-
-    let user = match fetch_user(req) {
-        Ok(user) => user,
-        Err(err_msg) => {
-            info!("cannot fetch user {}", err_msg);
-            return false;
+fn set_auth_user(req: &mut ServiceRequest) -> bool {
+    match fetch_user(req) {
+        Ok(user) => {
+            req.extensions_mut().insert(user);
+            true
         }
-    };
-
-    req.extensions_mut().insert(user);
-    true
+        Err(err_msg) => {
+            info!("Cannot fetch user {}", err_msg);
+            false
+        }
+    }
 }
 
 fn fetch_user(req: &ServiceRequest) -> Result<User, &str> {
-    let user_id = get_user_id(req)?;
+    let user_id = get_user_id_from_header(req)?;
 
     let conn = req
         .app_data::<Data<AppState>>()
@@ -137,7 +122,7 @@ fn fetch_user(req: &ServiceRequest) -> Result<User, &str> {
     find_auth_user(&conn, user_id).map_err(|_err| "Cannot find auth user")
 }
 
-fn get_user_id(req: &ServiceRequest) -> Result<Uuid, &str> {
+fn get_user_id_from_header(req: &ServiceRequest) -> Result<Uuid, &str> {
     req.headers()
         .get(constants::AUTHORIZATION)
         .ok_or("Cannot find authrization key-value in req header")
@@ -171,11 +156,11 @@ struct SkipAuthRoute {
 }
 
 impl SkipAuthRoute {
-    fn is_match_path_and_method(&self, path: &str, method: &Method) -> bool {
-        self.is_match_path(path) && self.is_match_method(method)
+    fn matches_path_and_method(&self, path: &str, method: &Method) -> bool {
+        self.matches_path(path) && self.matches_method(method)
     }
 
-    fn is_match_path(&self, path: &str) -> bool {
+    fn matches_path(&self, path: &str) -> bool {
         let expect_path = self.path.split('/').collect::<Vec<_>>();
         let this_path = path.split('/').collect::<Vec<_>>();
         if expect_path.len() != this_path.len() {
@@ -193,7 +178,7 @@ impl SkipAuthRoute {
         true
     }
 
-    fn is_match_method(&self, method: &Method) -> bool {
+    fn matches_method(&self, method: &Method) -> bool {
         self.method == method
     }
 
@@ -214,13 +199,13 @@ mod tests {
             path: "/api/healthcheck",
             method: Method::GET,
         };
-        assert!(route.is_match_path_and_method("/api/healthcheck", &Method::GET));
+        assert!(route.matches_path_and_method("/api/healthcheck", &Method::GET));
 
         let route = SkipAuthRoute {
             path: "/api/{this-is-slug}/healthcheck",
             method: Method::POST,
         };
-        assert!(route.is_match_path_and_method("/api/1234/healthcheck", &Method::POST));
+        assert!(route.matches_path_and_method("/api/1234/healthcheck", &Method::POST));
     }
 }
 
@@ -250,3 +235,10 @@ const SKIP_AUTH_ROUTES: [SkipAuthRoute; 6] = [
         method: Method::GET,
     },
 ];
+
+// ================
+// TODO: should inject this func
+fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> Result<User, AppError> {
+    let user = User::find(conn, user_id)?;
+    Ok(user)
+}
