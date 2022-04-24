@@ -94,7 +94,7 @@ fn should_skip_verification(req: &ServiceRequest) -> bool {
         return true;
     }
 
-    IGNORE_AUTH_ROUTES
+    SKIP_AUTH_ROUTES
         .iter()
         .any(|route| route.is_match_path_and_method(req.path(), req.method()))
 }
@@ -165,12 +165,12 @@ pub fn get_current_user(req: &HttpRequest) -> Result<User, AppError> {
     Ok(user)
 }
 
-struct IgnoreAuthRoute {
+struct SkipAuthRoute {
     path: &'static str,
     method: Method,
 }
 
-impl IgnoreAuthRoute {
+impl SkipAuthRoute {
     fn is_match_path_and_method(&self, path: &str, method: &Method) -> bool {
         self.is_match_path(path) && self.is_match_method(method)
     }
@@ -183,7 +183,7 @@ impl IgnoreAuthRoute {
         };
         let path_set = expect_path.iter().zip(this_path.iter());
         for (expect_path, this_path) in path_set {
-            if IgnoreAuthRoute::is_slug_path(*expect_path) {
+            if SkipAuthRoute::is_slug_path(*expect_path) {
                 continue;
             }
             if expect_path != this_path {
@@ -210,13 +210,13 @@ mod tests {
     use actix_web::http::Method;
     #[test]
     fn is_match_path_and_method_test() {
-        let route = IgnoreAuthRoute {
+        let route = SkipAuthRoute {
             path: "/api/healthcheck",
             method: Method::GET,
         };
         assert!(route.is_match_path_and_method("/api/healthcheck", &Method::GET));
 
-        let route = IgnoreAuthRoute {
+        let route = SkipAuthRoute {
             path: "/api/{this-is-slug}/healthcheck",
             method: Method::POST,
         };
@@ -224,28 +224,28 @@ mod tests {
     }
 }
 
-const IGNORE_AUTH_ROUTES: [IgnoreAuthRoute; 6] = [
-    IgnoreAuthRoute {
+const SKIP_AUTH_ROUTES: [SkipAuthRoute; 6] = [
+    SkipAuthRoute {
         path: "/api/healthcheck",
         method: Method::GET,
     },
-    IgnoreAuthRoute {
+    SkipAuthRoute {
         path: "/api/tags",
         method: Method::GET,
     },
-    IgnoreAuthRoute {
+    SkipAuthRoute {
         path: "/api/users",
         method: Method::POST,
     },
-    IgnoreAuthRoute {
+    SkipAuthRoute {
         path: "/api/users/login",
         method: Method::POST,
     },
-    IgnoreAuthRoute {
+    SkipAuthRoute {
         path: "/api/articles",
         method: Method::GET,
     },
-    IgnoreAuthRoute {
+    SkipAuthRoute {
         path: "/api/articles/{article_title_slug}/comments",
         method: Method::GET,
     },
