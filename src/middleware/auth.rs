@@ -140,14 +140,12 @@ fn get_user_id_from_header(req: &ServiceRequest) -> Result<Uuid, &str> {
 }
 
 pub fn get_current_user(req: &HttpRequest) -> Result<User, AppError> {
-    let user = req.extensions();
-    let user = user.get::<User>();
-    let user = user.map(|user| user.to_owned()); // TODO: avoid copy
-    let user = user.ok_or_else(|| {
-        AppError::Unauthorized(json!({"error": "Unauthrized user. Need auth token on header."}))
-    })?;
-
-    Ok(user)
+    req.extensions()
+        .get::<User>()
+        .map(|user| user.to_owned()) // TODO: avoid copy
+        .ok_or_else(|| {
+            AppError::Unauthorized(json!({"error": "Unauthrized user. Need auth token on header."}))
+        })
 }
 
 struct SkipAuthRoute {
