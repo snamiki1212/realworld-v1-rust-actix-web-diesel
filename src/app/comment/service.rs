@@ -4,7 +4,6 @@ use crate::app::profile::model::Profile;
 use crate::app::profile::service::{conver_user_to_profile, ConverUserToProfile};
 use crate::app::user::model::User;
 use crate::error::AppError;
-// use crate::schema::follows;
 use diesel::pg::PgConnection;
 use uuid::Uuid;
 
