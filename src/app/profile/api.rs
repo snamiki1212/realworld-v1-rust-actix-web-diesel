@@ -1,7 +1,7 @@
 use super::response::ProfileResponse;
 use super::service;
-use crate::error::AppError;
 use crate::middleware::{auth, state::AppState};
+use crate::utils::api::ApiResponse;
 use actix_web::{web, HttpRequest, HttpResponse};
 
 type UsernameSlug = String;
@@ -10,7 +10,7 @@ pub async fn show(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let _username = path.into_inner();
@@ -29,7 +29,7 @@ pub async fn follow(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let username = path.into_inner();
@@ -42,7 +42,7 @@ pub async fn unfollow(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let username = path.into_inner();

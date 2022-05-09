@@ -3,16 +3,16 @@ use super::{
     response::{MultipleCommentsResponse, SingleCommentResponse},
     service,
 };
-use crate::error::AppError;
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
+use crate::utils::api::ApiResponse;
 use crate::utils::uuid;
 use actix_web::{web, HttpRequest, HttpResponse};
 
 type ArticleIdSlug = String;
 type CommentIdSlug = String;
 
-pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> Result<HttpResponse, AppError> {
+pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req).ok();
     let list = service::fetch_comments_list(&conn, &current_user)?;
@@ -25,7 +25,7 @@ pub async fn create(
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
     form: web::Json<request::CreateCommentRequest>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
@@ -45,7 +45,7 @@ pub async fn delete(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<(ArticleIdSlug, CommentIdSlug)>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let (article_title_slug, comment_id) = path.into_inner();
