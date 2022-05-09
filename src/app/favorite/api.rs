@@ -2,8 +2,9 @@ use super::{
     response::SingleArticleResponse,
     service::{self, UnfavoriteService},
 };
+use crate::middleware::auth;
 use crate::middleware::state::AppState;
-use crate::{error::AppError, middleware::auth};
+use crate::utils::api::ApiResponse;
 use actix_web::{web, HttpRequest, HttpResponse};
 
 type ArticleIdSlug = String;
@@ -12,7 +13,7 @@ pub async fn favorite(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
@@ -31,7 +32,7 @@ pub async fn unfavorite(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<ArticleIdSlug>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();

@@ -4,9 +4,9 @@ use super::{
     response::{MultipleArticlesResponse, SingleArticleResponse},
     service,
 };
-use crate::error::AppError;
 use crate::middleware::auth;
 use crate::middleware::state::AppState;
+use crate::utils::api::ApiResponse;
 use actix_web::{web, HttpRequest, HttpResponse};
 use serde::Deserialize;
 
@@ -24,7 +24,7 @@ pub struct ArticlesListQueryParameter {
 pub async fn index(
     state: web::Data<AppState>,
     params: web::Query<ArticlesListQueryParameter>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
@@ -54,7 +54,7 @@ pub async fn feed(
     state: web::Data<AppState>,
     req: HttpRequest,
     params: web::Query<FeedQueryParameter>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
@@ -72,10 +72,7 @@ pub async fn feed(
     Ok(HttpResponse::Ok().json(res))
 }
 
-pub async fn show(
-    state: web::Data<AppState>,
-    path: web::Path<ArticleTitleSlug>,
-) -> Result<HttpResponse, AppError> {
+pub async fn show(state: web::Data<AppState>, path: web::Path<ArticleTitleSlug>) -> ApiResponse {
     let conn = state.get_conn()?;
     let article_title_slug = path.into_inner();
     let (article, profile, favorite_info, tags_list) =
@@ -88,7 +85,7 @@ pub async fn create(
     state: web::Data<AppState>,
     req: HttpRequest,
     form: web::Json<request::CreateArticleRequest>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let (article, profile, favorite_info, tag_list) = service::create(
@@ -111,7 +108,7 @@ pub async fn update(
     req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
     form: web::Json<request::UpdateArticleRequest>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
@@ -141,7 +138,7 @@ pub async fn delete(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
-) -> Result<HttpResponse, AppError> {
+) -> ApiResponse {
     let conn = state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
