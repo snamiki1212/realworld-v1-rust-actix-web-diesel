@@ -70,19 +70,19 @@ $ APIURL=http://localhost:8080/api zsh e2e/run-api-tests.sh
 sequenceDiagram
   actor Client
   participant Middleware as Middleware<br>/middleware/*
-  participant Controller as Controller<br>/[domain]/api.rs
-  participant Service as Service<br>/[domain]/service.rs
+  participant Controller as Controller<br>/[feature]/api.rs
+  participant Service as Service<br>/[feature]/service.rs
   participant DB
 
   Client ->> Middleware: request
   Middleware ->> Controller: -
-  Controller ->> Controller: Assign to Request Object<br>(/[domain]/request.rs)
+  Controller ->> Controller: Assign to Request Object<br>(/[feature]/request.rs)
   Controller ->> Service: -
   Service ->> DB: -
 
   DB ->> Service: -
   Service ->> Controller: -
-  Controller ->> Controller: Convert into Response Object<br>(/[domain]/response.rs)
+  Controller ->> Controller: Convert into Response Object<br>(/[feature]/response.rs)
   Controller ->> Client: response
 ```
 
