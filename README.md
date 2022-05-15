@@ -1,3 +1,7 @@
+![logo](https://user-images.githubusercontent.com/26793088/168470794-337f3e7f-9c94-4cae-9505-1684b3251de5.png)
+
+![CI](https://github.com/snamiki1212/realworld-v1-rust-actix-web-diesel/actions/workflows/ci.yml/badge.svg)
+
 # Overview
 
 Realworld App using `Rust`, `actix-web`, and `diesel`.
@@ -49,7 +53,7 @@ $ curl http://localhost:8080/api/healthcheck
 
 ## E2E Test
 
-Running API test using POSTMAN scripts here: [realworld/api at main · gothinkster/realworld · GitHub](https://github.com/gothinkster/realworld/tree/main/api).
+Running E2E tests using [POSTMAN scripts](https://github.com/gothinkster/realworld/tree/main/api) on CI
 
 ```zsh
 # run e2e
