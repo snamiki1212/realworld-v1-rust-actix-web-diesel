@@ -1,3 +1,7 @@
+![logo](https://user-images.githubusercontent.com/26793088/168470794-337f3e7f-9c94-4cae-9505-1684b3251de5.png)
+
+![CI](https://github.com/snamiki1212/realworld-v1-rust-actix-web-diesel/actions/workflows/ci.yml/badge.svg?branch=main)
+
 # Overview
 
 Realworld App using `Rust`, `actix-web`, and `diesel`.
@@ -49,7 +53,7 @@ $ curl http://localhost:8080/api/healthcheck
 
 ## E2E Test
 
-Running API test using POSTMAN scripts here: [realworld/api at main · gothinkster/realworld · GitHub](https://github.com/gothinkster/realworld/tree/main/api).
+Running E2E tests using [POSTMAN scripts](https://github.com/gothinkster/realworld/tree/main/api) on CI
 
 ```zsh
 # run e2e
@@ -70,19 +74,19 @@ $ APIURL=http://localhost:8080/api zsh e2e/run-api-tests.sh
 sequenceDiagram
   actor Client
   participant Middleware as Middleware<br>/middleware/*
-  participant Controller as Controller<br>/[domain]/api.rs
-  participant Service as Service<br>/[domain]/service.rs
+  participant Controller as Controller<br>/[feature]/api.rs
+  participant Service as Service<br>/[feature]/service.rs
   participant DB
 
   Client ->> Middleware: request
   Middleware ->> Controller: -
-  Controller ->> Controller: Assign to Request Object<br>(/[domain]/request.rs)
+  Controller ->> Controller: Assign to Request Object<br>(/[feature]/request.rs)
   Controller ->> Service: -
   Service ->> DB: -
 
   DB ->> Service: -
   Service ->> Controller: -
-  Controller ->> Controller: Convert into Response Object<br>(/[domain]/response.rs)
+  Controller ->> Controller: Convert into Response Object<br>(/[feature]/response.rs)
   Controller ->> Client: response
 ```
 
