@@ -35,21 +35,21 @@ impl Article {
     pub fn update(
         conn: &PgConnection,
         article_title_slug: &str,
-        _author_id: &Uuid,
+        author_id: &Uuid,
         record: &UpdateArticle,
     ) -> Result<Self, AppError> {
         let article = diesel::update(
             articles::table
                 .filter(articles::slug.eq(article_title_slug))
-                .filter(articles::author_id.eq_all(_author_id)),
+                .filter(articles::author_id.eq_all(author_id)),
         )
         .set(record)
         .get_result::<Article>(conn)?;
         Ok(article)
     }
 
-    pub fn convert_title_to_slug(_title: &str) -> String {
-        converter::to_kebab(_title)
+    pub fn convert_title_to_slug(title: &str) -> String {
+        converter::to_kebab(title)
     }
 
     pub fn fetch_by_slug_and_author_id(
