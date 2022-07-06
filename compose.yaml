@@ -18,6 +18,6 @@ services:
     environment:
       POSTGRES_DB: realworld-rust-actix-web
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: postgres
 volumes:
   .:
