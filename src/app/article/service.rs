@@ -223,7 +223,6 @@ pub fn fetch_article_by_slug(
 }
 
 use crate::schema::follows;
-use crate::schema::follows::dsl::*;
 pub struct FetchFollowedArticlesSerivce {
     pub current_user: User,
     pub offset: i64,
