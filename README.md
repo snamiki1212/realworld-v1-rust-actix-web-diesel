@@ -37,7 +37,7 @@ $ sh ./scripts/copy-env.sh
 
 ```zsh
 # start postgres
-$ brew services start postgres
+$ brew services start postgresql
 
 # start app
 $ diesel setup
