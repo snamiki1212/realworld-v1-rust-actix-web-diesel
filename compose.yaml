@@ -1,6 +1,6 @@
 services:
   app:
-    container_name: conduit_app
+    container_name: app
     build: .
     command: 'bash -c "diesel setup && cargo watch --exec run"'
     volumes:
@@ -12,6 +12,7 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/realworld-rust-actix-web
   db:
+    container_name: db
     image: "postgres:14.0-alpine"
     ports:
       - "5432:5432"
