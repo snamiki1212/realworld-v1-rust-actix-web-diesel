@@ -6,7 +6,8 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
@@ -14,6 +15,11 @@ services:
   db:
     container_name: db
     image: "postgres:14.0-alpine"
+    healthcheck:
+      test: pg_isready
+      interval: 5s
+      timeout: 10s
+      retries: 10
     ports:
       - "5432:5432"
     environment:
