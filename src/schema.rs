@@ -73,11 +73,4 @@ diesel::joinable!(favorites -> articles (article_id));
 diesel::joinable!(favorites -> users (user_id));
 diesel::joinable!(tags -> articles (article_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    articles,
-    comments,
-    favorites,
-    follows,
-    tags,
-    users,
-);
+diesel::allow_tables_to_appear_in_same_query!(articles, comments, favorites, follows, tags, users,);

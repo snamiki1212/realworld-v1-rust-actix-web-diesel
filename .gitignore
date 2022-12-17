@@ -2,3 +2,10 @@
 
 .env
 secret.key
+
+# devenv
+.direnv/*
+result
+.devenv*
+/.cache
+/.pre-commit-config.yaml
