@@ -8,48 +8,23 @@ Realworld App using `Rust`, `actix-web`, and `diesel`.
 
 ## Getting Started
 
-<details>
-  <summary>Docker</summary>
   
+First-time setup:
 ```zsh
-# ready
-$ sh ./scripts/copy-env.sh
+# Install Nix Flake + direnv as per https://devenv.sh/getting-started
+$ direnv allow
 ```
 
+Start postgres and compile and run project:
 ```zsh
-$ docker compose up -d
+$ devenv up
 ```
 
+Try out endpoint:
 ```zsh
-$ curl http://localhost:8080/api/healthcheck
+$ curl $APIURL/healthcheck
 # => OK
 ```
-
-</details>
-
-<details>
-  <summary>Local</summary>
-  
-```zsh
-# ready
-$ sh ./scripts/copy-env.sh
-```
-
-```zsh
-# start postgres
-$ brew services start postgresql
-
-# start app
-$ diesel setup
-$ cargo watch
-```
-
-```zsh
-$ curl http://localhost:8080/api/healthcheck
-# => OK
-```
-
-  </details>
 
 ## E2E Test
 
@@ -57,7 +32,7 @@ Running E2E tests using [POSTMAN scripts](https://github.com/gothinkster/realwor
 
 ```zsh
 # run e2e
-$ APIURL=http://localhost:8080/api zsh e2e/run-api-tests.sh
+$ $DEVENV_ROOT/e2e/run-api-tests.sh
 ```
 
 ## Tech Stacks

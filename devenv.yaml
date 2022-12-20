@@ -1,0 +1,4 @@
+# NOTE: it's very confusing that in a Flake usage context we still have to have this file
+inputs:
+  devenv:
+    url: github:thenonameguy/devenv/naked-shell
