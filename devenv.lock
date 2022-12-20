@@ -8,11 +8,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1671482583,
-        "narHash": "sha256-dsh17pfp/XsL3nd0LT5rXdGXA2pcA6eh3DKzF95qI9M=",
+        "lastModified": 1671533662,
+        "narHash": "sha256-JybB8hCd0CMoJUNe5l4bHxbmGYyxJUG61GxGner8KUE=",
         "owner": "thenonameguy",
         "repo": "devenv",
-        "rev": "ccee09d30ff456a66610b146968849e91c34a84e",
+        "rev": "4717da802b1868318ab60758c244c4b37774f426",
         "type": "github"
       },
       "original": {
