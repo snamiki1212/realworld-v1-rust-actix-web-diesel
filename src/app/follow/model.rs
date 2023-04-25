@@ -19,14 +19,14 @@ pub struct Follow {
 
 impl Follow {
     pub fn create(conn: &mut PgConnection, params: &CreateFollow) -> Result<(), AppError> {
-        let _ = diesel::insert_into(follows::table)
+        diesel::insert_into(follows::table)
             .values(params)
             .execute(conn)?;
         Ok(())
     }
 
     pub fn delete(conn: &mut PgConnection, params: &DeleteFollow) -> Result<(), AppError> {
-        let _ = diesel::delete(
+        diesel::delete(
             follows::table
                 .filter(follows::followee_id.eq(params.followee_id))
                 .filter(follows::follower_id.eq(params.follower_id)),

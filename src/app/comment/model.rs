@@ -30,7 +30,7 @@ impl Comment {
     }
 
     pub fn delete(conn: &mut PgConnection, params: &DeleteComment) -> Result<(), AppError> {
-        let _ = diesel::delete(comments::table)
+        diesel::delete(comments::table)
             .filter(comments::id.eq(params.comment_id))
             .filter(comments::author_id.eq(params.author_id))
             .filter(comments::article_id.eq(params.article_id))

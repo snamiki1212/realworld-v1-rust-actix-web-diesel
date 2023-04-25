@@ -24,7 +24,7 @@ pub fn favorite(
             author_id: params.current_user.id,
         },
     )?;
-    let _ = Favorite::create(
+    Favorite::create(
         conn,
         &CreateFavorite {
             user_id: params.current_user.id,
@@ -57,7 +57,7 @@ pub fn unfavorite(
             author_id: params.current_user.id,
         },
     )?;
-    let _ = Favorite::delete(
+    Favorite::delete(
         conn,
         &DeleteFavorite {
             user_id: params.current_user.id,
