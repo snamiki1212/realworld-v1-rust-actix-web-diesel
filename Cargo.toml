@@ -14,10 +14,10 @@ description = "Realworld Application with Rust / actix-web / diesel."
 actix-web = { version = "4.3" }
 
 # A safe, extensible ORM and Query Builder for PostgreSQL, SQLite, and MySQL
-diesel = { version = "1.4", features = ["r2d2", "postgres", "chrono", "uuidv07", "serde_json"] }
+diesel = { version = "2.0.4", features = ["r2d2", "postgres", "chrono", "uuid", "serde_json"] }
 
 # Create and decode JWTs in a strongly typed way.
-jsonwebtoken = { version = "7" }
+jsonwebtoken = { version = "8.3" }
 
 # A generic serialization/deserialization framework
 serde = { version = "1.0", features = ["derive"] }

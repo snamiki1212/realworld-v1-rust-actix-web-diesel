@@ -9,9 +9,9 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Identifiable, Deserialize, Serialize, Queryable, Associations, Debug, Clone)]
-#[belongs_to(User, foreign_key = "author_id")]
-#[belongs_to(Article, foreign_key = "article_id")]
-#[table_name = "comments"]
+#[diesel(belongs_to(User, foreign_key = author_id))]
+#[diesel(belongs_to(Article, foreign_key = article_id))]
+#[diesel(table_name = comments)]
 pub struct Comment {
     pub id: Uuid,
     pub article_id: Uuid,
@@ -22,14 +22,14 @@ pub struct Comment {
 }
 
 impl Comment {
-    pub fn create(conn: &PgConnection, record: &CreateComment) -> Result<Self, AppError> {
+    pub fn create(conn: &mut PgConnection, record: &CreateComment) -> Result<Self, AppError> {
         let new_comment = diesel::insert_into(comments::table)
             .values(record)
             .get_result::<Comment>(conn)?;
         Ok(new_comment)
     }
 
-    pub fn delete(conn: &PgConnection, params: &DeleteComment) -> Result<(), AppError> {
+    pub fn delete(conn: &mut PgConnection, params: &DeleteComment) -> Result<(), AppError> {
         let _ = diesel::delete(comments::table)
             .filter(comments::id.eq(params.comment_id))
             .filter(comments::author_id.eq(params.author_id))

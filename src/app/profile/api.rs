@@ -11,11 +11,11 @@ pub async fn show(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
-    let conn = state.get_conn()?;
+    let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let _username = path.into_inner();
     let profile = service::fetch_by_name(
-        &conn,
+        conn,
         &service::FetchProfileByName {
             current_user,
             username: _username,
@@ -30,10 +30,10 @@ pub async fn follow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
-    let conn = state.get_conn()?;
+    let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let username = path.into_inner();
-    let profile = current_user.follow(&conn, &username)?;
+    let profile = current_user.follow(conn, &username)?;
     let res = ProfileResponse::from(profile);
     Ok(HttpResponse::Ok().json(res))
 }
@@ -43,10 +43,10 @@ pub async fn unfollow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
-    let conn = state.get_conn()?;
+    let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let username = path.into_inner();
-    let profile = current_user.unfollow(&conn, &username)?;
+    let profile = current_user.unfollow(conn, &username)?;
     let res = ProfileResponse::from(profile);
     Ok(HttpResponse::Ok().json(res))
 }

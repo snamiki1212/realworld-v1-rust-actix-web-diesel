@@ -14,7 +14,7 @@ pub struct FavoriteService {
 
 // TODO: move to User model
 pub fn favorite(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     params: &FavoriteService,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let article = Article::fetch_by_slug_and_author_id(
@@ -47,7 +47,7 @@ pub struct UnfavoriteService {
 }
 
 pub fn unfavorite(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     params: &UnfavoriteService,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let article = Article::fetch_by_slug_and_author_id(

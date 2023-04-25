@@ -9,8 +9,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Identifiable, Queryable, Debug, Serialize, Deserialize, Clone, Associations)]
-#[belongs_to(Article, foreign_key = "article_id")]
-#[table_name = "tags"]
+#[diesel(belongs_to(Article, foreign_key = article_id))]
+#[diesel(table_name = tags)]
 pub struct Tag {
     pub id: Uuid,
     pub article_id: Uuid,
@@ -21,7 +21,7 @@ pub struct Tag {
 
 impl Tag {
     pub fn fetch_by_article_id(
-        conn: &PgConnection,
+        conn: &mut PgConnection,
         article_id: Uuid,
     ) -> Result<Vec<Self>, AppError> {
         let list = tags::table
@@ -30,12 +30,15 @@ impl Tag {
         Ok(list)
     }
 
-    pub fn fetch(conn: &PgConnection) -> Result<Vec<Self>, AppError> {
+    pub fn fetch(conn: &mut PgConnection) -> Result<Vec<Self>, AppError> {
         let list = tags::table.load::<Self>(conn)?;
         Ok(list)
     }
 
-    pub fn fetch_ids_by_name(conn: &PgConnection, tag_name: &str) -> Result<Vec<Uuid>, AppError> {
+    pub fn fetch_ids_by_name(
+        conn: &mut PgConnection,
+        tag_name: &str,
+    ) -> Result<Vec<Uuid>, AppError> {
         let ids = tags::table
             .filter(tags::name.eq(tag_name))
             .select(tags::article_id)
@@ -44,7 +47,7 @@ impl Tag {
     }
 
     pub fn create_list(
-        conn: &PgConnection,
+        conn: &mut PgConnection,
         records: Vec<CreateTag>,
     ) -> Result<Vec<Self>, AppError> {
         let tags_list = diesel::insert_into(tags::table)

@@ -114,12 +114,12 @@ fn set_auth_user(req: &mut ServiceRequest) -> bool {
 fn fetch_user(req: &ServiceRequest) -> Result<User, &str> {
     let user_id = get_user_id_from_header(req)?;
 
-    let conn = req
+    let conn = &mut req
         .app_data::<Data<AppState>>()
         .ok_or("Cannot get state.")
         .and_then(|state| state.get_conn().map_err(|_err| "Cannot get db connection."))?;
 
-    find_auth_user(&conn, user_id).map_err(|_err| "Cannot find auth user")
+    find_auth_user(conn, user_id).map_err(|_err| "Cannot find auth user")
 }
 
 fn get_user_id_from_header(req: &ServiceRequest) -> Result<Uuid, &str> {
@@ -236,7 +236,7 @@ const SKIP_AUTH_ROUTES: [SkipAuthRoute; 6] = [
 
 // ================
 // TODO: should inject this func
-fn find_auth_user(conn: &PgConnection, user_id: Uuid) -> Result<User, AppError> {
+fn find_auth_user(conn: &mut PgConnection, user_id: Uuid) -> Result<User, AppError> {
     let user = User::find(conn, user_id)?;
     Ok(user)
 }

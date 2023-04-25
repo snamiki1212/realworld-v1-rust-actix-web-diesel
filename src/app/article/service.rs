@@ -20,7 +20,7 @@ pub struct CreateArticleSerivce {
     pub current_user: User,
 }
 pub fn create(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     params: &CreateArticleSerivce,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let article = Article::create(
@@ -52,7 +52,7 @@ pub fn create(
 }
 
 fn create_tag_list(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     tag_name_list: &Option<Vec<String>>,
     article_id: &Uuid,
 ) -> Result<Vec<Tag>, AppError> {
@@ -81,11 +81,12 @@ type ArticlesCount = i64;
 type ArticlesListInner = (Article, Profile, FavoriteInfo);
 type ArticlesList = Vec<(ArticlesListInner, Vec<Tag>)>;
 pub fn fetch_articles_list(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     params: FetchArticlesList,
 ) -> Result<(ArticlesList, ArticlesCount), AppError> {
     use diesel::prelude::*;
-    let create_query = || {
+
+    let query = {
         let mut query = articles::table.inner_join(users::table).into_boxed();
 
         if let Some(tag_name) = &params.tag {
@@ -109,16 +110,40 @@ pub fn fetch_articles_list(
 
         query
     };
-
-    let articles_count = create_query()
+    let articles_count = query
         .select(diesel::dsl::count(articles::id))
         .first::<i64>(conn)?;
 
     let list = {
-        let article_and_user_list = create_query()
-            .offset(params.offset)
-            .limit(params.limit)
-            .load::<(Article, User)>(conn)?;
+        let query = {
+            let mut query = articles::table.inner_join(users::table).into_boxed();
+
+            if let Some(tag_name) = &params.tag {
+                let ids = Tag::fetch_ids_by_name(conn, tag_name)
+                    .expect("could not fetch tagged article ids."); // TODO: use ? or error handling
+                query = query.filter(articles::id.eq_any(ids));
+            }
+
+            if let Some(author_name) = &params.author {
+                let ids = Article::fetch_ids_by_author_name(conn, author_name)
+                    .expect("could not fetch authors id."); // TODO: use ? or error handling
+                query = query.filter(articles::id.eq_any(ids));
+            }
+
+            if let Some(username) = &params.favorited {
+                let ids = Favorite::fetch_favorited_article_ids_by_username(conn, username)
+                    .expect("could not fetch favorited articles id."); // TODO: use ? or error handling
+
+                query = query.filter(articles::id.eq_any(ids));
+            }
+
+            query
+        };
+        let article_and_user_list =
+            query
+                .offset(params.offset)
+                .limit(params.limit)
+                .load::<(Article, User)>(conn)?;
 
         let tags_list = {
             let articles_list = article_and_user_list
@@ -173,7 +198,7 @@ pub struct FetchArticle {
     pub current_user: User,
 }
 pub fn fetch_article(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     FetchArticle {
         article_id,
         current_user,
@@ -201,7 +226,7 @@ pub struct FetchArticleBySlug {
     pub article_title_slug: String,
 }
 pub fn fetch_article_by_slug(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     params: &FetchArticleBySlug,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let (article, author) = Article::fetch_by_slug_with_author(conn, &params.article_title_slug)?;
@@ -229,7 +254,7 @@ pub struct FetchFollowedArticlesSerivce {
     pub limit: i64,
 }
 pub fn fetch_following_articles(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     params: &FetchFollowedArticlesSerivce,
 ) -> Result<(ArticlesList, ArticlesCount), AppError> {
     let create_query = {
@@ -331,7 +356,7 @@ pub struct UpdateArticleService {
     pub body: Option<String>,
 }
 pub fn update_article(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     params: &UpdateArticleService,
 ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
     let article = Article::update(
