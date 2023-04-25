@@ -38,7 +38,7 @@ uuid = { version = "0.8", features = ["serde", "v4"] }
 bcrypt = { version = "0.10.1" }
 
 # A lightweight logging facade for Rust
-log = { version = "0.4.14" }
+log = { version = "0.4.17" }
 
 # A logging implementation for `log` which is configured via an environment variable.
 env_logger = { version = "0.10.0" }
