@@ -62,13 +62,8 @@ impl From<PoolError> for AppError {
 }
 
 impl From<BcryptError> for AppError {
-    fn from(err: BcryptError) -> Self {
-        match err {
-            BcryptError::InvalidPassword => AppError::Unauthorized(json!({
-                "error": "PW is invalid"
-            })),
-            _ => AppError::InternalServerError,
-        }
+    fn from(_err: BcryptError) -> Self {
+        AppError::InternalServerError
     }
 }
 

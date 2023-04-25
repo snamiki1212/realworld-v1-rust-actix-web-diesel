@@ -35,7 +35,7 @@ chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "0.8", features = ["serde", "v4"] }
 
 # Easily hash and verify passwords using bcrypt
-bcrypt = { version = "0.10.1" }
+bcrypt = { version = "0.14.0" }
 
 # A lightweight logging facade for Rust
 log = { version = "0.4.17" }
