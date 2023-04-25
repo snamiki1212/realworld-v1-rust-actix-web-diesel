@@ -58,7 +58,7 @@ impl User {
             .filter(users::email.eq(email))
             .limit(1)
             .first::<User>(conn)?;
-        hasher::verify(&naive_password, &user.password)?;
+        hasher::verify(naive_password, &user.password)?;
         let token = user.generate_token()?;
         Ok((user, token))
     }

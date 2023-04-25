@@ -166,7 +166,7 @@ impl SkipAuthRoute {
         };
         let path_set = expect_path.iter().zip(this_path.iter());
         for (expect_path, this_path) in path_set {
-            if SkipAuthRoute::is_slug_path(*expect_path) {
+            if SkipAuthRoute::is_slug_path(expect_path) {
                 continue;
             }
             if expect_path != this_path {
