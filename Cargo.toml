@@ -11,7 +11,7 @@ description = "Realworld Application with Rust / actix-web / diesel."
 [dependencies]
 
 # Actix Web is a powerful, pragmatic, and extremely fast web framework for Rust
-actix-web = { version = "4" }
+actix-web = { version = "4.3" }
 
 # A safe, extensible ORM and Query Builder for PostgreSQL, SQLite, and MySQL
 diesel = { version = "1.4", features = ["r2d2", "postgres", "chrono", "uuidv07", "serde_json"] }
@@ -59,4 +59,4 @@ futures = { version = "0.3" }
 actix-cors = { version = "0.6.1" }
 
 # Convert strings into any case
-convert_case = { version = "0.4.0" }
+convert_case = { version = "0.6.0" }
