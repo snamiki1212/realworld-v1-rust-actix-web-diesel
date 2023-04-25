@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Queryable, Associations, Clone, Serialize, Deserialize)]
-#[belongs_to(User, foreign_key = "followee_id", foreign_key = "follower_id")]
-#[table_name = "follows"]
+#[diesel(belongs_to(User, foreign_key = followee_id, foreign_key = follower_id))]
+#[diesel(table_name = follows)]
 pub struct Follow {
     pub followee_id: Uuid,
     pub follower_id: Uuid,
@@ -18,14 +18,14 @@ pub struct Follow {
 }
 
 impl Follow {
-    pub fn create(conn: &PgConnection, params: &CreateFollow) -> Result<(), AppError> {
+    pub fn create(conn: &mut PgConnection, params: &CreateFollow) -> Result<(), AppError> {
         let _ = diesel::insert_into(follows::table)
             .values(params)
             .execute(conn)?;
         Ok(())
     }
 
-    pub fn delete(conn: &PgConnection, params: &DeleteFollow) -> Result<(), AppError> {
+    pub fn delete(conn: &mut PgConnection, params: &DeleteFollow) -> Result<(), AppError> {
         let _ = diesel::delete(
             follows::table
                 .filter(follows::followee_id.eq(params.followee_id))
@@ -36,7 +36,7 @@ impl Follow {
     }
 
     pub fn fetch_folowee_ids_by_follower_id(
-        conn: &PgConnection,
+        conn: &mut PgConnection,
         follower_id: &Uuid,
     ) -> Result<Vec<Uuid>, AppError> {
         let result = follows::table

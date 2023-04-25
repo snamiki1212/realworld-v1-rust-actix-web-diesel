@@ -8,9 +8,9 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Queryable, Identifiable, Associations, Clone, Debug)]
-#[belongs_to(Article, foreign_key = "article_id")]
-#[belongs_to(User, foreign_key = "user_id")]
-#[table_name = "favorites"]
+#[diesel(belongs_to(Article, foreign_key = article_id))]
+#[diesel(belongs_to(User, foreign_key = user_id))]
+#[diesel(table_name = favorites)]
 pub struct Favorite {
     pub id: Uuid,
     pub article_id: Uuid,
@@ -20,7 +20,7 @@ pub struct Favorite {
 }
 
 impl Favorite {
-    pub fn create(conn: &PgConnection, record: &CreateFavorite) -> Result<usize, AppError> {
+    pub fn create(conn: &mut PgConnection, record: &CreateFavorite) -> Result<usize, AppError> {
         let item = diesel::insert_into(favorites::table)
             .values(record)
             .execute(conn)?;
@@ -28,7 +28,7 @@ impl Favorite {
     }
 
     pub fn delete(
-        conn: &PgConnection,
+        conn: &mut PgConnection,
         DeleteFavorite {
             user_id,
             article_id,
@@ -42,7 +42,7 @@ impl Favorite {
     }
 
     pub fn fetch_favorited_article_ids_by_username(
-        conn: &PgConnection,
+        conn: &mut PgConnection,
         username: &str,
     ) -> Result<Vec<Uuid>, AppError> {
         use crate::schema::users;

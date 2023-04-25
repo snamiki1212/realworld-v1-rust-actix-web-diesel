@@ -9,7 +9,7 @@ pub struct FetchProfileByName {
 }
 
 pub fn fetch_by_name(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     FetchProfileByName {
         current_user,
         username,
@@ -27,7 +27,7 @@ pub struct ConverUserToProfile<'a> {
     pub current_user: &'a Option<User>,
 }
 
-pub fn conver_user_to_profile(conn: &PgConnection, params: &ConverUserToProfile) -> Profile {
+pub fn conver_user_to_profile(conn: &mut PgConnection, params: &ConverUserToProfile) -> Profile {
     let following = match params.current_user.as_ref() {
         Some(current_user) => current_user.is_following(conn, &params.user.id),
         None => false,

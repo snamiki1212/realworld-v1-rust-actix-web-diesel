@@ -10,8 +10,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Identifiable, Queryable, Debug, Serialize, Deserialize, Associations, Clone)]
-#[belongs_to(User, foreign_key = "author_id")]
-#[table_name = "articles"]
+#[diesel(belongs_to(User, foreign_key = author_id))]
+#[diesel(table_name = articles)]
 pub struct Article {
     pub id: Uuid,
     pub author_id: Uuid,
@@ -24,7 +24,7 @@ pub struct Article {
 }
 
 impl Article {
-    pub fn create(conn: &PgConnection, record: &CreateArticle) -> Result<Self, AppError> {
+    pub fn create(conn: &mut PgConnection, record: &CreateArticle) -> Result<Self, AppError> {
         let article = diesel::insert_into(articles::table)
             .values(record)
             .get_result::<Article>(conn)?;
@@ -33,7 +33,7 @@ impl Article {
     }
 
     pub fn update(
-        conn: &PgConnection,
+        conn: &mut PgConnection,
         article_title_slug: &str,
         author_id: &Uuid,
         record: &UpdateArticle,
@@ -53,7 +53,7 @@ impl Article {
     }
 
     pub fn fetch_by_slug_and_author_id(
-        conn: &PgConnection,
+        conn: &mut PgConnection,
         params: &FetchBySlugAndAuthorId,
     ) -> Result<Self, AppError> {
         let item = articles::table
@@ -64,7 +64,7 @@ impl Article {
     }
 
     pub fn fetch_by_slug_with_author(
-        conn: &PgConnection,
+        conn: &mut PgConnection,
         slug: &str,
     ) -> Result<(Self, User), AppError> {
         use crate::schema::users;
@@ -76,7 +76,7 @@ impl Article {
     }
 
     pub fn fetch_ids_by_author_name(
-        conn: &PgConnection,
+        conn: &mut PgConnection,
         name: &str,
     ) -> Result<Vec<Uuid>, AppError> {
         use crate::schema::users;
@@ -88,7 +88,7 @@ impl Article {
         Ok(ids)
     }
 
-    pub fn find_with_author(conn: &PgConnection, id: &Uuid) -> Result<(Self, User), AppError> {
+    pub fn find_with_author(conn: &mut PgConnection, id: &Uuid) -> Result<(Self, User), AppError> {
         use crate::schema::users;
         let result = articles::table
             .inner_join(users::table)
@@ -97,7 +97,7 @@ impl Article {
         Ok(result)
     }
 
-    pub fn delete(conn: &PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
+    pub fn delete(conn: &mut PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
         let _ = diesel::delete(
             articles::table
                 .filter(articles::slug.eq(&params.slug))
@@ -113,7 +113,7 @@ impl Article {
 impl Article {
     pub fn is_favorited_by_user_id(
         &self,
-        conn: &PgConnection,
+        conn: &mut PgConnection,
         user_id: &Uuid,
     ) -> Result<bool, AppError> {
         use crate::schema::favorites;
@@ -126,7 +126,7 @@ impl Article {
         Ok(count >= 1)
     }
 
-    pub fn fetch_favorites_count(&self, conn: &PgConnection) -> Result<i64, AppError> {
+    pub fn fetch_favorites_count(&self, conn: &mut PgConnection) -> Result<i64, AppError> {
         use crate::schema::favorites;
         let favorites_count = favorites::table
             .filter(favorites::article_id.eq_all(self.id))

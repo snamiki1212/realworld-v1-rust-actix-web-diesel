@@ -6,16 +6,16 @@ use crate::utils::api::ApiResponse;
 use actix_web::{web, HttpRequest, HttpResponse};
 
 pub async fn signin(state: web::Data<AppState>, form: web::Json<request::Signin>) -> ApiResponse {
-    let conn = state.get_conn()?;
-    let (user, token) = User::signin(&conn, &form.user.email, &form.user.password)?;
+    let conn = &mut state.get_conn()?;
+    let (user, token) = User::signin(conn, &form.user.email, &form.user.password)?;
     let res = UserResponse::from((user, token));
     Ok(HttpResponse::Ok().json(res))
 }
 
 pub async fn signup(state: web::Data<AppState>, form: web::Json<request::Signup>) -> ApiResponse {
-    let conn = state.get_conn()?;
+    let conn = &mut state.get_conn()?;
     let (user, token) = User::signup(
-        &conn,
+        conn,
         &form.user.email,
         &form.user.username,
         &form.user.password,
@@ -36,10 +36,10 @@ pub async fn update(
     req: HttpRequest,
     form: web::Json<request::Update>,
 ) -> ApiResponse {
-    let conn = state.get_conn()?;
+    let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let user = User::update(
-        &conn,
+        conn,
         current_user.id,
         UpdateUser {
             email: form.user.email.clone(),

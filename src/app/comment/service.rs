@@ -13,7 +13,7 @@ pub struct CreateCommentService {
     pub author: User,
 }
 pub fn create(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     params: &CreateCommentService,
 ) -> Result<(Comment, Profile), AppError> {
     let CreateCommentService {
@@ -41,7 +41,7 @@ pub fn create(
 }
 
 pub fn fetch_comments_list(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     current_user: &Option<User>,
 ) -> Result<Vec<(Comment, Profile)>, AppError> {
     let comments = {
@@ -75,7 +75,10 @@ pub struct DeleteCommentService {
     pub comment_id: Uuid,
 }
 
-pub fn delete_comment(conn: &PgConnection, params: &DeleteCommentService) -> Result<(), AppError> {
+pub fn delete_comment(
+    conn: &mut PgConnection,
+    params: &DeleteCommentService,
+) -> Result<(), AppError> {
     let article = Article::fetch_by_slug_and_author_id(
         conn,
         &FetchBySlugAndAuthorId {
