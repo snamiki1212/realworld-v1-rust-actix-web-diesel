@@ -6,6 +6,7 @@ use chrono::NaiveDateTime;
 // use diesel::dsl::{AsSelect, SqlTypeOf};
 // use diesel::expression::{AsExpression, Expression};
 // use diesel::pg::Pg;
+use diesel::dsl::{Eq, Filter, Select};
 use diesel::pg::PgConnection;
 use diesel::prelude::sql_function;
 use diesel::sql_types;
@@ -51,12 +52,11 @@ sql_function!(fn canon_id(x: sql_types::Uuid) -> sql_types::Uuid);
 // Tags
 type CanonName<T> = canon_name::HelperType<T>;
 type CanonArticleId<T> = canon_id::HelperType<T>;
-type All = diesel::dsl::Select<tags::table, AllColumns>;
-type WithName<'a> = diesel::dsl::Eq<CanonName<tags::name>, CanonName<&'a str>>;
-type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
-type WithArticleId<'a> =
-    diesel::dsl::Eq<CanonArticleId<tags::article_id>, CanonArticleId<&'a Uuid>>;
-type ByArticleId<'a> = diesel::dsl::Filter<All, WithArticleId<'a>>;
+type All = Select<tags::table, AllColumns>;
+type WithName<'a> = Eq<CanonName<tags::name>, CanonName<&'a str>>;
+type ByName<'a> = Filter<All, WithName<'a>>;
+type WithArticleId<'a> = Eq<CanonArticleId<tags::article_id>, CanonArticleId<&'a Uuid>>;
+type ByArticleId<'a> = Filter<All, WithArticleId<'a>>;
 
 impl Tag {
     // pub fn with_name<T>(name: T) -> WithName<'static>
