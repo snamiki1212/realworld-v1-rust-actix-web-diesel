@@ -3,9 +3,9 @@ use crate::error::AppError;
 use crate::schema::tags;
 use chrono::NaiveDateTime;
 // use diesel::dsl::Eq;
-use diesel::dsl::{AsSelect, SqlTypeOf};
+// use diesel::dsl::{AsSelect, SqlTypeOf};
 // use diesel::expression::{AsExpression, Expression};
-use diesel::pg::Pg;
+// use diesel::pg::Pg;
 use diesel::pg::PgConnection;
 use diesel::prelude::sql_function;
 use diesel::sql_types;
@@ -42,6 +42,7 @@ pub struct Tag {
 }
 
 sql_function!(fn canon_name(x: sql_types::Text) -> sql_types::Text);
+sql_function!(fn canon_id(x: sql_types::Uuid) -> sql_types::Uuid);
 
 // General
 // type SqlType = SqlTypeOf<AsSelect<Tag, Pg>>;
@@ -49,9 +50,13 @@ sql_function!(fn canon_name(x: sql_types::Text) -> sql_types::Text);
 
 // Tags
 type CanonName<T> = canon_name::HelperType<T>;
+type CanonArticleId<T> = canon_id::HelperType<T>;
 type All = diesel::dsl::Select<tags::table, AllColumns>;
 type WithName<'a> = diesel::dsl::Eq<CanonName<tags::name>, CanonName<&'a str>>;
 type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
+type WithArticleId<'a> =
+    diesel::dsl::Eq<CanonArticleId<tags::article_id>, CanonArticleId<&'a Uuid>>;
+type ByArticleId<'a> = diesel::dsl::Filter<All, WithArticleId<'a>>;
 
 impl Tag {
     // pub fn with_name<T>(name: T) -> WithName<'static>
@@ -91,16 +96,22 @@ impl Tag {
     }
 
     pub fn by_name(name: &str) -> ByName<'_> {
-        Tag::all().filter(Self::with_name(name))
+        Self::all().filter(Self::with_name(name))
+    }
+
+    pub fn with_article_id(article_id: &Uuid) -> WithArticleId<'_> {
+        canon_id(tags::article_id).eq(canon_id(article_id))
+    }
+
+    pub fn by_article_id(article_id: &Uuid) -> ByArticleId<'_> {
+        Self::all().filter(Self::with_article_id(article_id))
     }
 
     pub fn fetch_by_article_id(
         conn: &mut PgConnection,
         article_id: Uuid,
     ) -> Result<Vec<Self>, AppError> {
-        let list = tags::table
-            .filter(tags::article_id.eq(article_id))
-            .get_results::<Self>(conn)?;
+        let list = Self::by_article_id(&article_id).get_results::<Self>(conn)?;
         Ok(list)
     }
 
