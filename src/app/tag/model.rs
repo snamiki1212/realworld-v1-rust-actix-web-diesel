@@ -43,7 +43,7 @@ pub struct Tag {
 }
 
 sql_function!(fn canon_name(x: sql_types::Text) -> sql_types::Text);
-sql_function!(fn canon_id(x: sql_types::Uuid) -> sql_types::Uuid);
+// sql_function!(fn canon_id(x: sql_types::Uuid) -> sql_types::Uuid);
 
 // General
 // type SqlType = SqlTypeOf<AsSelect<Tag, Pg>>;
@@ -51,12 +51,12 @@ sql_function!(fn canon_id(x: sql_types::Uuid) -> sql_types::Uuid);
 
 // Tags
 type CanonName<T> = canon_name::HelperType<T>;
-type CanonArticleId<T> = canon_id::HelperType<T>;
+// type CanonArticleId<T> = canon_id::HelperType<T>;
 type All = Select<tags::table, AllColumns>;
 type WithName<'a> = Eq<CanonName<tags::name>, CanonName<&'a str>>;
 type ByName<'a> = Filter<All, WithName<'a>>;
-type WithArticleId<'a> = Eq<CanonArticleId<tags::article_id>, CanonArticleId<&'a Uuid>>;
-type ByArticleId<'a> = Filter<All, WithArticleId<'a>>;
+// type WithArticleId<'a> = Eq<CanonArticleId<tags::article_id>, CanonArticleId<&'a Uuid>>;
+// type ByArticleId<'a> = Filter<All, WithArticleId<'a>>;
 
 impl Tag {
     // pub fn with_name<T>(name: T) -> WithName<'static>
@@ -99,19 +99,22 @@ impl Tag {
         Self::all().filter(Self::with_name(name))
     }
 
-    pub fn with_article_id(article_id: &Uuid) -> WithArticleId<'_> {
-        canon_id(tags::article_id).eq(canon_id(article_id))
-    }
+    // pub fn with_article_id(article_id: &Uuid) -> WithArticleId<'_> {
+    //     canon_id(tags::article_id).eq(canon_id(article_id))
+    // }
 
-    pub fn by_article_id(article_id: &Uuid) -> ByArticleId<'_> {
-        Self::all().filter(Self::with_article_id(article_id))
-    }
+    // pub fn by_article_id(article_id: &Uuid) -> ByArticleId<'_> {
+    //     Self::all().filter(Self::with_article_id(article_id))
+    // }
 
     pub fn fetch_by_article_id(
         conn: &mut PgConnection,
         article_id: Uuid,
     ) -> Result<Vec<Self>, AppError> {
-        let list = Self::by_article_id(&article_id).get_results::<Self>(conn)?;
+        // let list = Self::by_article_id(&article_id).get_results::<Self>(conn)?;
+        let list = tags::table
+            .filter(tags::article_id.eq(article_id))
+            .get_results::<Self>(conn)?;
         Ok(list)
     }
 
