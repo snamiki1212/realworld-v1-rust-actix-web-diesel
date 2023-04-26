@@ -98,7 +98,7 @@ impl Article {
     }
 
     pub fn delete(conn: &mut PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
-        let _ = diesel::delete(
+        diesel::delete(
             articles::table
                 .filter(articles::slug.eq(&params.slug))
                 .filter(articles::author_id.eq(params.author_id)),

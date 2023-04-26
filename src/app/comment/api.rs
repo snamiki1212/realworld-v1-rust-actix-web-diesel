@@ -50,7 +50,7 @@ pub async fn delete(
     let current_user = auth::get_current_user(&req)?;
     let (article_title_slug, comment_id) = path.into_inner();
     let comment_id = uuid::parse(&comment_id)?;
-    let _ = service::delete_comment(
+    service::delete_comment(
         conn,
         &service::DeleteCommentService {
             article_title_slug,

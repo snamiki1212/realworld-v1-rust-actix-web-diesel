@@ -142,7 +142,7 @@ pub async fn delete(
     let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
-    let _ = Article::delete(
+    Article::delete(
         conn,
         &DeleteArticle {
             slug: article_title_slug,

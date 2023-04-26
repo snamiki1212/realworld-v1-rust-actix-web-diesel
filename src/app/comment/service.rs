@@ -86,7 +86,7 @@ pub fn delete_comment(
             author_id: params.author_id,
         },
     )?;
-    let _ = Comment::delete(
+    Comment::delete(
         conn,
         &DeleteComment {
             comment_id: params.comment_id,

@@ -58,7 +58,7 @@ impl User {
             .filter(users::email.eq(email))
             .limit(1)
             .first::<User>(conn)?;
-        let _ = hasher::verify(&naive_password, &user.password)?;
+        hasher::verify(naive_password, &user.password)?;
         let token = user.generate_token()?;
         Ok((user, token))
     }
@@ -93,7 +93,7 @@ impl User {
             .filter(users::username.eq(username))
             .first::<User>(conn)?;
 
-        let _ = Follow::create(
+        Follow::create(
             conn,
             &CreateFollow {
                 follower_id: self.id,
@@ -114,7 +114,7 @@ impl User {
             .filter(users::username.eq(username))
             .first::<User>(conn)?;
 
-        let _ = Follow::delete(
+        Follow::delete(
             conn,
             &DeleteFollow {
                 followee_id: followee.id,
