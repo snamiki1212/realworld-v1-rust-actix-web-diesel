@@ -2,11 +2,33 @@ use crate::app::article::model::Article;
 use crate::error::AppError;
 use crate::schema::tags;
 use chrono::NaiveDateTime;
+// use diesel::dsl::Eq;
+use diesel::dsl::{AsSelect, SqlTypeOf};
+// use diesel::expression::{AsExpression, Expression};
+use diesel::pg::Pg;
 use diesel::pg::PgConnection;
+use diesel::prelude::sql_function;
+use diesel::sql_types;
 use diesel::Insertable;
 use diesel::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+type AllColumns = (
+    tags::id,
+    tags::article_id,
+    tags::name,
+    tags::created_at,
+    tags::updated_at,
+);
+
+pub const ALL_COLUMNS: AllColumns = (
+    tags::id,
+    tags::article_id,
+    tags::name,
+    tags::created_at,
+    tags::updated_at,
+);
 
 #[derive(Identifiable, Queryable, Debug, Serialize, Deserialize, Clone, Associations)]
 #[diesel(belongs_to(Article, foreign_key = article_id))]
@@ -19,7 +41,59 @@ pub struct Tag {
     pub updated_at: NaiveDateTime,
 }
 
+sql_function!(fn canon_name(x: sql_types::Text) -> sql_types::Text);
+
+// General
+// type SqlType = SqlTypeOf<AsSelect<Tag, Pg>>;
+// type BoxedQuery<'a> = tags::BoxedQuery<'a, Pg, SqlType>;
+
+// Tags
+type CanonName<T> = canon_name::HelperType<T>;
+type All = diesel::dsl::Select<tags::table, AllColumns>;
+type WithName<'a> = diesel::dsl::Eq<CanonName<tags::name>, CanonName<&'a str>>;
+type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
+
 impl Tag {
+    // pub fn with_name<T>(name: T) -> WithName<'static>
+    // where
+    //     T: AsExpression<sql_types::Text>,
+    // {
+    //     canon_name(tags::name).eq(canon_name(name))
+    // }
+    // fn by_article_id<'a, T>(article_id: T) -> BoxedQuery<'a>
+    // where
+    //     T: AsExpression<sql_types::Uuid>,
+    //     T::Expression: BoxableExpression<tags::table, Pg>,
+    // {
+    //     tags::table.filter(with_article_id(article_id))
+    // }
+
+    // fn select_article_ids() -> BoxedQuery<'static> {
+    //     // tags::table.select(Tag::as_select()).into_boxed()
+    //     tags::table.select(tags::article_id).into_boxed()
+    // }
+
+    // fn by_name<'a, T>(name: T) -> BoxedQuery<'a>
+    // where
+    //     T: AsExpression<sql_types::Text>,
+    //     T::Expression: BoxableExpression<tags::table, Pg>,
+    // {
+    //     tags::table.filter(with_name(name))
+    //     // Self::select_article_ids().filter(with_name(name))
+    // }
+
+    pub fn all() -> All {
+        tags::table.select(ALL_COLUMNS)
+    }
+
+    pub fn with_name(name: &str) -> WithName<'_> {
+        canon_name(tags::name).eq(canon_name(name))
+    }
+
+    pub fn by_name(name: &str) -> ByName<'_> {
+        Tag::all().filter(Self::with_name(name))
+    }
+
     pub fn fetch_by_article_id(
         conn: &mut PgConnection,
         article_id: Uuid,
@@ -39,8 +113,7 @@ impl Tag {
         conn: &mut PgConnection,
         tag_name: &str,
     ) -> Result<Vec<Uuid>, AppError> {
-        let ids = tags::table
-            .filter(tags::name.eq(tag_name))
+        let ids = Self::by_name(tag_name)
             .select(tags::article_id)
             .load::<Uuid>(conn)?;
         Ok(ids)
