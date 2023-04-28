@@ -63,12 +63,12 @@ sql_function!(fn canon_name(x: sql_types::Text) -> sql_types::Text);
 // type BoxedQuery<'a> = tags::BoxedQuery<'a, Pg, SqlType>;
 
 // Tags
-type CanonName<T> = canon_name::HelperType<T>;
+// type CanonName<T> = canon_name::HelperType<T>;
 // type CanonArticleId<T> = canon_id::HelperType<T>;
 type All<DB> = Select<tags::table, AsSelect<Tag, DB>>;
 // type All<Columns> = Select<tags::table, AsSelect<Tag, Columns>>;
-type WithName<T> = Eq<CanonName<tags::name>, CanonName<T>>;
-type ByName<T, DB> = diesel::dsl::Filter<All<DB>, WithName<T>>;
+type WithName<T> = Eq<tags::name, T>;
+// type ByName<T, DB> = diesel::dsl::Filter<All<DB>, WithName<T>>;
 // type WithArticleId<'a> = Eq<CanonArticleId<tags::article_id>, CanonArticleId<&'a Uuid>>;
 // type ByArticleId<'a> = Filter<All, WithArticleId<'a>>;
 
@@ -112,7 +112,8 @@ impl Tag {
     where
         T: AsExpression<sql_types::Text>,
     {
-        canon_name(tags::name).eq(canon_name(name))
+        tags::name.eq(name)
+        // canon_name(tags::name).eq(canon_name(name))
     }
 
     // pub fn by_name<T, DB>(name: T) -> ByName<T, DB>
