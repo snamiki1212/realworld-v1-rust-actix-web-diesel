@@ -154,7 +154,7 @@ impl Tag {
         //     Self::all().filter(Self::with_name(name))
 
         let ids = tags::table
-            .select::<AllColumns>(ALL_COLUMNS)
+            // .select::<AllColumns>(ALL_COLUMNS)
             .filter(Tag::with_name(tag_name))
             .select(tags::article_id)
             .load::<Uuid>(conn)?;
