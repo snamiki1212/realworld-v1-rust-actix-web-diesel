@@ -2,11 +2,14 @@ use crate::app::article::model::Article;
 use crate::error::AppError;
 use crate::schema::tags;
 use chrono::NaiveDateTime;
+use diesel::backend::Backend;
 // use diesel::dsl::Eq;
 // use diesel::dsl::{AsSelect, SqlTypeOf};
 // use diesel::expression::{AsExpression, Expression};
 // use diesel::pg::Pg;
-use diesel::dsl::{Eq, Filter, Select};
+use diesel::dsl::{AsSelect, Select};
+use diesel::dsl::{Eq, Filter};
+use diesel::expression::AsExpression;
 use diesel::pg::PgConnection;
 use diesel::prelude::sql_function;
 use diesel::sql_types;
@@ -31,7 +34,17 @@ pub const ALL_COLUMNS: AllColumns = (
     tags::updated_at,
 );
 
-#[derive(Identifiable, Queryable, Debug, Serialize, Deserialize, Clone, Associations)]
+#[derive(
+    Identifiable,
+    Selectable,
+    Queryable,
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    Associations,
+    QueryableByName,
+)]
 #[diesel(belongs_to(Article, foreign_key = article_id))]
 #[diesel(table_name = tags)]
 pub struct Tag {
@@ -52,9 +65,10 @@ sql_function!(fn canon_name(x: sql_types::Text) -> sql_types::Text);
 // Tags
 type CanonName<T> = canon_name::HelperType<T>;
 // type CanonArticleId<T> = canon_id::HelperType<T>;
-type All = Select<tags::table, AllColumns>;
-type WithName<'a> = Eq<CanonName<tags::name>, CanonName<&'a str>>;
-type ByName<'a> = Filter<All, WithName<'a>>;
+type All<DB> = Select<tags::table, AsSelect<Tag, DB>>;
+// type All<Columns> = Select<tags::table, AsSelect<Tag, Columns>>;
+type WithName<T> = Eq<CanonName<tags::name>, CanonName<T>>;
+type ByName<T, DB> = diesel::dsl::Filter<All<DB>, WithName<T>>;
 // type WithArticleId<'a> = Eq<CanonArticleId<tags::article_id>, CanonArticleId<&'a Uuid>>;
 // type ByArticleId<'a> = Filter<All, WithArticleId<'a>>;
 
@@ -87,17 +101,27 @@ impl Tag {
     //     // Self::select_article_ids().filter(with_name(name))
     // }
 
-    pub fn all() -> All {
-        tags::table.select(ALL_COLUMNS)
+    pub fn all<DB>() -> All<DB>
+    where
+        DB: Backend,
+    {
+        tags::table.select(Tag::as_select())
     }
 
-    pub fn with_name(name: &str) -> WithName<'_> {
+    pub fn with_name<T>(name: T) -> WithName<T>
+    where
+        T: AsExpression<sql_types::Text>,
+    {
         canon_name(tags::name).eq(canon_name(name))
     }
 
-    pub fn by_name(name: &str) -> ByName<'_> {
-        Self::all().filter(Self::with_name(name))
-    }
+    // pub fn by_name<T, DB>(name: T) -> ByName<T, DB>
+    // where
+    //     T: AsExpression<sql_types::Text>,
+    //     DB: Backend,
+    // {
+    //     Self::all().filter(Self::with_name(name))
+    // }
 
     // pub fn with_article_id(article_id: &Uuid) -> WithArticleId<'_> {
     //     canon_id(tags::article_id).eq(canon_id(article_id))
@@ -127,7 +151,11 @@ impl Tag {
         conn: &mut PgConnection,
         tag_name: &str,
     ) -> Result<Vec<Uuid>, AppError> {
-        let ids = Self::by_name(tag_name)
+        //     Self::all().filter(Self::with_name(name))
+
+        let ids = tags::table
+            .select::<AllColumns>(ALL_COLUMNS)
+            .filter(Tag::with_name(tag_name))
             .select(tags::article_id)
             .load::<Uuid>(conn)?;
         Ok(ids)
