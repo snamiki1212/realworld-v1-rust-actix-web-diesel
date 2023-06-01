@@ -32,6 +32,7 @@ dotenv = { version = "0.15" }
 chrono = { version = "0.4", features = ["serde"] }
 
 # A library to generate and parse UUIDs.
+# Compatible version is here: https://github.com/diesel-rs/diesel/blob/master/diesel/Cargo.toml#L26
 uuid = { version = "0.8", features = ["serde", "v4"] }
 
 # Easily hash and verify passwords using bcrypt
