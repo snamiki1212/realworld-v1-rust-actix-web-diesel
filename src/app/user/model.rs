@@ -176,7 +176,7 @@ impl User {
 }
 
 #[derive(Insertable, Debug, Deserialize)]
-#[table_name = "users"]
+#[diesel(table_name = users)]
 pub struct SignupUser<'a> {
     pub email: &'a str,
     pub username: &'a str,
@@ -184,7 +184,7 @@ pub struct SignupUser<'a> {
 }
 
 #[derive(AsChangeset, Debug, Deserialize, Clone)]
-#[table_name = "users"]
+#[diesel(table_name = users)]
 pub struct UpdateUser {
     pub email: Option<String>,
     pub username: Option<String>,
