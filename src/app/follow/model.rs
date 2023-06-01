@@ -48,7 +48,7 @@ impl Follow {
 }
 
 #[derive(Insertable)]
-#[table_name = "follows"]
+#[diesel(table_name = follows)]
 pub struct CreateFollow {
     pub follower_id: Uuid,
     pub followee_id: Uuid,

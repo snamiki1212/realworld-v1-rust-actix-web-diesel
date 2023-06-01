@@ -56,7 +56,7 @@ impl Favorite {
 }
 
 #[derive(Insertable)]
-#[table_name = "favorites"]
+#[diesel(table_name = favorites)]
 pub struct CreateFavorite {
     pub user_id: Uuid,
     pub article_id: Uuid,
