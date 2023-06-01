@@ -14,7 +14,7 @@ description = "Realworld Application with Rust / actix-web / diesel."
 actix-web = { version = "4.3" }
 
 # A safe, extensible ORM and Query Builder for PostgreSQL, SQLite, and MySQL
-diesel = { version = "2.0.4", features = ["r2d2", "postgres", "chrono", "uuid", "serde_json"] }
+diesel = { version = "2.1.0", features = ["r2d2", "postgres", "chrono", "uuid", "serde_json"] }
 
 # Create and decode JWTs in a strongly typed way.
 jsonwebtoken = { version = "8.3" }
@@ -32,6 +32,7 @@ dotenv = { version = "0.15" }
 chrono = { version = "0.4", features = ["serde"] }
 
 # A library to generate and parse UUIDs.
+# Compatible version is here: https://github.com/diesel-rs/diesel/blob/master/diesel/Cargo.toml#L26
 uuid = { version = "0.8", features = ["serde", "v4"] }
 
 # Easily hash and verify passwords using bcrypt
