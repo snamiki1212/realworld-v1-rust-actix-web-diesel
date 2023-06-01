@@ -46,7 +46,7 @@ pub struct DeleteComment {
 }
 
 #[derive(Insertable, Clone)]
-#[table_name = "comments"]
+#[diesel(table_name = comments)]
 pub struct CreateComment {
     pub body: String,
     pub author_id: Uuid,

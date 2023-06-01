@@ -64,7 +64,7 @@ $ APIURL=http://localhost:8080/api zsh e2e/run-api-tests.sh
 
 - Rust Edition 2021
 - ActixWeb 4.x
-- Diesel 1.4.x
+- Diesel 2.x
 
 ## Architecture
 

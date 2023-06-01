@@ -137,7 +137,7 @@ impl Article {
 }
 
 #[derive(Insertable, Clone)]
-#[table_name = "articles"]
+#[diesel(table_name = articles)]
 pub struct CreateArticle {
     pub author_id: Uuid,
     pub slug: String,
@@ -147,7 +147,7 @@ pub struct CreateArticle {
 }
 
 #[derive(AsChangeset)]
-#[table_name = "articles"]
+#[diesel(table_name = articles)]
 pub struct UpdateArticle {
     pub slug: Option<String>,
     pub title: Option<String>,

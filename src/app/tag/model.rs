@@ -171,7 +171,7 @@ impl Tag {
 }
 
 #[derive(Insertable)]
-#[table_name = "tags"]
+#[diesel(table_name = tags)]
 pub struct CreateTag<'a> {
     pub name: &'a str,
     pub article_id: &'a Uuid,
