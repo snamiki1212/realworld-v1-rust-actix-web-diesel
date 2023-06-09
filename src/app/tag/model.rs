@@ -8,7 +8,7 @@ use diesel::backend::Backend;
 // use diesel::expression::{AsExpression, Expression};
 // use diesel::pg::Pg;
 use diesel::dsl::Eq;
-// use diesel::dsl::Filter;
+use diesel::dsl::Filter;
 use diesel::dsl::{AsSelect, Select};
 use diesel::expression::AsExpression;
 use diesel::pg::PgConnection;
@@ -69,7 +69,7 @@ pub struct Tag {
 type All<DB> = Select<tags::table, AsSelect<Tag, DB>>;
 // type All<Columns> = Select<tags::table, AsSelect<Tag, Columns>>;
 type WithName<T> = Eq<tags::name, T>;
-// type ByName<T, DB> = Filter<All<DB>, WithName<T>>;
+type ByName<T, DB> = Filter<All<DB>, WithName<T>>;
 type WithArticleId<'a> = Eq<tags::article_id, &'a Uuid>;
 // type ByArticleId<'a> = Filter<All, WithArticleId<'a>>;
 
@@ -93,15 +93,6 @@ impl Tag {
     //     tags::table.select(tags::article_id).into_boxed()
     // }
 
-    // fn by_name<'a, T>(name: T) -> BoxedQuery<'a>
-    // where
-    //     T: AsExpression<sql_types::Text>,
-    //     T::Expression: BoxableExpression<tags::table, Pg>,
-    // {
-    //     tags::table.filter(with_name(name))
-    //     // Self::select_article_ids().filter(with_name(name))
-    // }
-
     pub fn all<DB>() -> All<DB>
     where
         DB: Backend,
@@ -109,21 +100,16 @@ impl Tag {
         tags::table.select(Tag::as_select())
     }
 
-    pub fn with_name<T>(name: T) -> WithName<T>
-    where
-        T: AsExpression<sql_types::Text>,
-    {
+    pub fn with_name(name: &str) -> WithName<&str> {
         tags::name.eq(name)
     }
 
-    // pub fn by_name<T, DB>(name: T) -> ByName<T, DB>
-    // where
-    //     T: AsExpression<sql_types::Text>,
-    //     DB: Backend,
-    // {
-    //     tags::table.filter(Self::with_name(name))
-    //     // Self::all().filter(Self::with_name(name))
-    // }
+    pub fn by_name<DB>(name: &str) -> ByName<&str, DB>
+    where
+        DB: Backend,
+    {
+        Self::all().filter(Self::with_name(name))
+    }
 
     pub fn with_article_id(article_id: &Uuid) -> WithArticleId<'_> {
         tags::article_id.eq(article_id)
