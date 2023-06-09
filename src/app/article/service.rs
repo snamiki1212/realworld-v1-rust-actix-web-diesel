@@ -90,7 +90,7 @@ pub fn fetch_articles_list(
         let mut query = articles::table.inner_join(users::table).into_boxed();
 
         if let Some(tag_name) = &params.tag {
-            let ids = Tag::fetch_ids_by_name(conn, tag_name)
+            let ids = Tag::fetch_article_ids_by_name(conn, tag_name)
                 .expect("could not fetch tagged article ids."); // TODO: use ? or error handling
             query = query.filter(articles::id.eq_any(ids));
         }
@@ -119,7 +119,7 @@ pub fn fetch_articles_list(
             let mut query = articles::table.inner_join(users::table).into_boxed();
 
             if let Some(tag_name) = &params.tag {
-                let ids = Tag::fetch_ids_by_name(conn, tag_name)
+                let ids = Tag::fetch_article_ids_by_name(conn, tag_name)
                     .expect("could not fetch tagged article ids."); // TODO: use ? or error handling
                 query = query.filter(articles::id.eq_any(ids));
             }

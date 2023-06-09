@@ -134,15 +134,16 @@ impl Tag {
         Ok(list)
     }
 
-    pub fn fetch_ids_by_name(
+    pub fn fetch_article_ids_by_name(
         conn: &mut PgConnection,
         tag_name: &str,
     ) -> Result<Vec<Uuid>, AppError> {
-        let ids = tags::table
-            .filter(Self::with_name(tag_name))
-            .select(tags::article_id)
-            .load::<Uuid>(conn)?;
-        Ok(ids)
+        let article_ids = Self::by_name(tag_name)
+            .load::<Tag>(conn)?
+            .iter()
+            .map(|tag| tag.article_id)
+            .collect();
+        Ok(article_ids)
     }
 
     pub fn create_list(
