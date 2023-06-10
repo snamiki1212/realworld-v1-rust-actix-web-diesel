@@ -72,7 +72,8 @@ impl Tag {
         conn: &mut PgConnection,
         article_id: &Uuid,
     ) -> Result<Vec<Self>, AppError> {
-        let list = Self::by_article_id(article_id).get_results::<Self>(conn)?;
+        let t = Self::by_article_id(article_id);
+        let list = t.get_results::<Self>(conn)?;
         Ok(list)
     }
 
@@ -85,7 +86,8 @@ impl Tag {
         conn: &mut PgConnection,
         tag_name: &str,
     ) -> Result<Vec<Uuid>, AppError> {
-        let article_ids = Self::by_name(tag_name)
+        let t = Self::by_name(tag_name);
+        let article_ids = t
             .load::<Tag>(conn)?
             .iter()
             .map(|tag| tag.article_id)

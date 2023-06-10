@@ -93,14 +93,16 @@ impl User {
         email: &str,
         naive_password: &str,
     ) -> Result<(User, Token), AppError> {
-        let user = Self::by_email(email).limit(1).first::<User>(conn)?;
+        let t = Self::by_email(email).limit(1);
+        let user = t.first::<User>(conn)?;
         hasher::verify(naive_password, &user.password)?;
         let token = user.generate_token()?;
         Ok((user, token))
     }
 
     pub fn find(conn: &mut PgConnection, id: Uuid) -> Result<Self, AppError> {
-        let user = users::table.find(id).first(conn)?;
+        let t = users::table.find(id);
+        let user = t.first(conn)?;
         Ok(user)
     }
 
@@ -117,12 +119,14 @@ impl User {
     }
 
     pub fn find_by_username(conn: &mut PgConnection, username: &str) -> Result<Self, AppError> {
-        let user = Self::by_username(username).limit(1).first::<User>(conn)?;
+        let t = Self::by_username(username).limit(1);
+        let user = t.first::<User>(conn)?;
         Ok(user)
     }
 
     pub fn follow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
-        let followee = Self::by_username(username).first::<User>(conn)?;
+        let t = Self::by_username(username);
+        let followee = t.first::<User>(conn)?;
 
         Follow::create(
             conn,
@@ -141,7 +145,8 @@ impl User {
     }
 
     pub fn unfollow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
-        let followee = Self::by_username(username).first::<User>(conn)?;
+        let t = Self::by_username(username);
+        let followee = t.first::<User>(conn)?;
 
         Follow::delete(
             conn,
@@ -161,10 +166,10 @@ impl User {
 
     pub fn is_following(&self, conn: &mut PgConnection, followee_id: &Uuid) -> bool {
         use crate::schema::follows;
-        let follow = follows::table
+        let t = follows::table
             .filter(Follow::with_followee(followee_id))
-            .filter(Follow::with_follower(&self.id))
-            .get_result::<Follow>(conn);
+            .filter(Follow::with_follower(&self.id));
+        let follow = t.get_result::<Follow>(conn);
         follow.is_ok()
     }
 }
@@ -181,10 +186,10 @@ impl User {
         conn: &mut PgConnection,
     ) -> Result<Vec<Uuid>, AppError> {
         use crate::schema::favorites;
-        let favorited_article_ids = favorites::table
+        let t = favorites::table
             .filter(favorites::user_id.eq(self.id))
-            .select(favorites::article_id)
-            .get_results::<Uuid>(conn)?;
+            .select(favorites::article_id);
+        let favorited_article_ids = t.get_results::<Uuid>(conn)?;
         Ok(favorited_article_ids)
     }
 

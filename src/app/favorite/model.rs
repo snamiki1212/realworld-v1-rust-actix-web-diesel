@@ -3,7 +3,7 @@ use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::favorites;
 use chrono::NaiveDateTime;
-use diesel::dsl::{AsSelect, Eq, Filter, Select};
+use diesel::dsl::Eq;
 use diesel::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -20,11 +20,8 @@ pub struct Favorite {
     pub updated_at: NaiveDateTime,
 }
 
-// type All<DB> = Select<users::table, AsSelect<User, DB>>;
 type WithUserId<T> = Eq<favorites::user_id, T>;
 type WithArticleId<T> = Eq<favorites::article_id, T>;
-// type ByUserId<DB, T> = Filter<All<DB>, WithUserId<T>>;
-// type ByArticleId<DB, T> = Filter<All<DB>, WithArticleId<T>>;
 
 impl Favorite {
     pub fn with_user_id(user_id: &Uuid) -> WithUserId<&Uuid> {
@@ -52,8 +49,8 @@ impl Favorite {
         }: &DeleteFavorite,
     ) -> Result<usize, AppError> {
         let t = favorites::table
-            .filter(favorites::user_id.eq_all(user_id))
-            .filter(favorites::article_id.eq_all(article_id));
+            .filter(Self::with_user_id(user_id))
+            .filter(Self::with_article_id(article_id));
         let item = diesel::delete(t).execute(conn)?;
         Ok(item)
     }
