@@ -3,6 +3,7 @@ use crate::error::AppError;
 use crate::schema::articles;
 use crate::utils::converter;
 use chrono::NaiveDateTime;
+use diesel::dsl::{AsSelect, Eq, Filter, Select};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use diesel::Insertable;
@@ -21,6 +22,16 @@ pub struct Article {
     pub body: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+}
+
+type All<DB> = Select<articles::table, AsSelect<Article, DB>>;
+type WithAuthorId<T> = Eq<articles::author_id, T>;
+// type ByArticleId<T, DB> = Filter<All<DB>, WithArticleId<T>>;
+
+impl Article {
+    fn with_article_id(author_id: &Uuid) -> WithAuthorId<&Uuid> {
+        articles::author_id.eq(author_id)
+    }
 }
 
 impl Article {
@@ -58,7 +69,7 @@ impl Article {
     ) -> Result<Self, AppError> {
         let item = articles::table
             .filter(articles::slug.eq_all(params.slug.to_owned()))
-            .filter(articles::author_id.eq_all(params.author_id))
+            .filter(Self::with_article_id(&params.author_id))
             .first::<Self>(conn)?;
         Ok(item)
     }
