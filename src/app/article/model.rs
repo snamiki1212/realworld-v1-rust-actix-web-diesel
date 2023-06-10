@@ -121,12 +121,10 @@ impl Article {
     }
 
     pub fn delete(conn: &mut PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
-        diesel::delete(
-            articles::table
-                .filter(Self::with_slug(&params.slug))
-                .filter(Self::with_author_id(&params.author_id)),
-        )
-        .execute(conn)?;
+        let t = articles::table
+            .filter(Self::with_slug(&params.slug))
+            .filter(Self::with_author_id(&params.author_id));
+        diesel::delete(t).execute(conn)?;
         // NOTE: references tag rows are deleted automatically by DELETE CASCADE
 
         Ok(())

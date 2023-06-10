@@ -51,10 +51,10 @@ impl Favorite {
             article_id,
         }: &DeleteFavorite,
     ) -> Result<usize, AppError> {
-        let item = diesel::delete(favorites::table)
+        let t = favorites::table
             .filter(favorites::user_id.eq_all(user_id))
-            .filter(favorites::article_id.eq_all(article_id))
-            .execute(conn)?;
+            .filter(favorites::article_id.eq_all(article_id));
+        let item = diesel::delete(t).execute(conn)?;
         Ok(item)
     }
 
