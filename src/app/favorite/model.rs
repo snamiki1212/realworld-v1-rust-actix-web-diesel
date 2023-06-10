@@ -60,11 +60,11 @@ impl Favorite {
         username: &str,
     ) -> Result<Vec<Uuid>, AppError> {
         use crate::schema::users;
-        let ids = favorites::table
+        let t = favorites::table
             .inner_join(users::table)
             .filter(User::with_username(username))
-            .select(favorites::article_id)
-            .load::<Uuid>(conn)?;
+            .select(favorites::article_id);
+        let ids = t.load::<Uuid>(conn)?;
         Ok(ids)
     }
 }

@@ -2,7 +2,7 @@ use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::follows;
 use chrono::NaiveDateTime;
-use diesel::dsl::{AsSelect, Eq, Filter, Select};
+use diesel::dsl::Eq;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -29,11 +29,6 @@ impl Follow {
     pub fn with_follower(follower_id: &Uuid) -> WithFollower<&Uuid> {
         follows::follower_id.eq(follower_id)
     }
-    // fn by_followee_and_follower(followee_id: &Uuid, follower_id: &Uuid) -> Filter<Source,  {
-    //     let t = follows::table;
-    //     t.filter(follows::followee_id.eq(followee_id))
-    //         .filter(follows::follower_id.eq(follower_id))
-    // }
 }
 
 impl Follow {
@@ -56,10 +51,10 @@ impl Follow {
         conn: &mut PgConnection,
         follower_id: &Uuid,
     ) -> Result<Vec<Uuid>, AppError> {
-        let result = follows::table
+        let t = follows::table
             .filter(Follow::with_follower(follower_id))
-            .select(follows::followee_id)
-            .get_results::<Uuid>(conn)?;
+            .select(follows::followee_id);
+        let result = t.get_results::<Uuid>(conn)?;
         Ok(result)
     }
 }

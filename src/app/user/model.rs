@@ -112,7 +112,7 @@ impl User {
         user_id: Uuid,
         changeset: UpdateUser,
     ) -> Result<Self, AppError> {
-        let target = users::table.filter(users::id.eq(user_id));
+        let target = users::table.find(user_id);
         let user = diesel::update(target)
             .set(changeset)
             .get_result::<User>(conn)?;
