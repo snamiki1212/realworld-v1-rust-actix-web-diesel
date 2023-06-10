@@ -3,37 +3,12 @@ use crate::error::AppError;
 use crate::schema::tags;
 use chrono::NaiveDateTime;
 use diesel::backend::Backend;
-// use diesel::dsl::Eq;
-// use diesel::dsl::{AsSelect, SqlTypeOf};
-// use diesel::expression::{AsExpression, Expression};
-// use diesel::pg::Pg;
-use diesel::dsl::Eq;
-use diesel::dsl::Filter;
-use diesel::dsl::{AsSelect, Select};
-use diesel::expression::AsExpression;
+use diesel::dsl::{AsSelect, Eq, Filter, Select};
 use diesel::pg::PgConnection;
-// use diesel::prelude::sql_function;
-use diesel::sql_types;
 use diesel::Insertable;
 use diesel::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
-// type AllColumns = (
-//     tags::id,
-//     tags::article_id,
-//     tags::name,
-//     tags::created_at,
-//     tags::updated_at,
-// );
-
-// pub const ALL_COLUMNS: AllColumns = (
-//     tags::id,
-//     tags::article_id,
-//     tags::name,
-//     tags::created_at,
-//     tags::updated_at,
-// );
 
 #[derive(
     Identifiable,
@@ -56,39 +31,14 @@ pub struct Tag {
     pub updated_at: NaiveDateTime,
 }
 
-// General
-// type SqlType = SqlTypeOf<AsSelect<Tag, Pg>>;
-// type BoxedQuery<'a> = tags::BoxedQuery<'a, Pg, SqlType>;
-
 // Tags
 type All<DB> = Select<tags::table, AsSelect<Tag, DB>>;
 type WithName<T> = Eq<tags::name, T>;
 type ByName<T, DB> = Filter<All<DB>, WithName<T>>;
-// type WithArticleId<'a> = Eq<tags::article_id, &'a Uuid>;
-// type ByArticleId<'a> = Filter<Tag, WithArticleId<'a>>;
 type WithArticleId<T> = Eq<tags::article_id, T>;
 type ByArticleId<T, DB> = Filter<All<DB>, WithArticleId<T>>;
 
 impl Tag {
-    // pub fn with_name<T>(name: T) -> WithName<'static>
-    // where
-    //     T: AsExpression<sql_types::Text>,
-    // {
-    //     canon_name(tags::name).eq(canon_name(name))
-    // }
-    // fn by_article_id<'a, T>(article_id: T) -> BoxedQuery<'a>
-    // where
-    //     T: AsExpression<sql_types::Uuid>,
-    //     T::Expression: BoxableExpression<tags::table, Pg>,
-    // {
-    //     tags::table.filter(with_article_id(article_id))
-    // }
-
-    // fn select_article_ids() -> BoxedQuery<'static> {
-    //     // tags::table.select(Tag::as_select()).into_boxed()
-    //     tags::table.select(tags::article_id).into_boxed()
-    // }
-
     pub fn all<DB>() -> All<DB>
     where
         DB: Backend,
