@@ -5,6 +5,7 @@ use crate::schema::users;
 use crate::utils::{hasher, token};
 use chrono::prelude::*;
 use chrono::NaiveDateTime;
+use diesel::dsl::{Eq, Filter};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -24,6 +25,14 @@ pub struct User {
 }
 
 type Token = String;
+
+type WithUsername<T> = Eq<users::username, T>;
+
+impl User {
+    fn with_username(username: &str) -> WithUsername<&str> {
+        users::username.eq(username)
+    }
+}
 
 impl User {
     pub fn signup<'a>(
@@ -82,7 +91,7 @@ impl User {
 
     pub fn find_by_username(conn: &mut PgConnection, username: &str) -> Result<Self, AppError> {
         let user = users::table
-            .filter(users::username.eq(username))
+            .filter(Self::with_username(username))
             .limit(1)
             .first::<User>(conn)?;
         Ok(user)
@@ -90,7 +99,7 @@ impl User {
 
     pub fn follow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
         let followee = users::table
-            .filter(users::username.eq(username))
+            .filter(Self::with_username(username))
             .first::<User>(conn)?;
 
         Follow::create(
@@ -111,7 +120,7 @@ impl User {
 
     pub fn unfollow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
         let followee = users::table
-            .filter(users::username.eq(username))
+            .filter(Self::with_username(username))
             .first::<User>(conn)?;
 
         Follow::delete(
