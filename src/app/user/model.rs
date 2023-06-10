@@ -5,13 +5,14 @@ use crate::schema::users;
 use crate::utils::{hasher, token};
 use chrono::prelude::*;
 use chrono::NaiveDateTime;
-use diesel::dsl::{Eq, Filter};
+use diesel::backend::Backend;
+use diesel::dsl::{AsSelect, Eq, Filter, Select};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Identifiable, Queryable, Serialize, Deserialize, Debug, Clone)]
+#[derive(Identifiable, Queryable, Selectable, Serialize, Deserialize, Debug, Clone)]
 #[diesel(table_name = users)]
 pub struct User {
     pub id: Uuid,
@@ -26,11 +27,27 @@ pub struct User {
 
 type Token = String;
 
+type All<DB> = Select<users::table, AsSelect<User, DB>>;
 type WithUsername<T> = Eq<users::username, T>;
+type ByUsername<DB, T> = Filter<All<DB>, WithUsername<T>>;
 
 impl User {
+    fn all<DB>() -> All<DB>
+    where
+        DB: Backend,
+    {
+        users::table.select(User::as_select())
+    }
+
     fn with_username(username: &str) -> WithUsername<&str> {
         users::username.eq(username)
+    }
+
+    fn by_username<DB>(username: &str) -> ByUsername<DB, &str>
+    where
+        DB: Backend,
+    {
+        Self::all().filter(Self::with_username(username))
     }
 }
 
@@ -90,17 +107,12 @@ impl User {
     }
 
     pub fn find_by_username(conn: &mut PgConnection, username: &str) -> Result<Self, AppError> {
-        let user = users::table
-            .filter(Self::with_username(username))
-            .limit(1)
-            .first::<User>(conn)?;
+        let user = Self::by_username(username).limit(1).first::<User>(conn)?;
         Ok(user)
     }
 
     pub fn follow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
-        let followee = users::table
-            .filter(Self::with_username(username))
-            .first::<User>(conn)?;
+        let followee = Self::by_username(username).first::<User>(conn)?;
 
         Follow::create(
             conn,
@@ -119,9 +131,7 @@ impl User {
     }
 
     pub fn unfollow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
-        let followee = users::table
-            .filter(Self::with_username(username))
-            .first::<User>(conn)?;
+        let followee = Self::by_username(username).first::<User>(conn)?;
 
         Follow::delete(
             conn,
