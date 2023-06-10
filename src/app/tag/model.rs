@@ -39,29 +39,29 @@ type WithArticleId<T> = Eq<tags::article_id, T>;
 type ByArticleId<T, DB> = Filter<All<DB>, WithArticleId<T>>;
 
 impl Tag {
-    pub fn all<DB>() -> All<DB>
+    fn all<DB>() -> All<DB>
     where
         DB: Backend,
     {
         tags::table.select(Tag::as_select())
     }
 
-    pub fn with_name(name: &str) -> WithName<&str> {
+    fn with_name(name: &str) -> WithName<&str> {
         tags::name.eq(name)
     }
 
-    pub fn by_name<DB>(name: &str) -> ByName<&str, DB>
+    fn by_name<DB>(name: &str) -> ByName<&str, DB>
     where
         DB: Backend,
     {
         Self::all().filter(Self::with_name(name))
     }
 
-    pub fn with_article_id(article_id: &Uuid) -> WithArticleId<&Uuid> {
+    fn with_article_id(article_id: &Uuid) -> WithArticleId<&Uuid> {
         tags::article_id.eq(article_id)
     }
 
-    pub fn by_article_id<DB>(article_id: &Uuid) -> ByArticleId<&Uuid, DB>
+    fn by_article_id<DB>(article_id: &Uuid) -> ByArticleId<&Uuid, DB>
     where
         DB: Backend,
     {
