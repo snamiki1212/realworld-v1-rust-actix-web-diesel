@@ -29,7 +29,9 @@ type Token = String;
 
 type All<DB> = Select<users::table, AsSelect<User, DB>>;
 type WithUsername<T> = Eq<users::username, T>;
+type WithEmail<T> = Eq<users::email, T>;
 type ByUsername<DB, T> = Filter<All<DB>, WithUsername<T>>;
+type ByEmail<DB, T> = Filter<All<DB>, WithEmail<T>>;
 
 impl User {
     fn all<DB>() -> All<DB>
@@ -48,6 +50,17 @@ impl User {
         DB: Backend,
     {
         Self::all().filter(Self::with_username(username))
+    }
+
+    fn with_email(email: &str) -> WithEmail<&str> {
+        users::email.eq(email)
+    }
+
+    fn by_email<DB>(email: &str) -> ByEmail<DB, &str>
+    where
+        DB: Backend,
+    {
+        Self::all().filter(Self::with_email(email))
     }
 }
 
@@ -80,10 +93,7 @@ impl User {
         email: &str,
         naive_password: &str,
     ) -> Result<(User, Token), AppError> {
-        let user = users::table
-            .filter(users::email.eq(email))
-            .limit(1)
-            .first::<User>(conn)?;
+        let user = Self::by_email(email).limit(1).first::<User>(conn)?;
         hasher::verify(naive_password, &user.password)?;
         let token = user.generate_token()?;
         Ok((user, token))
