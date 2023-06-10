@@ -1,3 +1,4 @@
+use crate::app::favorite::model::Favorite;
 use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::articles;
@@ -141,8 +142,8 @@ impl Article {
         use crate::schema::favorites;
         let count = favorites::table
             .select(diesel::dsl::count(favorites::id))
-            .filter(favorites::article_id.eq_all(self.id))
-            .filter(favorites::user_id.eq_all(user_id))
+            .filter(Favorite::with_article_id(&self.id))
+            .filter(Favorite::with_user_id(user_id))
             .first::<i64>(conn)?;
 
         Ok(count >= 1)
@@ -151,7 +152,7 @@ impl Article {
     pub fn fetch_favorites_count(&self, conn: &mut PgConnection) -> Result<i64, AppError> {
         use crate::schema::favorites;
         let favorites_count = favorites::table
-            .filter(favorites::article_id.eq_all(self.id))
+            .filter(Favorite::with_article_id(&self.id))
             .select(diesel::dsl::count(favorites::created_at))
             .first::<i64>(conn)?;
         Ok(favorites_count)

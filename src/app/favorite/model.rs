@@ -3,6 +3,7 @@ use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::favorites;
 use chrono::NaiveDateTime;
+use diesel::dsl::{AsSelect, Eq, Filter, Select};
 use diesel::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -17,6 +18,22 @@ pub struct Favorite {
     pub user_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+}
+
+// type All<DB> = Select<users::table, AsSelect<User, DB>>;
+type WithUserId<T> = Eq<favorites::user_id, T>;
+type WithArticleId<T> = Eq<favorites::article_id, T>;
+// type ByUserId<DB, T> = Filter<All<DB>, WithUserId<T>>;
+// type ByArticleId<DB, T> = Filter<All<DB>, WithArticleId<T>>;
+
+impl Favorite {
+    pub fn with_user_id(user_id: &Uuid) -> WithUserId<&Uuid> {
+        favorites::user_id.eq_all(user_id)
+    }
+
+    pub fn with_article_id(article_id: &Uuid) -> WithArticleId<&Uuid> {
+        favorites::article_id.eq_all(article_id)
+    }
 }
 
 impl Favorite {
@@ -48,7 +65,7 @@ impl Favorite {
         use crate::schema::users;
         let ids = favorites::table
             .inner_join(users::table)
-            .filter(users::username.eq(username))
+            .filter(User::with_username(username))
             .select(favorites::article_id)
             .load::<Uuid>(conn)?;
         Ok(ids)
