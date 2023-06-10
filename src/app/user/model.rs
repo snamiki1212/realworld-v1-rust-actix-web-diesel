@@ -1,3 +1,4 @@
+use crate::app::favorite::model::Favorite;
 use crate::app::follow::model::{CreateFollow, DeleteFollow, Follow};
 use crate::app::profile::model::Profile;
 use crate::error::AppError;
@@ -187,7 +188,7 @@ impl User {
     ) -> Result<Vec<Uuid>, AppError> {
         use crate::schema::favorites;
         let t = favorites::table
-            .filter(favorites::user_id.eq(self.id))
+            .filter(Favorite::with_user_id(&self.id))
             .select(favorites::article_id);
         let favorited_article_ids = t.get_results::<Uuid>(conn)?;
         Ok(favorited_article_ids)
