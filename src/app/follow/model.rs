@@ -2,6 +2,7 @@ use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::follows;
 use chrono::NaiveDateTime;
+use diesel::dsl::{AsSelect, Eq, Filter, Select};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -17,6 +18,24 @@ pub struct Follow {
     pub updated_at: NaiveDateTime,
 }
 
+type WithFollowee<T> = Eq<follows::followee_id, T>;
+type WithFollower<T> = Eq<follows::follower_id, T>;
+
+impl Follow {
+    pub fn with_followee(followee_id: &Uuid) -> WithFollowee<&Uuid> {
+        follows::followee_id.eq(followee_id)
+    }
+
+    pub fn with_follower(follower_id: &Uuid) -> WithFollower<&Uuid> {
+        follows::follower_id.eq(follower_id)
+    }
+    // fn by_followee_and_follower(followee_id: &Uuid, follower_id: &Uuid) -> Filter<Source,  {
+    //     let t = follows::table;
+    //     t.filter(follows::followee_id.eq(followee_id))
+    //         .filter(follows::follower_id.eq(follower_id))
+    // }
+}
+
 impl Follow {
     pub fn create(conn: &mut PgConnection, params: &CreateFollow) -> Result<(), AppError> {
         diesel::insert_into(follows::table)
@@ -26,12 +45,10 @@ impl Follow {
     }
 
     pub fn delete(conn: &mut PgConnection, params: &DeleteFollow) -> Result<(), AppError> {
-        diesel::delete(
-            follows::table
-                .filter(follows::followee_id.eq(params.followee_id))
-                .filter(follows::follower_id.eq(params.follower_id)),
-        )
-        .execute(conn)?;
+        let t = follows::table
+            .filter(Follow::with_followee(&params.followee_id))
+            .filter(Follow::with_follower(&params.follower_id));
+        diesel::delete(t).execute(conn)?;
         Ok(())
     }
 
@@ -40,7 +57,7 @@ impl Follow {
         follower_id: &Uuid,
     ) -> Result<Vec<Uuid>, AppError> {
         let result = follows::table
-            .filter(follows::follower_id.eq(follower_id))
+            .filter(Follow::with_follower(follower_id))
             .select(follows::followee_id)
             .get_results::<Uuid>(conn)?;
         Ok(result)

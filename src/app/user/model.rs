@@ -162,8 +162,8 @@ impl User {
     pub fn is_following(&self, conn: &mut PgConnection, followee_id: &Uuid) -> bool {
         use crate::schema::follows;
         let follow = follows::table
-            .filter(follows::followee_id.eq(followee_id))
-            .filter(follows::follower_id.eq(self.id))
+            .filter(Follow::with_followee(followee_id))
+            .filter(Follow::with_follower(&self.id))
             .get_result::<Follow>(conn);
         follow.is_ok()
     }

@@ -291,7 +291,7 @@ pub fn fetch_following_articles(
                 .collect::<Vec<_>>();
 
             let list = follows::table
-                .filter(follows::follower_id.eq(params.current_user.id))
+                .filter(Follow::with_follower(&params.current_user.id))
                 .filter(follows::followee_id.eq_any(user_ids_list))
                 .get_results::<Follow>(conn)?;
 
