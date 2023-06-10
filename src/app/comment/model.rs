@@ -3,6 +3,7 @@ use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::comments;
 use chrono::NaiveDateTime;
+use diesel::dsl::Eq;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -21,6 +22,22 @@ pub struct Comment {
     pub updated_at: NaiveDateTime,
 }
 
+type WithId<T> = Eq<comments::id, T>;
+type WithAuthor<T> = Eq<comments::author_id, T>;
+type WithArticle<T> = Eq<comments::article_id, T>;
+
+impl Comment {
+    fn with_id(id: &Uuid) -> WithId<&Uuid> {
+        comments::id.eq(id)
+    }
+    fn with_author(author_id: &Uuid) -> WithAuthor<&Uuid> {
+        comments::author_id.eq(author_id)
+    }
+    fn with_article(article_id: &Uuid) -> WithArticle<&Uuid> {
+        comments::article_id.eq(article_id)
+    }
+}
+
 impl Comment {
     pub fn create(conn: &mut PgConnection, record: &CreateComment) -> Result<Self, AppError> {
         let new_comment = diesel::insert_into(comments::table)
@@ -30,11 +47,11 @@ impl Comment {
     }
 
     pub fn delete(conn: &mut PgConnection, params: &DeleteComment) -> Result<(), AppError> {
-        diesel::delete(comments::table)
-            .filter(comments::id.eq(params.comment_id))
-            .filter(comments::author_id.eq(params.author_id))
-            .filter(comments::article_id.eq(params.article_id))
-            .execute(conn)?;
+        let t = comments::table
+            .filter(Self::with_id(&params.comment_id))
+            .filter(Self::with_author(&params.author_id))
+            .filter(Self::with_article(&params.article_id));
+        diesel::delete(t).execute(conn)?;
         Ok(())
     }
 }

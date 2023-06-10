@@ -90,7 +90,7 @@ pub fn fetch_articles_list(
         let mut query = articles::table.inner_join(users::table).into_boxed();
 
         if let Some(tag_name) = &params.tag {
-            let ids = Tag::fetch_ids_by_name(conn, tag_name)
+            let ids = Tag::fetch_article_ids_by_name(conn, tag_name)
                 .expect("could not fetch tagged article ids."); // TODO: use ? or error handling
             query = query.filter(articles::id.eq_any(ids));
         }
@@ -119,7 +119,7 @@ pub fn fetch_articles_list(
             let mut query = articles::table.inner_join(users::table).into_boxed();
 
             if let Some(tag_name) = &params.tag {
-                let ids = Tag::fetch_ids_by_name(conn, tag_name)
+                let ids = Tag::fetch_article_ids_by_name(conn, tag_name)
                     .expect("could not fetch tagged article ids."); // TODO: use ? or error handling
                 query = query.filter(articles::id.eq_any(ids));
             }
@@ -291,7 +291,7 @@ pub fn fetch_following_articles(
                 .collect::<Vec<_>>();
 
             let list = follows::table
-                .filter(follows::follower_id.eq(params.current_user.id))
+                .filter(Follow::with_follower(&params.current_user.id))
                 .filter(follows::followee_id.eq_any(user_ids_list))
                 .get_results::<Follow>(conn)?;
 
@@ -371,7 +371,7 @@ pub fn update_article(
         },
     )?;
 
-    let tag_list = Tag::fetch_by_article_id(conn, article.id)?;
+    let tag_list = Tag::fetch_by_article_id(conn, &article.id)?;
 
     let profile = params
         .current_user

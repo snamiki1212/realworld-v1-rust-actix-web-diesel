@@ -1,3 +1,4 @@
+use crate::app::favorite::model::Favorite;
 use crate::app::follow::model::{CreateFollow, DeleteFollow, Follow};
 use crate::app::profile::model::Profile;
 use crate::error::AppError;
@@ -5,12 +6,14 @@ use crate::schema::users;
 use crate::utils::{hasher, token};
 use chrono::prelude::*;
 use chrono::NaiveDateTime;
+use diesel::backend::Backend;
+use diesel::dsl::{AsSelect, Eq, Filter, Select};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Identifiable, Queryable, Serialize, Deserialize, Debug, Clone)]
+#[derive(Identifiable, Queryable, Selectable, Serialize, Deserialize, Debug, Clone)]
 #[diesel(table_name = users)]
 pub struct User {
     pub id: Uuid,
@@ -24,6 +27,43 @@ pub struct User {
 }
 
 type Token = String;
+
+type All<DB> = Select<users::table, AsSelect<User, DB>>;
+type WithUsername<T> = Eq<users::username, T>;
+type WithEmail<T> = Eq<users::email, T>;
+type ByUsername<DB, T> = Filter<All<DB>, WithUsername<T>>;
+type ByEmail<DB, T> = Filter<All<DB>, WithEmail<T>>;
+
+impl User {
+    fn all<DB>() -> All<DB>
+    where
+        DB: Backend,
+    {
+        users::table.select(User::as_select())
+    }
+
+    pub fn with_username(username: &str) -> WithUsername<&str> {
+        users::username.eq(username)
+    }
+
+    fn by_username<DB>(username: &str) -> ByUsername<DB, &str>
+    where
+        DB: Backend,
+    {
+        Self::all().filter(Self::with_username(username))
+    }
+
+    fn with_email(email: &str) -> WithEmail<&str> {
+        users::email.eq(email)
+    }
+
+    fn by_email<DB>(email: &str) -> ByEmail<DB, &str>
+    where
+        DB: Backend,
+    {
+        Self::all().filter(Self::with_email(email))
+    }
+}
 
 impl User {
     pub fn signup<'a>(
@@ -54,17 +94,16 @@ impl User {
         email: &str,
         naive_password: &str,
     ) -> Result<(User, Token), AppError> {
-        let user = users::table
-            .filter(users::email.eq(email))
-            .limit(1)
-            .first::<User>(conn)?;
+        let t = Self::by_email(email).limit(1);
+        let user = t.first::<User>(conn)?;
         hasher::verify(naive_password, &user.password)?;
         let token = user.generate_token()?;
         Ok((user, token))
     }
 
     pub fn find(conn: &mut PgConnection, id: Uuid) -> Result<Self, AppError> {
-        let user = users::table.find(id).first(conn)?;
+        let t = users::table.find(id);
+        let user = t.first(conn)?;
         Ok(user)
     }
 
@@ -73,7 +112,7 @@ impl User {
         user_id: Uuid,
         changeset: UpdateUser,
     ) -> Result<Self, AppError> {
-        let target = users::table.filter(users::id.eq(user_id));
+        let target = users::table.find(user_id);
         let user = diesel::update(target)
             .set(changeset)
             .get_result::<User>(conn)?;
@@ -81,17 +120,14 @@ impl User {
     }
 
     pub fn find_by_username(conn: &mut PgConnection, username: &str) -> Result<Self, AppError> {
-        let user = users::table
-            .filter(users::username.eq(username))
-            .limit(1)
-            .first::<User>(conn)?;
+        let t = Self::by_username(username).limit(1);
+        let user = t.first::<User>(conn)?;
         Ok(user)
     }
 
     pub fn follow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
-        let followee = users::table
-            .filter(users::username.eq(username))
-            .first::<User>(conn)?;
+        let t = Self::by_username(username);
+        let followee = t.first::<User>(conn)?;
 
         Follow::create(
             conn,
@@ -110,9 +146,8 @@ impl User {
     }
 
     pub fn unfollow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
-        let followee = users::table
-            .filter(users::username.eq(username))
-            .first::<User>(conn)?;
+        let t = Self::by_username(username);
+        let followee = t.first::<User>(conn)?;
 
         Follow::delete(
             conn,
@@ -132,10 +167,10 @@ impl User {
 
     pub fn is_following(&self, conn: &mut PgConnection, followee_id: &Uuid) -> bool {
         use crate::schema::follows;
-        let follow = follows::table
-            .filter(follows::followee_id.eq(followee_id))
-            .filter(follows::follower_id.eq(self.id))
-            .get_result::<Follow>(conn);
+        let t = follows::table
+            .filter(Follow::with_followee(followee_id))
+            .filter(Follow::with_follower(&self.id));
+        let follow = t.get_result::<Follow>(conn);
         follow.is_ok()
     }
 }
@@ -152,10 +187,10 @@ impl User {
         conn: &mut PgConnection,
     ) -> Result<Vec<Uuid>, AppError> {
         use crate::schema::favorites;
-        let favorited_article_ids = favorites::table
-            .filter(favorites::user_id.eq(self.id))
-            .select(favorites::article_id)
-            .get_results::<Uuid>(conn)?;
+        let t = favorites::table
+            .filter(Favorite::with_user_id(&self.id))
+            .select(favorites::article_id);
+        let favorited_article_ids = t.get_results::<Uuid>(conn)?;
         Ok(favorited_article_ids)
     }
 

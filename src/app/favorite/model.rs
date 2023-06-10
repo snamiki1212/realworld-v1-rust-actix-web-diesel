@@ -3,6 +3,7 @@ use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::favorites;
 use chrono::NaiveDateTime;
+use diesel::dsl::Eq;
 use diesel::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -17,6 +18,19 @@ pub struct Favorite {
     pub user_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+}
+
+type WithUserId<T> = Eq<favorites::user_id, T>;
+type WithArticleId<T> = Eq<favorites::article_id, T>;
+
+impl Favorite {
+    pub fn with_user_id(user_id: &Uuid) -> WithUserId<&Uuid> {
+        favorites::user_id.eq_all(user_id)
+    }
+
+    pub fn with_article_id(article_id: &Uuid) -> WithArticleId<&Uuid> {
+        favorites::article_id.eq_all(article_id)
+    }
 }
 
 impl Favorite {
@@ -34,10 +48,10 @@ impl Favorite {
             article_id,
         }: &DeleteFavorite,
     ) -> Result<usize, AppError> {
-        let item = diesel::delete(favorites::table)
-            .filter(favorites::user_id.eq_all(user_id))
-            .filter(favorites::article_id.eq_all(article_id))
-            .execute(conn)?;
+        let t = favorites::table
+            .filter(Self::with_user_id(user_id))
+            .filter(Self::with_article_id(article_id));
+        let item = diesel::delete(t).execute(conn)?;
         Ok(item)
     }
 
@@ -46,11 +60,11 @@ impl Favorite {
         username: &str,
     ) -> Result<Vec<Uuid>, AppError> {
         use crate::schema::users;
-        let ids = favorites::table
+        let t = favorites::table
             .inner_join(users::table)
-            .filter(users::username.eq(username))
-            .select(favorites::article_id)
-            .load::<Uuid>(conn)?;
+            .filter(User::with_username(username))
+            .select(favorites::article_id);
+        let ids = t.load::<Uuid>(conn)?;
         Ok(ids)
     }
 }

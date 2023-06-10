@@ -1,8 +1,10 @@
+use crate::app::favorite::model::Favorite;
 use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::schema::articles;
 use crate::utils::converter;
 use chrono::NaiveDateTime;
+use diesel::dsl::Eq;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use diesel::Insertable;
@@ -23,6 +25,24 @@ pub struct Article {
     pub updated_at: NaiveDateTime,
 }
 
+type WithAuthorId<T> = Eq<articles::author_id, T>;
+type WithSlug<T> = Eq<articles::slug, T>;
+type WithId<T> = Eq<articles::id, T>;
+
+impl Article {
+    fn with_author_id(author_id: &Uuid) -> WithAuthorId<&Uuid> {
+        articles::author_id.eq(author_id)
+    }
+
+    fn with_slug(slug: &str) -> WithSlug<&str> {
+        articles::slug.eq(slug)
+    }
+
+    fn with_id(id: &Uuid) -> WithId<&Uuid> {
+        articles::id.eq(id)
+    }
+}
+
 impl Article {
     pub fn create(conn: &mut PgConnection, record: &CreateArticle) -> Result<Self, AppError> {
         let article = diesel::insert_into(articles::table)
@@ -38,13 +58,10 @@ impl Article {
         author_id: &Uuid,
         record: &UpdateArticle,
     ) -> Result<Self, AppError> {
-        let article = diesel::update(
-            articles::table
-                .filter(articles::slug.eq(article_title_slug))
-                .filter(articles::author_id.eq_all(author_id)),
-        )
-        .set(record)
-        .get_result::<Article>(conn)?;
+        let t = articles::table
+            .filter(Self::with_slug(article_title_slug))
+            .filter(Self::with_author_id(author_id));
+        let article = diesel::update(t).set(record).get_result::<Article>(conn)?;
         Ok(article)
     }
 
@@ -56,10 +73,10 @@ impl Article {
         conn: &mut PgConnection,
         params: &FetchBySlugAndAuthorId,
     ) -> Result<Self, AppError> {
-        let item = articles::table
-            .filter(articles::slug.eq_all(params.slug.to_owned()))
-            .filter(articles::author_id.eq_all(params.author_id))
-            .first::<Self>(conn)?;
+        let t = articles::table
+            .filter(Self::with_slug(&params.slug))
+            .filter(Self::with_author_id(&params.author_id));
+        let item = t.first::<Self>(conn)?;
         Ok(item)
     }
 
@@ -68,10 +85,10 @@ impl Article {
         slug: &str,
     ) -> Result<(Self, User), AppError> {
         use crate::schema::users;
-        let result = articles::table
+        let t = articles::table
             .inner_join(users::table)
-            .filter(articles::slug.eq(slug))
-            .get_result::<(Self, User)>(conn)?;
+            .filter(Self::with_slug(slug));
+        let result = t.get_result::<(Self, User)>(conn)?;
         Ok(result)
     }
 
@@ -80,30 +97,28 @@ impl Article {
         name: &str,
     ) -> Result<Vec<Uuid>, AppError> {
         use crate::schema::users;
-        let ids = users::table
+        let t = users::table
             .inner_join(articles::table)
-            .filter(users::username.eq(name))
-            .select(articles::id)
-            .load::<Uuid>(conn)?;
+            .filter(User::with_username(name))
+            .select(articles::id);
+        let ids = t.load::<Uuid>(conn)?;
         Ok(ids)
     }
 
     pub fn find_with_author(conn: &mut PgConnection, id: &Uuid) -> Result<(Self, User), AppError> {
         use crate::schema::users;
-        let result = articles::table
+        let t = articles::table
             .inner_join(users::table)
-            .filter(articles::id.eq(id))
-            .get_result::<(Article, User)>(conn)?;
+            .filter(Self::with_id(id));
+        let result = t.get_result::<(Article, User)>(conn)?;
         Ok(result)
     }
 
     pub fn delete(conn: &mut PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
-        diesel::delete(
-            articles::table
-                .filter(articles::slug.eq(&params.slug))
-                .filter(articles::author_id.eq(params.author_id)),
-        )
-        .execute(conn)?;
+        let t = articles::table
+            .filter(Self::with_slug(&params.slug))
+            .filter(Self::with_author_id(&params.author_id));
+        diesel::delete(t).execute(conn)?;
         // NOTE: references tag rows are deleted automatically by DELETE CASCADE
 
         Ok(())
@@ -117,21 +132,20 @@ impl Article {
         user_id: &Uuid,
     ) -> Result<bool, AppError> {
         use crate::schema::favorites;
-        let count = favorites::table
+        let t = favorites::table
             .select(diesel::dsl::count(favorites::id))
-            .filter(favorites::article_id.eq_all(self.id))
-            .filter(favorites::user_id.eq_all(user_id))
-            .first::<i64>(conn)?;
-
+            .filter(Favorite::with_article_id(&self.id))
+            .filter(Favorite::with_user_id(user_id));
+        let count = t.first::<i64>(conn)?;
         Ok(count >= 1)
     }
 
     pub fn fetch_favorites_count(&self, conn: &mut PgConnection) -> Result<i64, AppError> {
         use crate::schema::favorites;
-        let favorites_count = favorites::table
-            .filter(favorites::article_id.eq_all(self.id))
-            .select(diesel::dsl::count(favorites::created_at))
-            .first::<i64>(conn)?;
+        let t = favorites::table
+            .filter(Favorite::with_article_id(&self.id))
+            .select(diesel::dsl::count(favorites::created_at));
+        let favorites_count = t.first::<i64>(conn)?;
         Ok(favorites_count)
     }
 }
