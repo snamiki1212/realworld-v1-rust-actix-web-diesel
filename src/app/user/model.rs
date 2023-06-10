@@ -41,7 +41,7 @@ impl User {
         users::table.select(User::as_select())
     }
 
-    fn with_username(username: &str) -> WithUsername<&str> {
+    pub fn with_username(username: &str) -> WithUsername<&str> {
         users::username.eq(username)
     }
 

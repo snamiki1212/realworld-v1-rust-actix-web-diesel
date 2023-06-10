@@ -26,11 +26,16 @@ pub struct Article {
 
 type All<DB> = Select<articles::table, AsSelect<Article, DB>>;
 type WithAuthorId<T> = Eq<articles::author_id, T>;
+type WithSlug<T> = Eq<articles::slug, T>;
 // type ByArticleId<T, DB> = Filter<All<DB>, WithArticleId<T>>;
 
 impl Article {
-    fn with_article_id(author_id: &Uuid) -> WithAuthorId<&Uuid> {
+    fn with_author_id(author_id: &Uuid) -> WithAuthorId<&Uuid> {
         articles::author_id.eq(author_id)
+    }
+
+    fn with_slug(slug: &str) -> WithSlug<&str> {
+        articles::slug.eq(slug)
     }
 }
 
@@ -51,8 +56,8 @@ impl Article {
     ) -> Result<Self, AppError> {
         let article = diesel::update(
             articles::table
-                .filter(articles::slug.eq(article_title_slug))
-                .filter(articles::author_id.eq_all(author_id)),
+                .filter(Self::with_slug(article_title_slug))
+                .filter(Self::with_author_id(author_id)),
         )
         .set(record)
         .get_result::<Article>(conn)?;
@@ -68,8 +73,8 @@ impl Article {
         params: &FetchBySlugAndAuthorId,
     ) -> Result<Self, AppError> {
         let item = articles::table
-            .filter(articles::slug.eq_all(params.slug.to_owned()))
-            .filter(Self::with_article_id(&params.author_id))
+            .filter(Self::with_slug(&params.slug))
+            .filter(Self::with_author_id(&params.author_id))
             .first::<Self>(conn)?;
         Ok(item)
     }
@@ -81,7 +86,7 @@ impl Article {
         use crate::schema::users;
         let result = articles::table
             .inner_join(users::table)
-            .filter(articles::slug.eq(slug))
+            .filter(Self::with_slug(slug))
             .get_result::<(Self, User)>(conn)?;
         Ok(result)
     }
@@ -93,7 +98,7 @@ impl Article {
         use crate::schema::users;
         let ids = users::table
             .inner_join(articles::table)
-            .filter(users::username.eq(name))
+            .filter(User::with_username(name))
             .select(articles::id)
             .load::<Uuid>(conn)?;
         Ok(ids)
@@ -111,8 +116,8 @@ impl Article {
     pub fn delete(conn: &mut PgConnection, params: &DeleteArticle) -> Result<(), AppError> {
         diesel::delete(
             articles::table
-                .filter(articles::slug.eq(&params.slug))
-                .filter(articles::author_id.eq(params.author_id)),
+                .filter(Self::with_slug(&params.slug))
+                .filter(Self::with_author_id(&params.author_id)),
         )
         .execute(conn)?;
         // NOTE: references tag rows are deleted automatically by DELETE CASCADE
