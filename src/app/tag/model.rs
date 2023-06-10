@@ -56,22 +56,18 @@ pub struct Tag {
     pub updated_at: NaiveDateTime,
 }
 
-// sql_function!(fn canon_name(x: sql_types::Text) -> sql_types::Text);
-// sql_function!(fn canon_id(x: sql_types::Uuid) -> sql_types::Uuid);
-
 // General
 // type SqlType = SqlTypeOf<AsSelect<Tag, Pg>>;
 // type BoxedQuery<'a> = tags::BoxedQuery<'a, Pg, SqlType>;
 
 // Tags
-// type CanonName<T> = canon_name::HelperType<T>;
-// type CanonArticleId<T> = canon_id::HelperType<T>;
 type All<DB> = Select<tags::table, AsSelect<Tag, DB>>;
-// type All<Columns> = Select<tags::table, AsSelect<Tag, Columns>>;
 type WithName<T> = Eq<tags::name, T>;
 type ByName<T, DB> = Filter<All<DB>, WithName<T>>;
-type WithArticleId<'a> = Eq<tags::article_id, &'a Uuid>;
-// type ByArticleId<'a> = Filter<All, WithArticleId<'a>>;
+// type WithArticleId<'a> = Eq<tags::article_id, &'a Uuid>;
+// type ByArticleId<'a> = Filter<Tag, WithArticleId<'a>>;
+type WithArticleId<T> = Eq<tags::article_id, T>;
+type ByArticleId<T, DB> = Filter<All<DB>, WithArticleId<T>>;
 
 impl Tag {
     // pub fn with_name<T>(name: T) -> WithName<'static>
@@ -111,21 +107,22 @@ impl Tag {
         Self::all().filter(Self::with_name(name))
     }
 
-    pub fn with_article_id(article_id: &Uuid) -> WithArticleId<'_> {
+    pub fn with_article_id(article_id: &Uuid) -> WithArticleId<&Uuid> {
         tags::article_id.eq(article_id)
     }
 
-    // pub fn by_article_id(article_id: &Uuid) -> ByArticleId<'_> {
-    //     Self::all().filter(Self::with_article_id(article_id))
-    // }
+    pub fn by_article_id<DB>(article_id: &Uuid) -> ByArticleId<&Uuid, DB>
+    where
+        DB: Backend,
+    {
+        Self::all().filter(Self::with_article_id(article_id))
+    }
 
     pub fn fetch_by_article_id(
         conn: &mut PgConnection,
         article_id: &Uuid,
     ) -> Result<Vec<Self>, AppError> {
-        let list = tags::table
-            .filter(Self::with_article_id(article_id))
-            .get_results::<Self>(conn)?;
+        let list = Self::by_article_id(article_id).get_results::<Self>(conn)?;
         Ok(list)
     }
 
