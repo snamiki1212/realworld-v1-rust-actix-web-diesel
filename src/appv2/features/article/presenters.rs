@@ -1,8 +1,10 @@
 use super::entities::Article;
+use super::services::ArticlesList;
 use crate::appv2::features::favorite::entities::FavoriteInfo;
 use crate::appv2::features::profile::entities::Profile;
 use crate::appv2::features::tag::entities::Tag;
 use crate::utils::date::Iso8601;
+use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 
@@ -51,7 +53,6 @@ pub struct MultipleArticlesResponse {
 
 type ArticlesCount = i64;
 type Inner = ((Article, Profile, FavoriteInfo), Vec<Tag>);
-type ArticlesList = Vec<Inner>;
 type Item = (ArticlesList, ArticlesCount);
 impl From<Item> for MultipleArticlesResponse {
     fn from((list, articles_count): (Vec<Inner>, ArticleCount)) -> Self {
@@ -118,4 +119,16 @@ pub struct AuthorContent {
     pub bio: Option<String>,
     pub image: Option<String>,
     pub following: bool,
+}
+
+#[derive(Clone)]
+pub struct ArticlePresenter {}
+impl ArticlePresenter {
+    pub fn new() -> Self {
+        Self {}
+    }
+    pub fn from_list_and_count(&self, list: ArticlesList, count: i64) -> HttpResponse {
+        let res = MultipleArticlesResponse::from((list, count));
+        HttpResponse::Ok().json(res)
+    }
 }

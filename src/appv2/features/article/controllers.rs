@@ -24,23 +24,18 @@ pub async fn index(
     state: web::Data<AppState>,
     params: web::Query<ArticlesListQueryParameter>,
 ) -> ApiResponse {
-    let conn = &mut state.get_conn()?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
-
-    let (articles_list, articles_count) = services::fetch_articles_list(
-        conn,
-        services::FetchArticlesList {
+    state
+        .di_container
+        .article_usecase
+        .fetch_articles_list(services::FetchArticlesList {
             tag: params.tag.clone(),
             author: params.author.clone(),
             favorited: params.favorited.clone(),
             offset,
             limit,
-        },
-    )?;
-
-    let res = MultipleArticlesResponse::from((articles_list, articles_count));
-    Ok(HttpResponse::Ok().json(res))
+        })
 }
 
 #[derive(Deserialize)]

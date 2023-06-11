@@ -79,11 +79,12 @@ pub struct FetchArticlesList {
 
 type ArticlesCount = i64;
 type ArticlesListInner = (Article, Profile, FavoriteInfo);
-type ArticlesList = Vec<(ArticlesListInner, Vec<Tag>)>;
+pub type ArticlesList = Vec<(ArticlesListInner, Vec<Tag>)>;
+pub type FetchArticlesListResult = (ArticlesList, ArticlesCount);
 pub fn fetch_articles_list(
     conn: &mut PgConnection,
     params: FetchArticlesList,
-) -> Result<(ArticlesList, ArticlesCount), AppError> {
+) -> Result<FetchArticlesListResult, AppError> {
     use diesel::prelude::*;
 
     let query = {
@@ -114,7 +115,7 @@ pub fn fetch_articles_list(
         .select(diesel::dsl::count(articles::id))
         .first::<i64>(conn)?;
 
-    let list = {
+    let result = {
         let query = {
             let mut query = articles::table.inner_join(users::table).into_boxed();
 
@@ -190,7 +191,7 @@ pub fn fetch_articles_list(
             .collect::<Vec<_>>()
     };
 
-    Ok((list, articles_count))
+    Ok((result, articles_count))
 }
 
 pub struct FetchArticle {
