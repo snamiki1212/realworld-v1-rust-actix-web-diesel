@@ -1,8 +1,9 @@
-use super::entities::User;
+use super::entities::{UpdateUser, User};
 use super::presenters::UserPresenter;
 use super::repositories::UserRepository;
 use crate::error::AppError;
 use actix_web::HttpResponse;
+use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct UserUsecase {
@@ -38,6 +39,12 @@ impl UserUsecase {
     pub fn me(&self, current_user: &User) -> Result<HttpResponse, AppError> {
         let (user, token) = self.user_repository.me(current_user)?;
         let res = self.user_presenter.from_user_and_token(user.clone(), token);
+        Ok(res)
+    }
+
+    pub fn update(&self, user_id: Uuid, changeset: UpdateUser) -> Result<HttpResponse, AppError> {
+        let (new_user, token) = self.user_repository.update(user_id, changeset)?;
+        let res = self.user_presenter.from_user_and_token(new_user, token);
         Ok(res)
     }
 }

@@ -1,8 +1,12 @@
+use uuid::Uuid;
+
 use crate::app::follow::model::{CreateFollow, DeleteFollow, Follow};
 use crate::appv2::features::profile::entities::Profile;
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use crate::utils::db::DbPool;
+
+use super::entities::UpdateUser;
 
 type Token = String;
 
@@ -87,5 +91,12 @@ impl UserRepository {
             image: current_user.image.clone(),
             following: false,
         })
+    }
+
+    pub fn update(&self, user_id: Uuid, changeset: UpdateUser) -> Result<(User, Token), AppError> {
+        let conn = &mut self.pool.get()?;
+        let new_user = User::update(conn, user_id, changeset)?;
+        let token = &new_user.generate_token()?;
+        Ok((new_user, token.clone()))
     }
 }
