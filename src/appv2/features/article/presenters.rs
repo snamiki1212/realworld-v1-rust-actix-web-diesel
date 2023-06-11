@@ -131,4 +131,8 @@ impl ArticlePresenter {
         let res = MultipleArticlesResponse::from((list, count));
         HttpResponse::Ok().json(res)
     }
+    pub fn from_item(&self, item: (Article, Profile, FavoriteInfo, Vec<Tag>)) -> HttpResponse {
+        let res = SingleArticleResponse::from(item);
+        HttpResponse::Ok().json(res)
+    }
 }

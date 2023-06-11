@@ -67,14 +67,11 @@ pub async fn feed(
 }
 
 pub async fn show(state: web::Data<AppState>, path: web::Path<ArticleTitleSlug>) -> ApiResponse {
-    let conn = &mut state.get_conn()?;
     let article_title_slug = path.into_inner();
-    let (article, profile, favorite_info, tags_list) = services::fetch_article_by_slug(
-        conn,
-        &services::FetchArticleBySlug { article_title_slug },
-    )?;
-    let res = SingleArticleResponse::from((article, profile, favorite_info, tags_list));
-    Ok(HttpResponse::Ok().json(res))
+    state
+        .di_container
+        .article_usecase
+        .fetch_article_by_slug(&services::FetchArticleBySlug { article_title_slug })
 }
 
 pub async fn create(

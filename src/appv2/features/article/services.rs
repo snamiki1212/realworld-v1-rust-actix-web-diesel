@@ -223,13 +223,14 @@ pub fn fetch_article(
     Ok((article, profile, favorite_info, tags_list))
 }
 
+pub type FetchArticleBySlugResult = (Article, Profile, FavoriteInfo, Vec<Tag>);
 pub struct FetchArticleBySlug {
     pub article_title_slug: String,
 }
 pub fn fetch_article_by_slug(
     conn: &mut PgConnection,
     params: &FetchArticleBySlug,
-) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
+) -> Result<FetchArticleBySlugResult, AppError> {
     let (article, author) = Article::fetch_by_slug_with_author(conn, &params.article_title_slug)?;
 
     let profile = author.fetch_profile(conn, &author.id)?;

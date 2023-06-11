@@ -30,4 +30,12 @@ impl ArticleRepository {
         )?;
         Ok(result)
     }
+
+    pub fn fetch_article_by_slug(
+        &self,
+        article_title_slug: String,
+    ) -> Result<services::FetchArticleBySlugResult, AppError> {
+        let conn = &mut self.pool.get()?;
+        services::fetch_article_by_slug(conn, &services::FetchArticleBySlug { article_title_slug })
+    }
 }
