@@ -1,12 +1,8 @@
-// use crate::appv2::features::profile::domains::profile_repository::{
-//     IProfileRepository, ProfileRepository,
-// };
 use crate::error::AppError;
 use crate::utils::db::DbPool;
+use crate::utils::di::DiContainer;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
-// use std::sync::Arc;
-use crate::utils::di::DiContainer;
 
 type AppConn = PooledConnection<ConnectionManager<PgConnection>>;
 

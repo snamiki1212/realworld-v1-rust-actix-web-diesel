@@ -1,7 +1,7 @@
-use crate::appv2::features::profile::adapters::presenters::ProfilePresenter;
-use crate::appv2::features::profile::domains::profile_repository::ProfileRepository;
-use crate::appv2::features::profile::usecases::profile_usecase::ProfileUsecase;
-use crate::appv2::features::user::domains::user_repository::UserRepository;
+use crate::appv2::features::profile::{
+    presenters::ProfilePresenter, repositories::ProfileRepository, usecases::ProfileUsecase,
+};
+use crate::appv2::features::user::repositories::UserRepository;
 
 use crate::utils::db::DbPool;
 
