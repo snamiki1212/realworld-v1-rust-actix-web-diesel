@@ -37,4 +37,15 @@ impl ProfileUsecase {
         let profile = self.user_repository.follow(current_user, target_username)?;
         Ok(self.presenter.complete(profile))
     }
+
+    pub fn unfollow(
+        &self,
+        current_user: &User,
+        target_username: &str,
+    ) -> Result<ProfileResponse, AppError> {
+        let profile = self
+            .user_repository
+            .unfollow(current_user, target_username)?;
+        Ok(self.presenter.complete(profile))
+    }
 }

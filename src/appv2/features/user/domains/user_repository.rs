@@ -1,4 +1,4 @@
-use crate::app::follow::model::{CreateFollow, Follow};
+use crate::app::follow::model::{CreateFollow, DeleteFollow, Follow};
 use crate::app::user::model::User;
 use crate::appv2::features::profile::entities::profile::Profile;
 use crate::error::AppError;
@@ -35,6 +35,34 @@ impl UserRepository {
             bio: current_user.bio.clone(),
             image: current_user.image.clone(),
             following: true,
+        })
+    }
+
+    pub fn unfollow(
+        &self,
+        current_user: &User,
+        target_username: &str,
+    ) -> Result<Profile, AppError> {
+        let conn = &mut self.pool.get()?;
+        let t = User::by_username(target_username);
+        let followee = {
+            use diesel::prelude::*;
+            t.first::<User>(conn)?
+        };
+
+        Follow::delete(
+            conn,
+            &DeleteFollow {
+                followee_id: followee.id,
+                follower_id: current_user.id,
+            },
+        )?;
+
+        Ok(Profile {
+            username: current_user.username.clone(),
+            bio: current_user.bio.clone(),
+            image: current_user.image.clone(),
+            following: false,
         })
     }
 }

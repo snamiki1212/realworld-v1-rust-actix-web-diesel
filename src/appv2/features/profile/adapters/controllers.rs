@@ -14,9 +14,9 @@ pub async fn show(
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
     let repositories = {
-        let profileRepository = ProfileRepository::new(state.pool.clone()); // TODO: move to DI container.
-        let userRepository = UserRepository::new(state.pool.clone()); // TODO: move to DI container.
-        (profileRepository, userRepository)
+        let profile_repository = ProfileRepository::new(state.pool.clone()); // TODO: move to DI container.
+        let user_repository = UserRepository::new(state.pool.clone()); // TODO: move to DI container.
+        (profile_repository, user_repository)
     };
     let presenter = ProfilePresenter::new(); // TODO: move to DI container.
     let usecase = ProfileUsecase::new(repositories, presenter); // TODO: move to DI container.
@@ -35,17 +35,17 @@ pub async fn follow(
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
     let repositories = {
-        let profileRepository = ProfileRepository::new(state.pool.clone()); // TODO: move to DI container.
-        let userRepository = UserRepository::new(state.pool.clone()); // TODO: move to DI container.
-        (profileRepository, userRepository)
+        let profile_repository = ProfileRepository::new(state.pool.clone()); // TODO: move to DI container.
+        let user_repository = UserRepository::new(state.pool.clone()); // TODO: move to DI container.
+        (profile_repository, user_repository)
     };
     let presenter = ProfilePresenter::new(); // TODO: move to DI container.
     let usecase = ProfileUsecase::new(repositories, presenter); // TODO: move to DI container.
 
     let profile = {
         let current_user = auth::get_current_user(&req)?;
-        let username = path.into_inner();
-        usecase.follow(&current_user, &username)?
+        let target_username = path.into_inner();
+        usecase.follow(&current_user, &target_username)?
     };
     Ok(HttpResponse::Ok().json(profile))
 }
@@ -55,10 +55,18 @@ pub async fn unfollow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
-    let conn = &mut state.get_conn()?;
-    let current_user = auth::get_current_user(&req)?;
-    let username = path.into_inner();
-    let profile = current_user.unfollow(conn, &username)?;
-    let res = ProfileResponse::from(profile);
-    Ok(HttpResponse::Ok().json(res))
+    let repositories = {
+        let profile_repository = ProfileRepository::new(state.pool.clone()); // TODO: move to DI container.
+        let user_repository = UserRepository::new(state.pool.clone()); // TODO: move to DI container.
+        (profile_repository, user_repository)
+    };
+    let presenter = ProfilePresenter::new(); // TODO: move to DI container.
+    let usecase = ProfileUsecase::new(repositories, presenter); // TODO: move to DI container.
+
+    let profile = {
+        let current_user = auth::get_current_user(&req)?;
+        let target_username = path.into_inner();
+        usecase.unfollow(&current_user, &target_username)?
+    };
+    Ok(HttpResponse::Ok().json(profile))
 }

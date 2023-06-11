@@ -1,5 +1,5 @@
 use crate::app::favorite::model::Favorite;
-use crate::app::follow::model::{CreateFollow, DeleteFollow, Follow};
+use crate::app::follow::model::Follow;
 use crate::appv2::features::profile::entities::profile::Profile;
 use crate::error::AppError;
 use crate::schema::users;
@@ -123,46 +123,6 @@ impl User {
         let t = Self::by_username(username).limit(1);
         let user = t.first::<User>(conn)?;
         Ok(user)
-    }
-
-    // pub fn follow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
-    //     let t = Self::by_username(username);
-    //     let followee = t.first::<User>(conn)?;
-
-    //     Follow::create(
-    //         conn,
-    //         &CreateFollow {
-    //             follower_id: self.id,
-    //             followee_id: followee.id,
-    //         },
-    //     )?;
-
-    //     Ok(Profile {
-    //         username: self.username.clone(),
-    //         bio: self.bio.clone(),
-    //         image: self.image.clone(),
-    //         following: true,
-    //     })
-    // }
-
-    pub fn unfollow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
-        let t = Self::by_username(username);
-        let followee = t.first::<User>(conn)?;
-
-        Follow::delete(
-            conn,
-            &DeleteFollow {
-                followee_id: followee.id,
-                follower_id: self.id,
-            },
-        )?;
-
-        Ok(Profile {
-            username: self.username.clone(),
-            bio: self.bio.clone(),
-            image: self.image.clone(),
-            following: false,
-        })
     }
 
     pub fn is_following(&self, conn: &mut PgConnection, followee_id: &Uuid) -> bool {
