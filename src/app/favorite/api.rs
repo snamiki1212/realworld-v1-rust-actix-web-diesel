@@ -2,8 +2,8 @@ use super::{
     response::SingleArticleResponse,
     service::{self, UnfavoriteService},
 };
-use crate::middleware::auth;
-use crate::middleware::state::AppState;
+use crate::appv2::drivers::middlewares::auth;
+use crate::appv2::drivers::middlewares::state::AppState;
 use crate::utils::api::ApiResponse;
 use actix_web::{web, HttpRequest, HttpResponse};
 

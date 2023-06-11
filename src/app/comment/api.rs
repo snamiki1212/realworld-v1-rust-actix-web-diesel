@@ -3,8 +3,8 @@ use super::{
     response::{MultipleCommentsResponse, SingleCommentResponse},
     service,
 };
-use crate::middleware::auth;
-use crate::middleware::state::AppState;
+use crate::appv2::drivers::middlewares::auth;
+use crate::appv2::drivers::middlewares::state::AppState;
 use crate::utils::api::ApiResponse;
 use crate::utils::uuid;
 use actix_web::{web, HttpRequest, HttpResponse};

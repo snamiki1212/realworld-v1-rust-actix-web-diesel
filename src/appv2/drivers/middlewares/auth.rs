@@ -1,7 +1,7 @@
 use crate::app::user::model::User;
+use crate::appv2::drivers::middlewares::state::AppState;
 use crate::constants;
 use crate::error::AppError;
-use crate::middleware::state::AppState;
 use crate::utils::token;
 use actix_web::HttpMessage;
 use actix_web::{

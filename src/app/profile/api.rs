@@ -1,6 +1,6 @@
 use super::response::ProfileResponse;
 use super::service;
-use crate::middleware::{auth, state::AppState};
+use crate::appv2::drivers::middlewares::{auth, state::AppState};
 use crate::utils::api::ApiResponse;
 use actix_web::{web, HttpRequest, HttpResponse};
 

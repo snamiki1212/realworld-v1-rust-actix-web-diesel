@@ -10,7 +10,6 @@ mod app;
 mod appv2;
 mod constants;
 mod error;
-mod middleware;
 mod schema;
 mod utils;
 
@@ -22,15 +21,15 @@ async fn main() -> std::io::Result<()> {
 
     let state = {
         let pool = utils::db::establish_connection();
-        middleware::state::AppState { pool }
+        appv2::drivers::middlewares::state::AppState { pool }
     };
 
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .app_data(actix_web::web::Data::new(state.clone()))
-            .wrap(middleware::cors::cors())
-            .wrap(middleware::auth::Authentication)
+            .wrap(appv2::drivers::middlewares::cors::cors())
+            .wrap(appv2::drivers::middlewares::auth::Authentication)
             .configure(appv2::drivers::routes::api)
     })
     .bind(constants::BIND)?
