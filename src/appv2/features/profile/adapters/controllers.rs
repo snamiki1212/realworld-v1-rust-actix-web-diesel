@@ -1,5 +1,5 @@
 use super::super::domains::profile_repository::ProfileRepository;
-use super::super::usecases::show_profile_usecase::ProfileUsecase;
+use super::super::usecases::profile_usecase::ProfileUsecase;
 use super::presenters::{ProfilePresenter, ProfileResponse};
 use crate::appv2::drivers::middlewares::{auth, state::AppState};
 use crate::appv2::features::user::domains::user_repository::UserRepository;

@@ -1,2 +1,2 @@
+pub mod profile_usecase;
 pub mod services;
-pub mod show_profile_usecase;
