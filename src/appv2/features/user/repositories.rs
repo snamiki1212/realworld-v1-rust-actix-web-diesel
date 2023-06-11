@@ -16,6 +16,11 @@ impl UserRepository {
         Self { pool }
     }
 
+    pub fn me<'a>(&self, current_user: &'a User) -> Result<(&'a User, Token), AppError> {
+        let token = current_user.generate_token()?;
+        Ok((current_user, token))
+    }
+
     pub fn signin(&self, email: &str, naive_password: &str) -> Result<(User, Token), AppError> {
         let conn = &mut self.pool.get()?;
         User::signin(conn, email, naive_password)

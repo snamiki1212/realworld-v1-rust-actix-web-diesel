@@ -22,11 +22,10 @@ pub async fn signup(state: web::Data<AppState>, form: web::Json<requests::Signup
     Ok(res)
 }
 
-pub async fn me(req: HttpRequest) -> ApiResponse {
-    let user = auth::get_current_user(&req)?;
-    let token = user.generate_token()?;
-    let res = UserResponse::from((user, token));
-    Ok(HttpResponse::Ok().json(res))
+pub async fn me(state: web::Data<AppState>, req: HttpRequest) -> ApiResponse {
+    let current_user = auth::get_current_user(&req)?;
+    let res = state.di_container.user_usecase.me(&current_user)?;
+    Ok(res)
 }
 
 pub async fn update(
