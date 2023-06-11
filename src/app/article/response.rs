@@ -1,8 +1,7 @@
-use crate::app::article::model::Article;
-use crate::app::tag::model::Tag;
 use crate::appv2::features::favorite::entities::FavoriteInfo;
 use crate::appv2::features::profile::entities::Profile;
 use crate::utils::date::Iso8601;
+use crate::{app::article::model::Article, appv2::features::tag::entities::Tag};
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 

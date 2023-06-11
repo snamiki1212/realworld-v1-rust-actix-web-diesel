@@ -1,4 +1,4 @@
-use super::model::Tag;
+use super::entities::Tag;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

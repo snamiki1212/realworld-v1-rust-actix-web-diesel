@@ -10,7 +10,9 @@ pub fn api(cfg: &mut web::ServiceConfig) {
                 "",
                 get().to(appv2::features::healthcheck::controllers::index),
             ))
-            .service(web::scope("/tags").route("", get().to(app::tag::api::index)))
+            .service(
+                web::scope("/tags").route("", get().to(appv2::features::tag::controllers::index)),
+            )
             .service(
                 web::scope("/users")
                     .route(

@@ -1,10 +1,10 @@
 use crate::app::article::model::{Article, FetchBySlugAndAuthorId};
 use crate::app::article::service::{fetch_article, FetchArticle};
-use crate::app::tag::model::Tag;
 use crate::appv2::features::favorite::entities::{
     CreateFavorite, DeleteFavorite, Favorite, FavoriteInfo,
 };
 use crate::appv2::features::profile::entities::Profile;
+use crate::appv2::features::tag::entities::Tag;
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use diesel::pg::PgConnection;
