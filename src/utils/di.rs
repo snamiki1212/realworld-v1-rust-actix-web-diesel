@@ -1,3 +1,6 @@
+use crate::appv2::features::favorite::{
+    presenters::FavoritePresenter, repositories::FavoriteRepository, usecases::FavoriteUsecase,
+};
 use crate::appv2::features::profile::{
     presenters::ProfilePresenter, repositories::ProfileRepository, usecases::ProfileUsecase,
 };
@@ -22,6 +25,13 @@ pub struct DiContainer {
     pub profile_repository: ProfileRepository,
     pub profile_presenter: ProfilePresenter,
     pub profile_usecase: ProfileUsecase,
+
+    /**
+     * Favorite
+     */
+    pub favorite_repository: FavoriteRepository,
+    pub favorite_presenter: FavoritePresenter,
+    pub favorite_usecase: FavoriteUsecase,
 }
 
 impl DiContainer {
@@ -39,13 +49,27 @@ impl DiContainer {
             profile_presenter.clone(),
         );
 
+        // Favorite
+        let favorite_repository = FavoriteRepository::new(pool.clone());
+        let favorite_presenter = FavoritePresenter::new();
+        let favorite_usecase =
+            FavoriteUsecase::new(favorite_repository.clone(), favorite_presenter.clone());
+
         Self {
+            // User
             user_repository,
             user_usecase,
             user_presenter,
+
+            // Profile
             profile_presenter,
             profile_repository,
             profile_usecase,
+
+            // Favorite
+            favorite_repository,
+            favorite_presenter,
+            favorite_usecase,
         }
     }
 }
