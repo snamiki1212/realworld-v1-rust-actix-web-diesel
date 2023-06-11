@@ -25,14 +25,3 @@ impl ProfileRepository {
         Ok(profile)
     }
 }
-
-// impl IProfileRepository for ProfileRepository {
-//     fn fetch_by_name(&self, current_user: &User, username: &str) -> Result<Profile, AppError> {
-//         let conn = &mut self.pool.get()?;
-//         let profile = {
-//             let followee = User::find_by_username(conn, username)?;
-//             current_user.fetch_profile(conn, &followee.id)?
-//         };
-//         Ok(profile)
-//     }
-// }

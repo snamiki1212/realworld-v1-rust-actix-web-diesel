@@ -1,5 +1,6 @@
 use super::super::domains::profile_repository::ProfileRepository;
-use super::presenters::ProfileResponse;
+use super::super::usecases::show_profile_usecase::ShowProfileUsecase;
+use super::presenters::{ProfilePresenter, ProfileResponse};
 use crate::appv2::drivers::middlewares::{auth, state::AppState};
 use crate::utils::api::ApiResponse;
 use actix_web::{web, HttpRequest, HttpResponse};
@@ -12,13 +13,15 @@ pub async fn show(
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
     let repository = ProfileRepository::new(state.pool.clone()); // TODO: move to DI container.
+    let presenter = ProfilePresenter::new(); // TODO: move to DI container.
+    let usecase = ShowProfileUsecase::new(repository, presenter); // TODO: move to DI container.
+
     let profile = {
         let current_user = auth::get_current_user(&req)?;
         let username = path.into_inner();
-        repository.fetch_by_name(&current_user, &username)?
+        usecase.handle(&current_user, &username)?
     };
-    let res = ProfileResponse::from(profile);
-    Ok(HttpResponse::Ok().json(res))
+    Ok(HttpResponse::Ok().json(profile))
 }
 
 pub async fn follow(

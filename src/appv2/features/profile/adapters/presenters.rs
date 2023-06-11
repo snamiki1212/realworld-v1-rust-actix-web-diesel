@@ -1,6 +1,7 @@
 use super::super::entities::profile::Profile as ProfileModel;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
+
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct ProfileResponse {
     pub profile: ProfileContent,
@@ -23,5 +24,15 @@ impl From<ProfileModel> for ProfileResponse {
             following: profile_model.following,
         };
         ProfileResponse { profile }
+    }
+}
+
+pub struct ProfilePresenter {}
+impl ProfilePresenter {
+    pub fn new() -> Self {
+        Self {}
+    }
+    pub fn complete(&self, output: ProfileModel) -> ProfileResponse {
+        ProfileResponse::from(output)
     }
 }
