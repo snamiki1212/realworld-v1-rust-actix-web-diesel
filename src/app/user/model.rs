@@ -46,7 +46,7 @@ impl User {
         users::username.eq(username)
     }
 
-    fn by_username<DB>(username: &str) -> ByUsername<DB, &str>
+    pub fn by_username<DB>(username: &str) -> ByUsername<DB, &str>
     where
         DB: Backend,
     {
@@ -125,25 +125,25 @@ impl User {
         Ok(user)
     }
 
-    pub fn follow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
-        let t = Self::by_username(username);
-        let followee = t.first::<User>(conn)?;
+    // pub fn follow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
+    //     let t = Self::by_username(username);
+    //     let followee = t.first::<User>(conn)?;
 
-        Follow::create(
-            conn,
-            &CreateFollow {
-                follower_id: self.id,
-                followee_id: followee.id,
-            },
-        )?;
+    //     Follow::create(
+    //         conn,
+    //         &CreateFollow {
+    //             follower_id: self.id,
+    //             followee_id: followee.id,
+    //         },
+    //     )?;
 
-        Ok(Profile {
-            username: self.username.clone(),
-            bio: self.bio.clone(),
-            image: self.image.clone(),
-            following: true,
-        })
-    }
+    //     Ok(Profile {
+    //         username: self.username.clone(),
+    //         bio: self.bio.clone(),
+    //         image: self.image.clone(),
+    //         following: true,
+    //     })
+    // }
 
     pub fn unfollow(&self, conn: &mut PgConnection, username: &str) -> Result<Profile, AppError> {
         let t = Self::by_username(username);

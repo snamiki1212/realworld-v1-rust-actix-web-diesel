@@ -1,0 +1,40 @@
+use crate::app::follow::model::{CreateFollow, Follow};
+use crate::app::user::model::User;
+use crate::appv2::features::profile::entities::profile::Profile;
+use crate::error::AppError;
+use crate::utils::db::DbPool;
+
+pub struct UserRepository {
+    pool: DbPool,
+}
+
+impl UserRepository {
+    pub fn new(pool: DbPool) -> Self {
+        Self { pool }
+    }
+
+    pub fn follow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError> {
+        let conn = &mut self.pool.get()?;
+        let t = User::by_username(target_username);
+
+        let followee = {
+            use diesel::prelude::*;
+            t.first::<User>(conn)?
+        };
+
+        Follow::create(
+            conn,
+            &CreateFollow {
+                follower_id: current_user.id,
+                followee_id: followee.id,
+            },
+        )?;
+
+        Ok(Profile {
+            username: current_user.username.clone(),
+            bio: current_user.bio.clone(),
+            image: current_user.image.clone(),
+            following: true,
+        })
+    }
+}
