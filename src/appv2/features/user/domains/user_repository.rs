@@ -1,6 +1,6 @@
 use crate::app::follow::model::{CreateFollow, DeleteFollow, Follow};
 use crate::app::user::model::User;
-use crate::appv2::features::profile::entities::profile::Profile;
+use crate::appv2::features::profile::entities::Profile;
 use crate::error::AppError;
 use crate::utils::db::DbPool;
 

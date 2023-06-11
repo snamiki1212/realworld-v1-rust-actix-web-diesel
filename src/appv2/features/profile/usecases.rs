@@ -1,5 +1,5 @@
-use super::super::adapters::presenters::{ProfilePresenter, ProfileResponse};
-use super::super::domains::profile_repository::ProfileRepository;
+use super::presenters::ProfilePresenter;
+use super::repositories::ProfileRepository;
 use crate::app::user::model::User;
 use crate::appv2::features::user::domains::user_repository::UserRepository;
 use crate::error::AppError;

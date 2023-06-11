@@ -1,4 +1,4 @@
-use super::super::entities::profile::Profile as ProfileModel;
+use super::entities::Profile as ProfileModel;
 use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 use std::convert::From;

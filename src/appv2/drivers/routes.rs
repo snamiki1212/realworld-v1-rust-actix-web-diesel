@@ -22,15 +22,15 @@ pub fn api(cfg: &mut web::ServiceConfig) {
                 web::scope("/profiles")
                     .route(
                         "/{username}",
-                        get().to(appv2::features::profile::adapters::controllers::show),
+                        get().to(appv2::features::profile::controllers::show),
                     )
                     .route(
                         "/{username}/follow",
-                        post().to(appv2::features::profile::adapters::controllers::follow),
+                        post().to(appv2::features::profile::controllers::follow),
                     )
                     .route(
                         "/{username}/follow",
-                        delete().to(appv2::features::profile::adapters::controllers::unfollow),
+                        delete().to(appv2::features::profile::controllers::unfollow),
                     ),
             )
             .service(

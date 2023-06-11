@@ -1,5 +1,5 @@
 use crate::app::comment::model::Comment;
-use crate::appv2::features::profile::entities::profile::Profile;
+use crate::appv2::features::profile::entities::Profile;
 use crate::utils::date::Iso8601;
 use serde::{Deserialize, Serialize};
 use std::convert::From;

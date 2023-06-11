@@ -3,7 +3,7 @@ use crate::app::favorite::model::{Favorite, FavoriteInfo};
 use crate::app::follow::model::Follow;
 use crate::app::tag::model::{CreateTag, Tag};
 use crate::app::user::model::User;
-use crate::appv2::features::profile::entities::profile::Profile;
+use crate::appv2::features::profile::entities::Profile;
 use crate::error::AppError;
 use crate::schema::articles::dsl::*;
 use crate::schema::{articles, tags, users};

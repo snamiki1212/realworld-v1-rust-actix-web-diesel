@@ -1,7 +1,7 @@
 use super::model::{Comment, CreateComment, DeleteComment};
 use crate::app::article::model::{Article, FetchBySlugAndAuthorId};
 use crate::app::user::model::User;
-use crate::appv2::features::profile::entities::profile::Profile;
+use crate::appv2::features::profile::entities::Profile;
 use crate::appv2::features::profile::usecases::services::{
     conver_user_to_profile, ConverUserToProfile,
 };

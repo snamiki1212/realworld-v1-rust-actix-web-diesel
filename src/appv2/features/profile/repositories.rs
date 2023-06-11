@@ -1,4 +1,4 @@
-use super::super::entities::profile::Profile;
+use super::entities::Profile;
 use crate::app::user::model::User;
 use crate::error::AppError;
 use crate::utils::db::DbPool;
