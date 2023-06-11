@@ -1,4 +1,4 @@
-use crate::app::article::model::{Article, CreateArticle, UpdateArticle};
+use crate::appv2::features::article::entities::{Article, CreateArticle, UpdateArticle};
 use crate::appv2::features::favorite::entities::{Favorite, FavoriteInfo};
 use crate::appv2::features::follow::entities::Follow;
 use crate::appv2::features::profile::entities::Profile;

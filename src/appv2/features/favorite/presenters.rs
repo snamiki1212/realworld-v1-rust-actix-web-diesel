@@ -1,8 +1,9 @@
 use actix_web::HttpResponse;
 
-pub use crate::app::article::response::SingleArticleResponse;
+use crate::appv2::features::article::entities::Article;
+pub use crate::appv2::features::article::presenters::SingleArticleResponse;
+use crate::appv2::features::profile::entities::Profile;
 use crate::appv2::features::tag::entities::Tag;
-use crate::{app::article::model::Article, appv2::features::profile::entities::Profile};
 
 use super::entities::FavoriteInfo;
 

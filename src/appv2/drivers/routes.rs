@@ -43,14 +43,20 @@ pub fn api(cfg: &mut web::ServiceConfig) {
             )
             .service(
                 web::scope("/articles")
-                    .route("/feed", get().to(app::article::api::feed))
-                    .route("", get().to(app::article::api::index))
-                    .route("", post().to(app::article::api::create))
+                    .route(
+                        "/feed",
+                        get().to(appv2::features::article::controllers::feed),
+                    )
+                    .route("", get().to(appv2::features::article::controllers::index))
+                    .route("", post().to(appv2::features::article::controllers::create))
                     .service(
                         web::scope("/{article_title_slug}")
-                            .route("", get().to(app::article::api::show))
-                            .route("", put().to(app::article::api::update))
-                            .route("", delete().to(app::article::api::delete))
+                            .route("", get().to(appv2::features::article::controllers::show))
+                            .route("", put().to(appv2::features::article::controllers::update))
+                            .route(
+                                "",
+                                delete().to(appv2::features::article::controllers::delete),
+                            )
                             .service(
                                 web::scope("/favorite")
                                     .route(

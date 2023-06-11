@@ -1,8 +1,7 @@
 use super::{
-    model::{Article, DeleteArticle},
-    request,
-    response::{MultipleArticlesResponse, SingleArticleResponse},
-    service,
+    entities::{Article, DeleteArticle},
+    presenters::{MultipleArticlesResponse, SingleArticleResponse},
+    requests, services,
 };
 use crate::appv2::drivers::middlewares::auth;
 use crate::appv2::drivers::middlewares::state::AppState;
@@ -29,9 +28,9 @@ pub async fn index(
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
 
-    let (articles_list, articles_count) = service::fetch_articles_list(
+    let (articles_list, articles_count) = services::fetch_articles_list(
         conn,
-        service::FetchArticlesList {
+        services::FetchArticlesList {
             tag: params.tag.clone(),
             author: params.author.clone(),
             favorited: params.favorited.clone(),
@@ -59,9 +58,9 @@ pub async fn feed(
     let current_user = auth::get_current_user(&req)?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
-    let (articles_list, articles_count) = service::fetch_following_articles(
+    let (articles_list, articles_count) = services::fetch_following_articles(
         conn,
-        &service::FetchFollowedArticlesSerivce {
+        &services::FetchFollowedArticlesSerivce {
             current_user,
             offset,
             limit,
@@ -75,8 +74,10 @@ pub async fn feed(
 pub async fn show(state: web::Data<AppState>, path: web::Path<ArticleTitleSlug>) -> ApiResponse {
     let conn = &mut state.get_conn()?;
     let article_title_slug = path.into_inner();
-    let (article, profile, favorite_info, tags_list) =
-        service::fetch_article_by_slug(conn, &service::FetchArticleBySlug { article_title_slug })?;
+    let (article, profile, favorite_info, tags_list) = services::fetch_article_by_slug(
+        conn,
+        &services::FetchArticleBySlug { article_title_slug },
+    )?;
     let res = SingleArticleResponse::from((article, profile, favorite_info, tags_list));
     Ok(HttpResponse::Ok().json(res))
 }
@@ -84,13 +85,13 @@ pub async fn show(state: web::Data<AppState>, path: web::Path<ArticleTitleSlug>)
 pub async fn create(
     state: web::Data<AppState>,
     req: HttpRequest,
-    form: web::Json<request::CreateArticleRequest>,
+    form: web::Json<requests::CreateArticleRequest>,
 ) -> ApiResponse {
     let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
-    let (article, profile, favorite_info, tag_list) = service::create(
+    let (article, profile, favorite_info, tag_list) = services::create(
         conn,
-        &service::CreateArticleSerivce {
+        &services::CreateArticleSerivce {
             title: form.article.title.clone(),
             slug: Article::convert_title_to_slug(&form.article.title),
             description: form.article.description.clone(),
@@ -107,7 +108,7 @@ pub async fn update(
     state: web::Data<AppState>,
     req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
-    form: web::Json<request::UpdateArticleRequest>,
+    form: web::Json<requests::UpdateArticleRequest>,
 ) -> ApiResponse {
     let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
@@ -118,9 +119,9 @@ pub async fn update(
         .as_ref()
         .map(|_title| Article::convert_title_to_slug(_title));
 
-    let (article, profile, favorite_info, tag_list) = service::update_article(
+    let (article, profile, favorite_info, tag_list) = services::update_article(
         conn,
-        &service::UpdateArticleService {
+        &services::UpdateArticleService {
             current_user,
             article_title_slug,
             slug: article_slug.to_owned(),

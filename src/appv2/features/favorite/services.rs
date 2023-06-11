@@ -1,5 +1,5 @@
-use crate::app::article::model::{Article, FetchBySlugAndAuthorId};
-use crate::app::article::service::{fetch_article, FetchArticle};
+use crate::appv2::features::article::entities::{Article, FetchBySlugAndAuthorId};
+use crate::appv2::features::article::services::{fetch_article, FetchArticle};
 use crate::appv2::features::favorite::entities::{
     CreateFavorite, DeleteFavorite, Favorite, FavoriteInfo,
 };
