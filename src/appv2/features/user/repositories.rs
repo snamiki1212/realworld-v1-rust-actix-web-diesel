@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::app::follow::model::{CreateFollow, DeleteFollow, Follow};
+use crate::appv2::features::follow::entities::{CreateFollow, DeleteFollow, Follow};
 use crate::appv2::features::profile::entities::Profile;
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
