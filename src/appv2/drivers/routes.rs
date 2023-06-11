@@ -1,4 +1,5 @@
 use crate::app;
+use crate::appv2;
 use actix_web::web;
 use actix_web::web::{delete, get, post, put};
 
@@ -19,11 +20,17 @@ pub fn api(cfg: &mut web::ServiceConfig) {
             )
             .service(
                 web::scope("/profiles")
-                    .route("/{username}", get().to(app::profile::api::show))
-                    .route("/{username}/follow", post().to(app::profile::api::follow))
+                    .route(
+                        "/{username}",
+                        get().to(appv2::features::profile::adapters::controllers::show),
+                    )
                     .route(
                         "/{username}/follow",
-                        delete().to(app::profile::api::unfollow),
+                        post().to(appv2::features::profile::adapters::controllers::follow),
+                    )
+                    .route(
+                        "/{username}/follow",
+                        delete().to(appv2::features::profile::adapters::controllers::unfollow),
                     ),
             )
             .service(

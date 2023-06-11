@@ -1,9 +1,9 @@
 use crate::app::article::model::{Article, CreateArticle, UpdateArticle};
 use crate::app::favorite::model::{Favorite, FavoriteInfo};
 use crate::app::follow::model::Follow;
-use crate::app::profile::model::Profile;
 use crate::app::tag::model::{CreateTag, Tag};
 use crate::app::user::model::User;
+use crate::appv2::features::profile::entities::profile::Profile;
 use crate::error::AppError;
 use crate::schema::articles::dsl::*;
 use crate::schema::{articles, tags, users};

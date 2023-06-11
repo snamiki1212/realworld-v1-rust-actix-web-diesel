@@ -1,5 +1,5 @@
-use super::response::ProfileResponse;
-use super::service;
+use super::super::usecases::services;
+use super::presenters::ProfileResponse;
 use crate::appv2::drivers::middlewares::{auth, state::AppState};
 use crate::utils::api::ApiResponse;
 use actix_web::{web, HttpRequest, HttpResponse};
@@ -14,9 +14,9 @@ pub async fn show(
     let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let _username = path.into_inner();
-    let profile = service::fetch_by_name(
+    let profile = services::fetch_by_name(
         conn,
-        &service::FetchProfileByName {
+        &services::FetchProfileByName {
             current_user,
             username: _username,
         },

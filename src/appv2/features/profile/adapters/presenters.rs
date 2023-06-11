@@ -1,4 +1,4 @@
-use crate::app::profile::model::Profile as ProfileModel;
+use super::super::entities::profile::Profile as ProfileModel;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 #[derive(Deserialize, Serialize, Debug, Clone)]

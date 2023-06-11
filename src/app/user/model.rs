@@ -1,6 +1,6 @@
 use crate::app::favorite::model::Favorite;
 use crate::app::follow::model::{CreateFollow, DeleteFollow, Follow};
-use crate::app::profile::model::Profile;
+use crate::appv2::features::profile::entities::profile::Profile;
 use crate::error::AppError;
 use crate::schema::users;
 use crate::utils::{hasher, token};
