@@ -4,6 +4,9 @@ use crate::appv2::features::favorite::{
 use crate::appv2::features::profile::{
     presenters::ProfilePresenter, repositories::ProfileRepository, usecases::ProfileUsecase,
 };
+use crate::appv2::features::tag::presenters::TagPresenter;
+use crate::appv2::features::tag::repositories::TagRepository;
+use crate::appv2::features::tag::usecases::TagUsecase;
 use crate::appv2::features::user::{
     presenters::UserPresenter, repositories::UserRepository, usecases::UserUsecase,
 };
@@ -32,6 +35,13 @@ pub struct DiContainer {
     pub favorite_repository: FavoriteRepository,
     pub favorite_presenter: FavoritePresenter,
     pub favorite_usecase: FavoriteUsecase,
+
+    /**
+     * Tag
+     */
+    pub tag_repository: TagRepository,
+    pub tag_presenter: TagPresenter,
+    pub tag_usecase: TagUsecase,
 }
 
 impl DiContainer {
@@ -55,6 +65,11 @@ impl DiContainer {
         let favorite_usecase =
             FavoriteUsecase::new(favorite_repository.clone(), favorite_presenter.clone());
 
+        // Tag
+        let tag_repository = TagRepository::new(pool.clone());
+        let tag_presenter = TagPresenter::new();
+        let tag_usecase = TagUsecase::new(tag_repository.clone(), tag_presenter.clone());
+
         Self {
             // User
             user_repository,
@@ -70,6 +85,11 @@ impl DiContainer {
             favorite_repository,
             favorite_presenter,
             favorite_usecase,
+
+            // Tag
+            tag_repository,
+            tag_presenter,
+            tag_usecase,
         }
     }
 }
