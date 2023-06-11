@@ -21,6 +21,16 @@ impl UserRepository {
         User::signin(conn, email, naive_password)
     }
 
+    pub fn signup(
+        &self,
+        email: &str,
+        username: &str,
+        naive_password: &str,
+    ) -> Result<(User, Token), AppError> {
+        let conn = &mut self.pool.get()?;
+        User::signup(conn, email, username, naive_password)
+    }
+
     pub fn follow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError> {
         let conn = &mut self.pool.get()?;
         let t = User::by_username(target_username);

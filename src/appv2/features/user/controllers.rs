@@ -14,15 +14,12 @@ pub async fn signin(state: web::Data<AppState>, form: web::Json<requests::Signin
 }
 
 pub async fn signup(state: web::Data<AppState>, form: web::Json<requests::Signup>) -> ApiResponse {
-    let conn = &mut state.get_conn()?;
-    let (user, token) = User::signup(
-        conn,
+    let res = state.di_container.user_usecase.signup(
         &form.user.email,
         &form.user.username,
         &form.user.password,
     )?;
-    let res = UserResponse::from((user, token));
-    Ok(HttpResponse::Ok().json(res))
+    Ok(res)
 }
 
 pub async fn me(req: HttpRequest) -> ApiResponse {

@@ -19,7 +19,18 @@ impl UserUsecase {
 
     pub fn signin(&self, email: &str, password: &str) -> Result<HttpResponse, AppError> {
         let (user, token) = self.user_repository.signin(email, password)?;
-        let res = self.user_presenter.signin(user, token);
+        let res = self.user_presenter.from_user_and_token(user, token);
+        Ok(res)
+    }
+
+    pub fn signup(
+        &self,
+        email: &str,
+        username: &str,
+        password: &str,
+    ) -> Result<HttpResponse, AppError> {
+        let (user, token) = self.user_repository.signup(email, username, password)?;
+        let res = self.user_presenter.from_user_and_token(user, token);
         Ok(res)
     }
 }

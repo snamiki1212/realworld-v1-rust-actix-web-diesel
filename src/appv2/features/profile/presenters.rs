@@ -34,7 +34,7 @@ impl ProfilePresenter {
     pub fn new() -> Self {
         Self {}
     }
-    pub fn complete(&self, model: ProfileModel) -> HttpResponse {
+    pub fn from_profile(&self, model: ProfileModel) -> HttpResponse {
         let res_model = ProfileResponse::from(model);
         HttpResponse::Ok().json(res_model)
     }

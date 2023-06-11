@@ -38,7 +38,7 @@ impl UserPresenter {
     pub fn new() -> Self {
         Self {}
     }
-    pub fn signin(&self, user: User, token: String) -> HttpResponse {
+    pub fn from_user_and_token(&self, user: User, token: String) -> HttpResponse {
         let res_model = UserResponse::from((user, token));
         HttpResponse::Ok().json(res_model)
     }
