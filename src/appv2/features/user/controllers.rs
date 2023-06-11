@@ -6,26 +6,23 @@ use crate::utils::api::ApiResponse;
 use actix_web::{web, HttpRequest};
 
 pub async fn signin(state: web::Data<AppState>, form: web::Json<requests::Signin>) -> ApiResponse {
-    let res = state
+    state
         .di_container
         .user_usecase
-        .signin(&form.user.email, &form.user.password)?;
-    Ok(res)
+        .signin(&form.user.email, &form.user.password)
 }
 
 pub async fn signup(state: web::Data<AppState>, form: web::Json<requests::Signup>) -> ApiResponse {
-    let res = state.di_container.user_usecase.signup(
+    state.di_container.user_usecase.signup(
         &form.user.email,
         &form.user.username,
         &form.user.password,
-    )?;
-    Ok(res)
+    )
 }
 
 pub async fn me(state: web::Data<AppState>, req: HttpRequest) -> ApiResponse {
     let current_user = auth::get_current_user(&req)?;
-    let res = state.di_container.user_usecase.me(&current_user)?;
-    Ok(res)
+    state.di_container.user_usecase.me(&current_user)
 }
 
 pub async fn update(
@@ -34,7 +31,7 @@ pub async fn update(
     form: web::Json<requests::Update>,
 ) -> ApiResponse {
     let current_user = auth::get_current_user(&req)?;
-    let res = state.di_container.user_usecase.update(
+    state.di_container.user_usecase.update(
         current_user.id,
         UpdateUser {
             email: form.user.email.clone(),
@@ -43,6 +40,5 @@ pub async fn update(
             image: form.user.image.clone(),
             bio: form.user.bio.clone(),
         },
-    )?;
-    Ok(res)
+    )
 }

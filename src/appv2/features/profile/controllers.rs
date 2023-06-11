@@ -11,11 +11,10 @@ pub async fn show(
 ) -> ApiResponse {
     let current_user = auth::get_current_user(&req)?;
     let username = path.into_inner();
-    let res = state
+    state
         .di_container
         .profile_usecase
-        .show(&current_user, &username)?;
-    Ok(res)
+        .show(&current_user, &username)
 }
 
 pub async fn follow(
@@ -25,11 +24,10 @@ pub async fn follow(
 ) -> ApiResponse {
     let current_user = auth::get_current_user(&req)?;
     let target_username = path.into_inner();
-    let res = state
+    state
         .di_container
         .profile_usecase
-        .follow(&current_user, &target_username)?;
-    Ok(res)
+        .follow(&current_user, &target_username)
 }
 
 pub async fn unfollow(
@@ -39,9 +37,8 @@ pub async fn unfollow(
 ) -> ApiResponse {
     let current_user = auth::get_current_user(&req)?;
     let target_username = path.into_inner();
-    let res = state
+    state
         .di_container
         .profile_usecase
-        .unfollow(&current_user, &target_username)?;
-    Ok(res)
+        .unfollow(&current_user, &target_username)
 }
