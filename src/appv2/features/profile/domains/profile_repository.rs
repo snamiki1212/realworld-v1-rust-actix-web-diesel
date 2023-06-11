@@ -7,6 +7,7 @@ pub trait IProfileRepository {
     fn fetch_by_name(&self, current_user: &User, username: &str) -> Result<Profile, AppError>;
 }
 
+#[derive(Clone)]
 pub struct ProfileRepository {
     pool: DbPool,
 }

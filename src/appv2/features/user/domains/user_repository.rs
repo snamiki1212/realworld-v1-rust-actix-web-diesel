@@ -4,6 +4,7 @@ use crate::appv2::features::profile::entities::profile::Profile;
 use crate::error::AppError;
 use crate::utils::db::DbPool;
 
+#[derive(Clone)]
 pub struct UserRepository {
     pool: DbPool,
 }

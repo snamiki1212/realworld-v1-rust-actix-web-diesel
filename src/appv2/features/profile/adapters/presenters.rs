@@ -27,6 +27,7 @@ impl From<ProfileModel> for ProfileResponse {
     }
 }
 
+#[derive(Clone)]
 pub struct ProfilePresenter {}
 impl ProfilePresenter {
     pub fn new() -> Self {

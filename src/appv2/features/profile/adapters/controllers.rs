@@ -1,9 +1,6 @@
-use super::super::domains::profile_repository::ProfileRepository;
-use super::super::usecases::profile_usecase::ProfileUsecase;
-use super::presenters::{ProfilePresenter, ProfileResponse};
 use crate::appv2::drivers::middlewares::{auth, state::AppState};
-use crate::appv2::features::user::domains::user_repository::UserRepository;
 use crate::utils::api::ApiResponse;
+use crate::utils::di::DiContainer;
 use actix_web::{web, HttpRequest, HttpResponse};
 
 type UsernameSlug = String;
@@ -13,18 +10,11 @@ pub async fn show(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
-    let repositories = {
-        let profile_repository = ProfileRepository::new(state.pool.clone()); // TODO: move to DI container.
-        let user_repository = UserRepository::new(state.pool.clone()); // TODO: move to DI container.
-        (profile_repository, user_repository)
-    };
-    let presenter = ProfilePresenter::new(); // TODO: move to DI container.
-    let usecase = ProfileUsecase::new(repositories, presenter); // TODO: move to DI container.
-
+    let container = DiContainer::new(&state.pool); // TODO: move di to top
     let profile = {
         let current_user = auth::get_current_user(&req)?;
         let username = path.into_inner();
-        usecase.show(&current_user, &username)?
+        container.profile_usecase.show(&current_user, &username)?
     };
     Ok(HttpResponse::Ok().json(profile))
 }
@@ -34,18 +24,13 @@ pub async fn follow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
-    let repositories = {
-        let profile_repository = ProfileRepository::new(state.pool.clone()); // TODO: move to DI container.
-        let user_repository = UserRepository::new(state.pool.clone()); // TODO: move to DI container.
-        (profile_repository, user_repository)
-    };
-    let presenter = ProfilePresenter::new(); // TODO: move to DI container.
-    let usecase = ProfileUsecase::new(repositories, presenter); // TODO: move to DI container.
-
+    let container = DiContainer::new(&state.pool); // TODO: move di to top
     let profile = {
         let current_user = auth::get_current_user(&req)?;
         let target_username = path.into_inner();
-        usecase.follow(&current_user, &target_username)?
+        container
+            .profile_usecase
+            .follow(&current_user, &target_username)?
     };
     Ok(HttpResponse::Ok().json(profile))
 }
@@ -55,18 +40,13 @@ pub async fn unfollow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
-    let repositories = {
-        let profile_repository = ProfileRepository::new(state.pool.clone()); // TODO: move to DI container.
-        let user_repository = UserRepository::new(state.pool.clone()); // TODO: move to DI container.
-        (profile_repository, user_repository)
-    };
-    let presenter = ProfilePresenter::new(); // TODO: move to DI container.
-    let usecase = ProfileUsecase::new(repositories, presenter); // TODO: move to DI container.
-
+    let container = DiContainer::new(&state.pool); // TODO: move di to top
     let profile = {
         let current_user = auth::get_current_user(&req)?;
         let target_username = path.into_inner();
-        usecase.unfollow(&current_user, &target_username)?
+        container
+            .profile_usecase
+            .unfollow(&current_user, &target_username)?
     };
     Ok(HttpResponse::Ok().json(profile))
 }
