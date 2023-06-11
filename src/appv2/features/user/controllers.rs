@@ -6,10 +6,11 @@ use crate::utils::api::ApiResponse;
 use actix_web::{web, HttpRequest, HttpResponse};
 
 pub async fn signin(state: web::Data<AppState>, form: web::Json<requests::Signin>) -> ApiResponse {
-    let conn = &mut state.get_conn()?;
-    let (user, token) = User::signin(conn, &form.user.email, &form.user.password)?;
-    let res = UserResponse::from((user, token));
-    Ok(HttpResponse::Ok().json(res))
+    let res = state
+        .di_container
+        .user_usecase
+        .signin(&form.user.email, &form.user.password)?;
+    Ok(res)
 }
 
 pub async fn signup(state: web::Data<AppState>, form: web::Json<requests::Signup>) -> ApiResponse {

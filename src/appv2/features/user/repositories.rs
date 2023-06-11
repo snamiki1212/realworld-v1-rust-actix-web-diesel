@@ -4,6 +4,8 @@ use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use crate::utils::db::DbPool;
 
+type Token = String;
+
 #[derive(Clone)]
 pub struct UserRepository {
     pool: DbPool,
@@ -12,6 +14,11 @@ pub struct UserRepository {
 impl UserRepository {
     pub fn new(pool: DbPool) -> Self {
         Self { pool }
+    }
+
+    pub fn signin(&self, email: &str, naive_password: &str) -> Result<(User, Token), AppError> {
+        let conn = &mut self.pool.get()?;
+        User::signin(conn, email, naive_password)
     }
 
     pub fn follow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError> {

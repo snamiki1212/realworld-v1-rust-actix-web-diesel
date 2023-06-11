@@ -1,4 +1,5 @@
 use crate::appv2::features::user::entities::User;
+use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 
@@ -29,4 +30,16 @@ pub struct AuthUser {
     pub username: String,
     pub bio: Option<String>,
     pub image: Option<String>,
+}
+
+#[derive(Clone)]
+pub struct UserPresenter {}
+impl UserPresenter {
+    pub fn new() -> Self {
+        Self {}
+    }
+    pub fn signin(&self, user: User, token: String) -> HttpResponse {
+        let res_model = UserResponse::from((user, token));
+        HttpResponse::Ok().json(res_model)
+    }
 }
