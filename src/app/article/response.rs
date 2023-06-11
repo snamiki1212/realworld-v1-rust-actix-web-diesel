@@ -1,6 +1,6 @@
 use crate::app::article::model::Article;
-use crate::app::favorite::model::FavoriteInfo;
 use crate::app::tag::model::Tag;
+use crate::appv2::features::favorite::entities::FavoriteInfo;
 use crate::appv2::features::profile::entities::Profile;
 use crate::utils::date::Iso8601;
 use serde::{Deserialize, Serialize};

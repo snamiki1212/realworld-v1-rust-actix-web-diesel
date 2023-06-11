@@ -1,5 +1,5 @@
-use crate::app::favorite::model::Favorite;
 use crate::app::follow::model::Follow;
+use crate::appv2::features::favorite::entities::Favorite;
 use crate::appv2::features::profile::entities::Profile;
 use crate::error::AppError;
 use crate::schema::users;

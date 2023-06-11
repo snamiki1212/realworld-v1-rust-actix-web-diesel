@@ -1,4 +1,4 @@
-use crate::app::favorite::model::Favorite;
+use crate::appv2::features::favorite::entities::Favorite;
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use crate::schema::articles;

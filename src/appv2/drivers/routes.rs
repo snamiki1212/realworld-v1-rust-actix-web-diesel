@@ -48,8 +48,15 @@ pub fn api(cfg: &mut web::ServiceConfig) {
                             .route("", delete().to(app::article::api::delete))
                             .service(
                                 web::scope("/favorite")
-                                    .route("", post().to(app::favorite::api::favorite))
-                                    .route("", delete().to(app::favorite::api::unfavorite)),
+                                    .route(
+                                        "",
+                                        post().to(appv2::features::favorite::controllers::favorite),
+                                    )
+                                    .route(
+                                        "",
+                                        delete()
+                                            .to(appv2::features::favorite::controllers::unfavorite),
+                                    ),
                             )
                             .service(
                                 web::scope("/comments")

@@ -1,6 +1,6 @@
 use super::{
-    response::SingleArticleResponse,
-    service::{self, UnfavoriteService},
+    presenters::SingleArticleResponse,
+    services::{self, UnfavoriteService},
 };
 use crate::appv2::drivers::middlewares::auth;
 use crate::appv2::drivers::middlewares::state::AppState;
@@ -17,9 +17,9 @@ pub async fn favorite(
     let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
-    let (article, profile, favorite_info, tags_list) = service::favorite(
+    let (article, profile, favorite_info, tags_list) = services::favorite(
         conn,
-        &service::FavoriteService {
+        &services::FavoriteService {
             current_user,
             article_title_slug,
         },
@@ -36,7 +36,7 @@ pub async fn unfavorite(
     let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
-    let (article, profile, favorite_info, tags_list) = service::unfavorite(
+    let (article, profile, favorite_info, tags_list) = services::unfavorite(
         conn,
         &UnfavoriteService {
             current_user,
