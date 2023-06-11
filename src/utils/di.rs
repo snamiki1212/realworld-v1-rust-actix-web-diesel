@@ -5,6 +5,7 @@ use crate::appv2::features::user::domains::user_repository::UserRepository;
 
 use crate::utils::db::DbPool;
 
+#[derive(Clone)]
 pub struct DiContainer {
     /**
      * Profile
