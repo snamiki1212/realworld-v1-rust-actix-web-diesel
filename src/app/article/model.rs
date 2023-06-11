@@ -1,5 +1,5 @@
 use crate::app::favorite::model::Favorite;
-use crate::app::user::model::User;
+use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use crate::schema::articles;
 use crate::utils::converter;

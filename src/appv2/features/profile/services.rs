@@ -1,5 +1,5 @@
 use super::entities::Profile;
-use crate::app::user::model::User;
+use crate::appv2::features::user::entities::User;
 use diesel::pg::PgConnection;
 
 #[deprecated(note = "use repository")]

@@ -1,5 +1,5 @@
 use crate::app::article::model::Article;
-use crate::app::user::model::User;
+use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use crate::schema::comments;
 use chrono::NaiveDateTime;

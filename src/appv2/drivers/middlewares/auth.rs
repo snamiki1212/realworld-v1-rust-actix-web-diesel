@@ -1,5 +1,5 @@
-use crate::app::user::model::User;
 use crate::appv2::drivers::middlewares::state::AppState;
+use crate::appv2::features::user::entities::User;
 use crate::constants;
 use crate::error::AppError;
 use crate::utils::token;

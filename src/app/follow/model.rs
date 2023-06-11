@@ -1,4 +1,4 @@
-use crate::app::user::model::User;
+use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use crate::schema::follows;
 use chrono::NaiveDateTime;

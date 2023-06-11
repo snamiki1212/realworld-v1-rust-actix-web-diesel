@@ -1,6 +1,6 @@
 use super::presenters::ProfilePresenter;
 use super::repositories::ProfileRepository;
-use crate::app::user::model::User;
+use crate::appv2::features::user::entities::User;
 use crate::appv2::features::user::repositories::UserRepository;
 use crate::error::AppError;
 use actix_web::HttpResponse;

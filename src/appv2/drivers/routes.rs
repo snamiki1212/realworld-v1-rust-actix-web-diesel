@@ -10,13 +10,16 @@ pub fn api(cfg: &mut web::ServiceConfig) {
             .service(web::scope("/tags").route("", get().to(app::tag::api::index)))
             .service(
                 web::scope("/users")
-                    .route("/login", post().to(app::user::api::signin))
-                    .route("", post().to(app::user::api::signup)),
+                    .route(
+                        "/login",
+                        post().to(appv2::features::user::controllers::signin),
+                    )
+                    .route("", post().to(appv2::features::user::controllers::signup)),
             )
             .service(
                 web::scope("/user")
-                    .route("", get().to(app::user::api::me))
-                    .route("", put().to(app::user::api::update)),
+                    .route("", get().to(appv2::features::user::controllers::me))
+                    .route("", put().to(appv2::features::user::controllers::update)),
             )
             .service(
                 web::scope("/profiles")
