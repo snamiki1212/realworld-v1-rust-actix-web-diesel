@@ -1,6 +1,6 @@
 use crate::appv2::drivers::middlewares::{auth, state::AppState};
 use crate::utils::api::ApiResponse;
-use actix_web::{web, HttpRequest, HttpResponse};
+use actix_web::{web, HttpRequest};
 
 type UsernameSlug = String;
 
@@ -9,15 +9,13 @@ pub async fn show(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
-    let profile = {
-        let current_user = auth::get_current_user(&req)?;
-        let username = path.into_inner();
-        state
-            .di_container
-            .profile_usecase
-            .show(&current_user, &username)?
-    };
-    Ok(HttpResponse::Ok().json(profile))
+    let current_user = auth::get_current_user(&req)?;
+    let username = path.into_inner();
+    let res = state
+        .di_container
+        .profile_usecase
+        .show(&current_user, &username)?;
+    Ok(res)
 }
 
 pub async fn follow(
@@ -25,15 +23,13 @@ pub async fn follow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
-    let profile = {
-        let current_user = auth::get_current_user(&req)?;
-        let target_username = path.into_inner();
-        state
-            .di_container
-            .profile_usecase
-            .follow(&current_user, &target_username)?
-    };
-    Ok(HttpResponse::Ok().json(profile))
+    let current_user = auth::get_current_user(&req)?;
+    let target_username = path.into_inner();
+    let res = state
+        .di_container
+        .profile_usecase
+        .follow(&current_user, &target_username)?;
+    Ok(res)
 }
 
 pub async fn unfollow(
@@ -41,13 +37,11 @@ pub async fn unfollow(
     req: HttpRequest,
     path: web::Path<UsernameSlug>,
 ) -> ApiResponse {
-    let profile = {
-        let current_user = auth::get_current_user(&req)?;
-        let target_username = path.into_inner();
-        state
-            .di_container
-            .profile_usecase
-            .unfollow(&current_user, &target_username)?
-    };
-    Ok(HttpResponse::Ok().json(profile))
+    let current_user = auth::get_current_user(&req)?;
+    let target_username = path.into_inner();
+    let res = state
+        .di_container
+        .profile_usecase
+        .unfollow(&current_user, &target_username)?;
+    Ok(res)
 }

@@ -1,4 +1,5 @@
 use super::super::entities::profile::Profile as ProfileModel;
+use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 
@@ -33,7 +34,8 @@ impl ProfilePresenter {
     pub fn new() -> Self {
         Self {}
     }
-    pub fn complete(&self, output: ProfileModel) -> ProfileResponse {
-        ProfileResponse::from(output)
+    pub fn complete(&self, model: ProfileModel) -> HttpResponse {
+        let res_model = ProfileResponse::from(model);
+        HttpResponse::Ok().json(res_model)
     }
 }

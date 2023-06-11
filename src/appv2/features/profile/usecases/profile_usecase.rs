@@ -3,6 +3,7 @@ use super::super::domains::profile_repository::ProfileRepository;
 use crate::app::user::model::User;
 use crate::appv2::features::user::domains::user_repository::UserRepository;
 use crate::error::AppError;
+use actix_web::HttpResponse;
 
 #[derive(Clone)]
 pub struct ProfileUsecase {
@@ -23,7 +24,7 @@ impl ProfileUsecase {
         }
     }
 
-    pub fn show(&self, current_user: &User, username: &str) -> Result<ProfileResponse, AppError> {
+    pub fn show(&self, current_user: &User, username: &str) -> Result<HttpResponse, AppError> {
         let profile = self
             .profile_repository
             .fetch_by_name(current_user, username)?;
@@ -34,7 +35,7 @@ impl ProfileUsecase {
         &self,
         current_user: &User,
         target_username: &str,
-    ) -> Result<ProfileResponse, AppError> {
+    ) -> Result<HttpResponse, AppError> {
         let profile = self.user_repository.follow(current_user, target_username)?;
         Ok(self.presenter.complete(profile))
     }
@@ -43,7 +44,7 @@ impl ProfileUsecase {
         &self,
         current_user: &User,
         target_username: &str,
-    ) -> Result<ProfileResponse, AppError> {
+    ) -> Result<HttpResponse, AppError> {
         let profile = self
             .user_repository
             .unfollow(current_user, target_username)?;
