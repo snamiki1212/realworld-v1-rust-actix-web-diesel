@@ -21,7 +21,8 @@ async fn main() -> std::io::Result<()> {
 
     let state = {
         let pool = utils::db::establish_connection();
-        appv2::drivers::middlewares::state::AppState { pool }
+        use appv2::drivers::middlewares::state::AppState;
+        AppState::new(pool)
     };
 
     HttpServer::new(move || {
