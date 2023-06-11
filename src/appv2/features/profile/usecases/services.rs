@@ -1,26 +1,6 @@
 use super::super::entities::profile::Profile;
 use crate::app::user::model::User;
-use crate::error::AppError;
 use diesel::pg::PgConnection;
-
-pub struct FetchProfileByName {
-    pub current_user: User,
-    pub username: String,
-}
-
-pub fn fetch_by_name(
-    conn: &mut PgConnection,
-    FetchProfileByName {
-        current_user,
-        username,
-    }: &FetchProfileByName,
-) -> Result<Profile, AppError> {
-    let profile = {
-        let followee = User::find_by_username(conn, username)?;
-        current_user.fetch_profile(conn, &followee.id)?
-    };
-    Ok(profile)
-}
 
 pub struct ConverUserToProfile<'a> {
     pub user: &'a User,

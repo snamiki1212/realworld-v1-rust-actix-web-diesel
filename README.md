@@ -68,6 +68,15 @@ $ APIURL=http://localhost:8080/api zsh e2e/run-api-tests.sh
 
 ## Architecture
 
+TODO:
+
+- Clean Architecture
+  - drivers
+  - adapters
+  - domains
+  - entities
+  - usecases
+
 ### Flow from Request to Response
 
 ```mermaid
