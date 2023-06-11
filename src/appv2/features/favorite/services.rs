@@ -14,7 +14,7 @@ pub struct FavoriteService {
     pub article_title_slug: String,
 }
 
-// TODO: move to User model
+#[deprecated(note = "use repository instead")]
 pub fn favorite(
     conn: &mut PgConnection,
     params: &FavoriteService,
@@ -48,6 +48,7 @@ pub struct UnfavoriteService {
     pub article_title_slug: String,
 }
 
+#[deprecated(note = "use repository instead")]
 pub fn unfavorite(
     conn: &mut PgConnection,
     params: &UnfavoriteService,

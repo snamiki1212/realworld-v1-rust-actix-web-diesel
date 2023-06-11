@@ -34,4 +34,16 @@ impl FavoriteUsecase {
         let res = self.favorite_presenter.complete(result);
         Ok(res)
     }
+
+    pub fn unfavorite(
+        &self,
+        user: User,
+        article_title_slug: String,
+    ) -> Result<HttpResponse, AppError> {
+        let result = self
+            .favorite_repository
+            .unfavorite(user, article_title_slug)?;
+        let res = self.favorite_presenter.complete(result);
+        Ok(res)
+    }
 }

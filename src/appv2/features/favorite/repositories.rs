@@ -32,4 +32,20 @@ impl FavoriteRepository {
         )?;
         Ok((article, profile, favorite_info, tags_list))
     }
+
+    pub fn unfavorite(
+        &self,
+        user: User,
+        article_title_slug: String,
+    ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
+        let conn = &mut self.pool.get()?;
+        let (article, profile, favorite_info, tags_list) = services::unfavorite(
+            conn,
+            &services::UnfavoriteService {
+                current_user: user,
+                article_title_slug,
+            },
+        )?;
+        Ok((article, profile, favorite_info, tags_list))
+    }
 }
