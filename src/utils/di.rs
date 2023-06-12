@@ -1,6 +1,9 @@
 use crate::appv2::features::article::presenters::ArticlePresenter;
 use crate::appv2::features::article::repositories::ArticleRepository;
 use crate::appv2::features::article::usecases::ArticleUsecase;
+use crate::appv2::features::comment::presenters::CommentPresenter;
+use crate::appv2::features::comment::repositories::CommentRepository;
+use crate::appv2::features::comment::usecases::CommentUsecase;
 use crate::appv2::features::favorite::{
     presenters::FavoritePresenter, repositories::FavoriteRepository, usecases::FavoriteUsecase,
 };
@@ -52,6 +55,13 @@ pub struct DiContainer {
     pub tag_repository: TagRepository,
     pub tag_presenter: TagPresenter,
     pub tag_usecase: TagUsecase,
+
+    /**
+     * Comment
+     */
+    pub comment_repository: CommentRepository,
+    pub comment_presenter: CommentPresenter,
+    pub comment_usecase: CommentUsecase,
 }
 
 impl DiContainer {
@@ -62,6 +72,7 @@ impl DiContainer {
         let favorite_repository = FavoriteRepository::new(pool.clone());
         let article_repository = ArticleRepository::new(pool.clone());
         let tag_repository = TagRepository::new(pool.clone());
+        let comment_repository = CommentRepository::new(pool.clone());
 
         // Presenter
         let user_presenter = UserPresenter::new();
@@ -69,6 +80,7 @@ impl DiContainer {
         let favorite_presenter = FavoritePresenter::new();
         let article_presenter = ArticlePresenter::new();
         let tag_presenter = TagPresenter::new();
+        let comment_presenter = CommentPresenter::new();
 
         // Usecase
         let user_usecase = UserUsecase::new(user_repository.clone(), user_presenter.clone());
@@ -84,6 +96,8 @@ impl DiContainer {
         let article_usecase =
             ArticleUsecase::new(article_repository.clone(), article_presenter.clone());
         let tag_usecase = TagUsecase::new(tag_repository.clone(), tag_presenter.clone());
+        let comment_usecase =
+            CommentUsecase::new(comment_repository.clone(), comment_presenter.clone());
 
         Self {
             // User
@@ -110,6 +124,11 @@ impl DiContainer {
             tag_repository,
             tag_presenter,
             tag_usecase,
+
+            // Comment
+            comment_repository,
+            comment_presenter,
+            comment_usecase,
         }
     }
 }

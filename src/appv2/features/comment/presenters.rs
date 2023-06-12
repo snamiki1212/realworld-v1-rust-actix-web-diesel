@@ -1,6 +1,7 @@
 use crate::appv2::features::comment::entities::Comment;
 use crate::appv2::features::profile::entities::Profile;
 use crate::utils::date::Iso8601;
+use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 use uuid::Uuid;
@@ -75,4 +76,23 @@ pub struct InnerAuthor {
     pub bio: Option<String>,
     pub image: Option<String>,
     pub following: bool,
+}
+
+#[derive(Clone)]
+pub struct CommentPresenter {}
+impl CommentPresenter {
+    pub fn new() -> Self {
+        Self {}
+    }
+
+    // pub fn complete(
+    //     &self,
+    //     (article, profile, favorite_info, tags_list): (Article, Profile, FavoriteInfo, Vec<Tag>),
+    // ) -> HttpResponse {
+    //     let res_model = SingleArticleResponse::from((article, profile, favorite_info, tags_list));
+    //     HttpResponse::Ok().json(res_model)
+    // }
+    pub fn toHttpRes(&self) -> HttpResponse {
+        HttpResponse::Ok().json("OK")
+    }
 }
