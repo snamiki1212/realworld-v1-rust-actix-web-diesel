@@ -1,6 +1,7 @@
 use super::{
     entities::{Article, DeleteArticle},
     presenters::{MultipleArticlesResponse, SingleArticleResponse},
+    repositories::FetchFollowingArticlesRepositoryInput,
     requests, services,
     usecases::{CreateArticleUsecaseInput, DeleteArticleUsecaseInput, UpdateArticleUsecaseInput},
 };
@@ -50,21 +51,13 @@ pub async fn feed(
     req: HttpRequest,
     params: web::Query<FeedQueryParameter>,
 ) -> ApiResponse {
-    let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let offset = std::cmp::min(params.offset.to_owned().unwrap_or(0), 100);
     let limit = params.limit.unwrap_or(20);
-    let (articles_list, articles_count) = services::fetch_following_articles(
-        conn,
-        &services::FetchFollowedArticlesSerivce {
-            current_user,
-            offset,
-            limit,
-        },
-    )?;
-
-    let res = MultipleArticlesResponse::from((articles_list, articles_count));
-    Ok(HttpResponse::Ok().json(res))
+    state
+        .di_container
+        .article_usecase
+        .fetch_following_articles(current_user, offset, limit)
 }
 
 pub async fn show(state: web::Data<AppState>, path: web::Path<ArticleTitleSlug>) -> ApiResponse {

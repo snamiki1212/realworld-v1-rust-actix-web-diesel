@@ -2,7 +2,7 @@ use super::entities::Article;
 use super::presenters::ArticlePresenter;
 use super::repositories::{
     ArticleRepository, CreateArticleRepositoryInput, DeleteArticleRepositoryInput,
-    UpdateArticleRepositoryInput,
+    FetchFollowingArticlesRepositoryInput, UpdateArticleRepositoryInput,
 };
 use super::services;
 use crate::appv2::features::user::entities::User;
@@ -50,6 +50,23 @@ impl ArticleUsecase {
             .article_repository
             .fetch_article_by_slug(article_title_slug)?;
         let res = self.article_presenter.from_item(result);
+        Ok(res)
+    }
+
+    pub fn fetch_following_articles(
+        &self,
+        user: User,
+        offset: i64,
+        limit: i64,
+    ) -> Result<HttpResponse, AppError> {
+        let (list, count) = self.article_repository.fetch_following_articles(
+            &FetchFollowingArticlesRepositoryInput {
+                current_user: user,
+                offset,
+                limit,
+            },
+        )?;
+        let res = self.article_presenter.from_list_and_count(list, count);
         Ok(res)
     }
 
