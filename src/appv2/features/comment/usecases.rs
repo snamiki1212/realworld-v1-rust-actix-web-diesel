@@ -29,6 +29,19 @@ impl CommentUsecase {
         Ok(res)
     }
 
+    pub fn create(
+        &self,
+        body: String,
+        article_title_slug: String,
+        author: User,
+    ) -> Result<HttpResponse, AppError> {
+        let result = self
+            .comment_repository
+            .create(body, article_title_slug, author)?;
+        let res = self.comment_presenter.from_comment_and_profile(result);
+        Ok(res)
+    }
+
     pub fn delete(
         &self,
         article_title_slug: &str,

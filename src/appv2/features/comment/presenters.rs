@@ -100,4 +100,9 @@ impl CommentPresenter {
         let res = MultipleCommentsResponse::from(list);
         HttpResponse::Ok().json(res)
     }
+
+    pub fn from_comment_and_profile(&self, item: (Comment, Profile)) -> HttpResponse {
+        let res = SingleCommentResponse::from(item);
+        HttpResponse::Ok().json(res)
+    }
 }

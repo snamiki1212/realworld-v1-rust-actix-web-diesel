@@ -13,7 +13,7 @@ use crate::{
     utils::db::DbPool,
 };
 
-use super::entities::{Comment, DeleteComment};
+use super::entities::{Comment, CreateComment, DeleteComment};
 
 #[derive(Clone)]
 pub struct CommentRepository {
@@ -55,6 +55,33 @@ impl CommentRepository {
             .collect::<Vec<(Comment, Profile)>>();
 
         Ok(comments)
+    }
+
+    pub fn create(
+        &self,
+        body: String,
+        article_title_slug: String,
+        author: User,
+    ) -> Result<(Comment, Profile), AppError> {
+        let conn = &mut self.pool.get()?;
+
+        let article = Article::fetch_by_slug_and_author_id(
+            conn,
+            &FetchBySlugAndAuthorId {
+                slug: article_title_slug.to_owned(),
+                author_id: author.id,
+            },
+        )?;
+        let comment = Comment::create(
+            conn,
+            &CreateComment {
+                body: body.to_string(),
+                author_id: author.id,
+                article_id: article.id.to_owned(),
+            },
+        )?;
+        let profile = author.fetch_profile(conn, &author.id)?;
+        Ok((comment, profile))
     }
 
     pub fn delete(
