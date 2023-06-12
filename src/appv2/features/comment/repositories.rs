@@ -3,10 +3,7 @@ use uuid::Uuid;
 use crate::{
     appv2::features::{
         article::entities::{Article, FetchBySlugAndAuthorId},
-        profile::{
-            entities::Profile,
-            services::{conver_user_to_profile, ConverUserToProfile},
-        },
+        profile::entities::Profile,
         user::entities::User,
     },
     error::AppError,
@@ -46,8 +43,8 @@ impl CommentRepository {
             .iter()
             .map(|(comment, user)| {
                 // TODO: avoid N+1. Write one query to fetch all data somehow.
-                let profile =
-                    conver_user_to_profile(conn, &ConverUserToProfile { user, current_user });
+                let profile = user.to_profile(conn, current_user);
+                // Self::conver_user_to_profile(&ConverUserToProfile { user, current_user });
 
                 // TODO: avoid copy
                 (comment.to_owned(), profile)
@@ -108,25 +105,4 @@ impl CommentRepository {
         )?;
         Ok(())
     }
-
-    // pub fn favorite(&self, user: User, article_title_slug: String) -> Result<Article, AppError> {
-    //     // let conn = &mut self.pool.get()?;
-
-    //     // let article = Article::fetch_by_slug_and_author_id(
-    //     //     conn,
-    //     //     &FetchBySlugAndAuthorId {
-    //     //         slug: article_title_slug.to_owned(),
-    //     //         author_id: user.id,
-    //     //     },
-    //     // )?;
-    //     // Favorite::create(
-    //     //     conn,
-    //     //     &CreateFavorite {
-    //     //         user_id: user.id,
-    //     //         article_id: article.id,
-    //     //     },
-    //     // )?;
-
-    //     // Ok(article)
-    // }
 }

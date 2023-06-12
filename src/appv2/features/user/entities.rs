@@ -168,6 +168,21 @@ impl User {
         };
         Ok(profile)
     }
+
+    pub fn to_profile(&self, conn: &mut PgConnection, current_user: &Option<User>) -> Profile {
+        let user = self;
+        let following = match current_user {
+            Some(current_user) => current_user.is_following(conn, &user.id),
+            None => false,
+        };
+
+        Profile {
+            username: user.username.to_owned(),
+            bio: user.bio.to_owned(),
+            image: user.image.to_owned(),
+            following,
+        }
+    }
 }
 
 #[derive(Insertable, Debug, Deserialize)]
