@@ -163,10 +163,11 @@ impl ArticleRepository {
         list
     }
 
-    pub fn fetch_article(
-        conn: &mut PgConnection,
-        input: &FetchArticleInput,
+    pub fn fetch_article_item(
+        &self,
+        input: &FetchArticleRepositoryInput,
     ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
+        let conn = &mut self.pool.get()?;
         let (article, author) = Article::find_with_author(conn, &input.article_id)?;
 
         let profile = input.current_user.fetch_profile(conn, &author.id)?;
@@ -214,7 +215,7 @@ pub struct UpdateArticleRepositoryInput {
 
 pub type FetchArticleBySlugOutput = (Article, Profile, FavoriteInfo, Vec<Tag>);
 
-pub struct FetchArticleInput {
+pub struct FetchArticleRepositoryInput {
     pub article_id: Uuid,
     pub current_user: User,
 }

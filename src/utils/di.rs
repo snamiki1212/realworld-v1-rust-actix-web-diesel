@@ -56,34 +56,33 @@ pub struct DiContainer {
 
 impl DiContainer {
     pub fn new(pool: &DbPool) -> Self {
-        // User
+        // Repository
         let user_repository = UserRepository::new(pool.clone());
-        let user_presenter = UserPresenter::new();
-        let user_usecase = UserUsecase::new(user_repository.clone(), user_presenter.clone());
-
-        // Profile
         let profile_repository = ProfileRepository::new(pool.clone());
+        let favorite_repository = FavoriteRepository::new(pool.clone());
+        let article_repository = ArticleRepository::new(pool.clone());
+        let tag_repository = TagRepository::new(pool.clone());
+
+        // Presenter
+        let user_presenter = UserPresenter::new();
         let profile_presenter = ProfilePresenter::new();
+        let favorite_presenter = FavoritePresenter::new();
+        let article_presenter = ArticlePresenter::new();
+        let tag_presenter = TagPresenter::new();
+
+        // Usecase
+        let user_usecase = UserUsecase::new(user_repository.clone(), user_presenter.clone());
         let profile_usecase = ProfileUsecase::new(
             (profile_repository.clone(), user_repository.clone()),
             profile_presenter.clone(),
         );
-
-        // Favorite
-        let favorite_repository = FavoriteRepository::new(pool.clone());
-        let favorite_presenter = FavoritePresenter::new();
-        let favorite_usecase =
-            FavoriteUsecase::new(favorite_repository.clone(), favorite_presenter.clone());
-
-        // Article
-        let article_repository = ArticleRepository::new(pool.clone());
-        let article_presenter = ArticlePresenter::new();
+        let favorite_usecase = FavoriteUsecase::new(
+            favorite_repository.clone(),
+            favorite_presenter.clone(),
+            article_repository.clone(),
+        );
         let article_usecase =
             ArticleUsecase::new(article_repository.clone(), article_presenter.clone());
-
-        // Tag
-        let tag_repository = TagRepository::new(pool.clone());
-        let tag_presenter = TagPresenter::new();
         let tag_usecase = TagUsecase::new(tag_repository.clone(), tag_presenter.clone());
 
         Self {
