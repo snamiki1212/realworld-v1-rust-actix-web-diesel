@@ -2,9 +2,9 @@ use super::entities::Article;
 use super::presenters::ArticlePresenter;
 use super::repositories::{
     ArticleRepository, CreateArticleRepositoryInput, DeleteArticleRepositoryInput,
-    FetchFollowingArticlesRepositoryInput, UpdateArticleRepositoryInput,
+    FetchArticlesListRepositoryInput, FetchFollowingArticlesRepositoryInput,
+    UpdateArticleRepositoryInput,
 };
-use super::services;
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use actix_web::HttpResponse;
@@ -26,11 +26,11 @@ impl ArticleUsecase {
 
     pub fn fetch_articles_list(
         &self,
-        params: services::FetchArticlesList,
+        params: FetchArticlesListUsecaseInput,
     ) -> Result<HttpResponse, AppError> {
         let (list, count) =
             self.article_repository
-                .fetch_articles_list(services::FetchArticlesList {
+                .fetch_articles_list(FetchArticlesListRepositoryInput {
                     tag: params.tag.clone(),
                     author: params.author.clone(),
                     favorited: params.favorited.clone(),
@@ -136,4 +136,12 @@ pub struct UpdateArticleUsecaseInput {
     pub title: Option<String>,
     pub description: Option<String>,
     pub body: Option<String>,
+}
+
+pub struct FetchArticlesListUsecaseInput {
+    pub tag: Option<String>,
+    pub author: Option<String>,
+    pub favorited: Option<String>,
+    pub offset: i64,
+    pub limit: i64,
 }

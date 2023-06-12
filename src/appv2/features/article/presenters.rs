@@ -1,5 +1,4 @@
-use super::entities::Article;
-use super::services::ArticlesList;
+use super::{entities::Article, repositories::ArticlesList};
 use crate::appv2::features::favorite::entities::FavoriteInfo;
 use crate::appv2::features::profile::entities::Profile;
 use crate::appv2::features::tag::entities::Tag;

@@ -2,8 +2,11 @@ use super::{
     entities::{Article, DeleteArticle},
     presenters::{MultipleArticlesResponse, SingleArticleResponse},
     repositories::FetchFollowingArticlesRepositoryInput,
-    requests, services,
-    usecases::{CreateArticleUsecaseInput, DeleteArticleUsecaseInput, UpdateArticleUsecaseInput},
+    requests,
+    usecases::{
+        CreateArticleUsecaseInput, DeleteArticleUsecaseInput, FetchArticlesListUsecaseInput,
+        UpdateArticleUsecaseInput,
+    },
 };
 use crate::appv2::drivers::middlewares::auth;
 use crate::appv2::drivers::middlewares::state::AppState;
@@ -31,7 +34,7 @@ pub async fn index(
     state
         .di_container
         .article_usecase
-        .fetch_articles_list(services::FetchArticlesList {
+        .fetch_articles_list(FetchArticlesListUsecaseInput {
             tag: params.tag.clone(),
             author: params.author.clone(),
             favorited: params.favorited.clone(),
