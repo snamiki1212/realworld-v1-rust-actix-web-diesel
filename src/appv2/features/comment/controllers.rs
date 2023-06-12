@@ -45,17 +45,11 @@ pub async fn delete(
     req: HttpRequest,
     path: web::Path<(ArticleIdSlug, CommentIdSlug)>,
 ) -> ApiResponse {
-    let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let (article_title_slug, comment_id) = path.into_inner();
     let comment_id = uuid::parse(&comment_id)?;
-    service::delete_comment(
-        conn,
-        &service::DeleteCommentService {
-            article_title_slug,
-            comment_id,
-            author_id: current_user.id,
-        },
-    )?;
-    Ok(HttpResponse::Ok().json("Ok"))
+    state
+        .di_container
+        .comment_usecase
+        .delete(&article_title_slug, comment_id, current_user.id)
 }

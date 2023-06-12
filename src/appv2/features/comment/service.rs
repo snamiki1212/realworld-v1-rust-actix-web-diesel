@@ -69,30 +69,30 @@ pub fn fetch_comments_list(
     Ok(comments)
 }
 
-pub struct DeleteCommentService {
-    pub article_title_slug: String,
-    pub author_id: Uuid,
-    pub comment_id: Uuid,
-}
+// pub struct DeleteCommentService {
+//     pub article_title_slug: String,
+//     pub author_id: Uuid,
+//     pub comment_id: Uuid,
+// }
 
-pub fn delete_comment(
-    conn: &mut PgConnection,
-    params: &DeleteCommentService,
-) -> Result<(), AppError> {
-    let article = Article::fetch_by_slug_and_author_id(
-        conn,
-        &FetchBySlugAndAuthorId {
-            slug: params.article_title_slug.to_owned(),
-            author_id: params.author_id,
-        },
-    )?;
-    Comment::delete(
-        conn,
-        &DeleteComment {
-            comment_id: params.comment_id,
-            article_id: article.id,
-            author_id: params.author_id,
-        },
-    )?;
-    Ok(())
-}
+// pub fn delete_comment(
+//     conn: &mut PgConnection,
+//     params: &DeleteCommentService,
+// ) -> Result<(), AppError> {
+//     let article = Article::fetch_by_slug_and_author_id(
+//         conn,
+//         &FetchBySlugAndAuthorId {
+//             slug: params.article_title_slug.to_owned(),
+//             author_id: params.author_id,
+//         },
+//     )?;
+//     Comment::delete(
+//         conn,
+//         &DeleteComment {
+//             comment_id: params.comment_id,
+//             article_id: article.id,
+//             author_id: params.author_id,
+//         },
+//     )?;
+//     Ok(())
+// }

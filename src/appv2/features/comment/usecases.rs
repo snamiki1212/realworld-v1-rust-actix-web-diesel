@@ -22,6 +22,17 @@ impl CommentUsecase {
             comment_presenter,
         }
     }
+    pub fn delete(
+        &self,
+        article_title_slug: &str,
+        comment_id: Uuid,
+        author_id: Uuid,
+    ) -> Result<HttpResponse, AppError> {
+        self.comment_repository
+            .delete(&article_title_slug, comment_id, author_id);
+        let res = self.comment_presenter.toHttpRes();
+        Ok(res)
+    }
 
     // pub fn favorite(
     //     &self,
