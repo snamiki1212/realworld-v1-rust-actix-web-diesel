@@ -1,15 +1,15 @@
+use diesel::PgConnection;
 use uuid::Uuid;
 
 use super::entities::{Article, CreateArticle, DeleteArticle, UpdateArticle};
 use super::services::{self, FetchArticlesListResult};
 use crate::appv2::features::favorite::entities::FavoriteInfo;
 use crate::appv2::features::profile::entities::Profile;
-use crate::appv2::features::tag::entities::Tag;
+use crate::appv2::features::tag::entities::{CreateTag, Tag};
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use crate::utils::db::DbPool;
 
-type ArticleCount = i64;
 #[derive(Clone)]
 pub struct ArticleRepository {
     pool: DbPool,
@@ -62,7 +62,8 @@ impl ArticleRepository {
                 body: params.body.clone(),
             },
         )?;
-        let tag_list = services::create_tag_list(conn, &params.tag_name_list, &article.id)?;
+
+        let tag_list = Self::create_tag_list(conn, &params.tag_name_list, &article.id)?;
 
         let profile = params
             .current_user
@@ -123,6 +124,24 @@ impl ArticleRepository {
         };
 
         Ok((article, profile, favorite_info, tag_list))
+    }
+
+    fn create_tag_list(
+        conn: &mut PgConnection,
+        tag_name_list: &Option<Vec<String>>,
+        article_id: &Uuid,
+    ) -> Result<Vec<Tag>, AppError> {
+        let list = tag_name_list
+            .as_ref()
+            .map(|tag_name_list| {
+                let records = tag_name_list
+                    .iter()
+                    .map(|name| CreateTag { name, article_id })
+                    .collect();
+                Tag::create_list(conn, records)
+            })
+            .unwrap_or_else(|| Ok(vec![]));
+        list
     }
 }
 

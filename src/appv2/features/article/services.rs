@@ -11,24 +11,6 @@ use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use uuid::Uuid;
 
-pub fn create_tag_list(
-    conn: &mut PgConnection,
-    tag_name_list: &Option<Vec<String>>,
-    article_id: &Uuid,
-) -> Result<Vec<Tag>, AppError> {
-    let list = tag_name_list
-        .as_ref()
-        .map(|tag_name_list| {
-            let records = tag_name_list
-                .iter()
-                .map(|name| CreateTag { name, article_id })
-                .collect();
-            Tag::create_list(conn, records)
-        })
-        .unwrap_or_else(|| Ok(vec![]));
-    list
-}
-
 pub struct FetchArticlesList {
     pub tag: Option<String>,
     pub author: Option<String>,
@@ -308,45 +290,3 @@ pub fn fetch_following_articles(
 
     Ok((articles_list, articles_count))
 }
-
-// pub struct UpdateArticleService {
-//     pub current_user: User,
-//     pub article_title_slug: String,
-//     pub slug: Option<String>,
-//     pub title: Option<String>,
-//     pub description: Option<String>,
-//     pub body: Option<String>,
-// }
-// pub fn update_article(
-//     conn: &mut PgConnection,
-//     params: &UpdateArticleService,
-// ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
-//     // let article = Article::update(
-//     //     conn,
-//     //     &params.article_title_slug,
-//     //     &params.current_user.id,
-//     //     &UpdateArticle {
-//     //         slug: params.slug.to_owned(),
-//     //         title: params.title.to_owned(),
-//     //         description: params.description.to_owned(),
-//     //         body: params.body.to_owned(),
-//     //     },
-//     // )?;
-
-//     // let tag_list = Tag::fetch_by_article_id(conn, &article.id)?;
-
-//     // let profile = params
-//     //     .current_user
-//     //     .fetch_profile(conn, &article.author_id)?;
-
-//     // let favorite_info = {
-//     //     let is_favorited = article.is_favorited_by_user_id(conn, &params.current_user.id)?;
-//     //     let favorites_count = article.fetch_favorites_count(conn)?;
-//     //     FavoriteInfo {
-//     //         is_favorited,
-//     //         favorites_count,
-//     //     }
-//     // };
-
-//     // Ok((article, profile, favorite_info, tag_list))
-// }
