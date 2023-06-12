@@ -22,6 +22,13 @@ impl CommentUsecase {
             comment_presenter,
         }
     }
+
+    pub fn fetch_comments_list(&self, user: &Option<User>) -> Result<HttpResponse, AppError> {
+        let result = self.comment_repository.fetch_comments_list(user)?;
+        let res = self.comment_presenter.from_comment_and_profile_list(result);
+        Ok(res)
+    }
+
     pub fn delete(
         &self,
         article_title_slug: &str,
@@ -33,23 +40,4 @@ impl CommentUsecase {
         let res = self.comment_presenter.toHttpRes();
         Ok(res)
     }
-
-    // pub fn favorite(
-    //     &self,
-    //     user: User,
-    //     article_title_slug: String,
-    // ) -> Result<HttpResponse, AppError> {
-    //     let article = self
-    //         .favorite_repository
-    //         .favorite(user.clone(), article_title_slug)?;
-
-    //     let result = self
-    //         .article_repository
-    //         .fetch_article_item(&FetchArticleRepositoryInput {
-    //             article_id: article.id,
-    //             current_user: user,
-    //         })?;
-    //     let res = self.favorite_presenter.complete(result);
-    //     Ok(res)
-    // }
 }

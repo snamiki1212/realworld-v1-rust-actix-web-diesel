@@ -12,11 +12,15 @@ type ArticleIdSlug = String;
 type CommentIdSlug = String;
 
 pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> ApiResponse {
-    let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req).ok();
-    let list = service::fetch_comments_list(conn, &current_user)?;
-    let res = MultipleCommentsResponse::from(list);
-    Ok(HttpResponse::Ok().json(res))
+    state
+        .di_container
+        .comment_usecase
+        .fetch_comments_list(&current_user)
+    // let conn = &mut state.get_conn()?;
+    // let list = service::fetch_comments_list(conn, &current_user)?;
+    // let res = MultipleCommentsResponse::from(list);
+    // Ok(HttpResponse::Ok().json(res))
 }
 
 pub async fn create(

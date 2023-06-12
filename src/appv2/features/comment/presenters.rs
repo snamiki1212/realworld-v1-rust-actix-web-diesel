@@ -95,4 +95,9 @@ impl CommentPresenter {
     pub fn toHttpRes(&self) -> HttpResponse {
         HttpResponse::Ok().json("OK")
     }
+
+    pub fn from_comment_and_profile_list(&self, list: Vec<(Comment, Profile)>) -> HttpResponse {
+        let res = MultipleCommentsResponse::from(list);
+        HttpResponse::Ok().json(res)
+    }
 }
