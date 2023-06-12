@@ -1,15 +1,14 @@
-use crate::appv2::features::article::entities::{Article, UpdateArticle};
+use crate::appv2::features::article::entities::Article;
 use crate::appv2::features::favorite::entities::{Favorite, FavoriteInfo};
 use crate::appv2::features::follow::entities::Follow;
 use crate::appv2::features::profile::entities::Profile;
-use crate::appv2::features::tag::entities::{CreateTag, Tag};
+use crate::appv2::features::tag::entities::Tag;
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use crate::schema::articles::dsl::*;
 use crate::schema::{articles, tags, users};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use uuid::Uuid;
 
 pub struct FetchArticlesList {
     pub tag: Option<String>,
@@ -134,35 +133,6 @@ pub fn fetch_articles_list(
     };
 
     Ok((result, articles_count))
-}
-
-pub struct FetchArticle {
-    pub article_id: Uuid,
-    pub current_user: User,
-}
-pub fn fetch_article(
-    conn: &mut PgConnection,
-    FetchArticle {
-        article_id,
-        current_user,
-    }: &FetchArticle,
-) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
-    let (article, author) = Article::find_with_author(conn, article_id)?;
-
-    let profile = current_user.fetch_profile(conn, &author.id)?;
-
-    let favorite_info = {
-        let is_favorited = article.is_favorited_by_user_id(conn, &current_user.id)?;
-        let favorites_count = article.fetch_favorites_count(conn)?;
-        FavoriteInfo {
-            is_favorited,
-            favorites_count,
-        }
-    };
-
-    let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
-
-    Ok((article, profile, favorite_info, tags_list))
 }
 
 use crate::schema::follows;

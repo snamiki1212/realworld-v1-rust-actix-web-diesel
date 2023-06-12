@@ -162,6 +162,31 @@ impl ArticleRepository {
             .unwrap_or_else(|| Ok(vec![]));
         list
     }
+
+    pub fn fetch_article(
+        conn: &mut PgConnection,
+        input: &FetchArticleInput,
+    ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
+        let (article, author) = Article::find_with_author(conn, &input.article_id)?;
+
+        let profile = input.current_user.fetch_profile(conn, &author.id)?;
+
+        let favorite_info = {
+            let is_favorited = article.is_favorited_by_user_id(conn, &input.current_user.id)?;
+            let favorites_count = article.fetch_favorites_count(conn)?;
+            FavoriteInfo {
+                is_favorited,
+                favorites_count,
+            }
+        };
+
+        let tags_list = {
+            use diesel::prelude::*;
+            Tag::belonging_to(&article).load::<Tag>(conn)?
+        };
+
+        Ok((article, profile, favorite_info, tags_list))
+    }
 }
 
 pub struct CreateArticleRepositoryInput {
@@ -188,3 +213,8 @@ pub struct UpdateArticleRepositoryInput {
 }
 
 pub type FetchArticleBySlugOutput = (Article, Profile, FavoriteInfo, Vec<Tag>);
+
+pub struct FetchArticleInput {
+    pub article_id: Uuid,
+    pub current_user: User,
+}
