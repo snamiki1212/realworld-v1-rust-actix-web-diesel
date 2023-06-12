@@ -72,7 +72,7 @@ pub async fn show(state: web::Data<AppState>, path: web::Path<ArticleTitleSlug>)
     state
         .di_container
         .article_usecase
-        .fetch_article_by_slug(&services::FetchArticleBySlug { article_title_slug })
+        .fetch_article_by_slug(article_title_slug)
 }
 
 pub async fn create(

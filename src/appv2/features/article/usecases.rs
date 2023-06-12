@@ -43,9 +43,9 @@ impl ArticleUsecase {
 
     pub fn fetch_article_by_slug(
         &self,
-        params: &services::FetchArticleBySlug,
+        article_title_slug: String,
     ) -> Result<HttpResponse, AppError> {
-        let article_title_slug = params.article_title_slug.clone();
+        let article_title_slug = article_title_slug.clone();
         let result = self
             .article_repository
             .fetch_article_by_slug(article_title_slug)?;

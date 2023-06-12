@@ -41,9 +41,28 @@ impl ArticleRepository {
     pub fn fetch_article_by_slug(
         &self,
         article_title_slug: String,
-    ) -> Result<services::FetchArticleBySlugResult, AppError> {
+    ) -> Result<FetchArticleBySlugOutput, AppError> {
         let conn = &mut self.pool.get()?;
-        services::fetch_article_by_slug(conn, &services::FetchArticleBySlug { article_title_slug })
+
+        let (article, author) = Article::fetch_by_slug_with_author(conn, &article_title_slug)?;
+
+        let profile = author.fetch_profile(conn, &author.id)?;
+
+        let tags_list = {
+            use diesel::prelude::*;
+            Tag::belonging_to(&article).load::<Tag>(conn)?
+        };
+
+        let favorite_info = {
+            let is_favorited = article.is_favorited_by_user_id(conn, &author.id)?;
+            let favorites_count = article.fetch_favorites_count(conn)?;
+            FavoriteInfo {
+                is_favorited,
+                favorites_count,
+            }
+        };
+
+        Ok((article, profile, favorite_info, tags_list))
     }
 
     pub fn create(
@@ -167,3 +186,5 @@ pub struct UpdateArticleRepositoryInput {
     pub description: Option<String>,
     pub body: Option<String>,
 }
+
+pub type FetchArticleBySlugOutput = (Article, Profile, FavoriteInfo, Vec<Tag>);

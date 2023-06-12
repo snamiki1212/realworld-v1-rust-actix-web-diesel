@@ -165,32 +165,6 @@ pub fn fetch_article(
     Ok((article, profile, favorite_info, tags_list))
 }
 
-pub type FetchArticleBySlugResult = (Article, Profile, FavoriteInfo, Vec<Tag>);
-pub struct FetchArticleBySlug {
-    pub article_title_slug: String,
-}
-pub fn fetch_article_by_slug(
-    conn: &mut PgConnection,
-    params: &FetchArticleBySlug,
-) -> Result<FetchArticleBySlugResult, AppError> {
-    let (article, author) = Article::fetch_by_slug_with_author(conn, &params.article_title_slug)?;
-
-    let profile = author.fetch_profile(conn, &author.id)?;
-
-    let tags_list = Tag::belonging_to(&article).load::<Tag>(conn)?;
-
-    let favorite_info = {
-        let is_favorited = article.is_favorited_by_user_id(conn, &author.id)?;
-        let favorites_count = article.fetch_favorites_count(conn)?;
-        FavoriteInfo {
-            is_favorited,
-            favorites_count,
-        }
-    };
-
-    Ok((article, profile, favorite_info, tags_list))
-}
-
 use crate::schema::follows;
 pub struct FetchFollowedArticlesSerivce {
     pub current_user: User,
