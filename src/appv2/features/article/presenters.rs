@@ -135,4 +135,8 @@ impl ArticlePresenter {
         let res = SingleArticleResponse::from(item);
         HttpResponse::Ok().json(res)
     }
+    pub fn toHttpRes(&self) -> HttpResponse {
+        let res = ();
+        HttpResponse::Ok().json(res)
+    }
 }

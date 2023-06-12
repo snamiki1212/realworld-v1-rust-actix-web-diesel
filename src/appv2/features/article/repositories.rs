@@ -1,4 +1,6 @@
-use super::entities::{Article, CreateArticle};
+use uuid::Uuid;
+
+use super::entities::{Article, CreateArticle, DeleteArticle};
 use super::services::{self, FetchArticlesListResult};
 use crate::appv2::features::favorite::entities::FavoriteInfo;
 use crate::appv2::features::profile::entities::Profile;
@@ -77,6 +79,17 @@ impl ArticleRepository {
 
         Ok((article, profile, favorite_info, tag_list))
     }
+
+    pub fn delete(&self, input: DeleteArticleRepositoryInput) -> Result<(), AppError> {
+        let conn = &mut self.pool.get()?;
+        Article::delete(
+            conn,
+            &DeleteArticle {
+                slug: input.slug,
+                author_id: input.author_id,
+            },
+        )
+    }
 }
 
 pub struct CreateArticleRepositoryInput {
@@ -86,4 +99,9 @@ pub struct CreateArticleRepositoryInput {
     pub body: String,
     pub tag_name_list: Option<Vec<String>>,
     pub current_user: User,
+}
+
+pub struct DeleteArticleRepositoryInput {
+    pub slug: String,
+    pub author_id: Uuid,
 }

@@ -2,7 +2,7 @@ use super::{
     entities::{Article, DeleteArticle},
     presenters::{MultipleArticlesResponse, SingleArticleResponse},
     requests, services,
-    usecases::CreateArticleUsecaseInput,
+    usecases::{CreateArticleUsecaseInput, DeleteArticleUsercaseInput},
 };
 use crate::appv2::drivers::middlewares::auth;
 use crate::appv2::drivers::middlewares::state::AppState;
@@ -129,15 +129,13 @@ pub async fn delete(
     req: HttpRequest,
     path: web::Path<ArticleTitleSlug>,
 ) -> ApiResponse {
-    let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
-    Article::delete(
-        conn,
-        &DeleteArticle {
-            slug: article_title_slug,
+    state
+        .di_container
+        .article_usecase
+        .delete(DeleteArticleUsercaseInput {
             author_id: current_user.id,
-        },
-    )?;
-    Ok(HttpResponse::Ok().json(()))
+            slug: article_title_slug,
+        })
 }

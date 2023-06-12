@@ -1,10 +1,13 @@
 use super::entities::Article;
 use super::presenters::ArticlePresenter;
-use super::repositories::{ArticleRepository, CreateArticleRepositoryInput};
+use super::repositories::{
+    ArticleRepository, CreateArticleRepositoryInput, DeleteArticleRepositoryInput,
+};
 use super::services;
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use actix_web::HttpResponse;
+use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct ArticleUsecase {
@@ -64,6 +67,16 @@ impl ArticleUsecase {
         let res = self.article_presenter.from_item(result);
         Ok(res)
     }
+
+    pub fn delete(&self, input: DeleteArticleUsercaseInput) -> Result<HttpResponse, AppError> {
+        self.article_repository
+            .delete(DeleteArticleRepositoryInput {
+                slug: input.slug,
+                author_id: input.author_id,
+            })?;
+        let res = self.article_presenter.toHttpRes();
+        Ok(res)
+    }
 }
 
 pub struct CreateArticleUsecaseInput {
@@ -72,4 +85,9 @@ pub struct CreateArticleUsecaseInput {
     pub body: String,
     pub tag_name_list: Option<Vec<String>>,
     pub current_user: User,
+}
+
+pub struct DeleteArticleUsercaseInput {
+    pub slug: String,
+    pub author_id: Uuid,
 }
