@@ -1,7 +1,6 @@
 use super::{
-    request,
-    response::{MultipleCommentsResponse, SingleCommentResponse},
-    service,
+    presenters::{MultipleCommentsResponse, SingleCommentResponse},
+    request, service,
 };
 use crate::appv2::drivers::middlewares::auth;
 use crate::appv2::drivers::middlewares::state::AppState;

@@ -1,4 +1,3 @@
-use crate::app;
 use crate::appv2;
 use actix_web::web;
 use actix_web::web::{delete, get, post, put};
@@ -71,9 +70,18 @@ pub fn api(cfg: &mut web::ServiceConfig) {
                             )
                             .service(
                                 web::scope("/comments")
-                                    .route("", get().to(app::comment::api::index))
-                                    .route("", post().to(app::comment::api::create))
-                                    .route("/{comment_id}", delete().to(app::comment::api::delete)),
+                                    .route(
+                                        "",
+                                        get().to(appv2::features::comment::controllers::index),
+                                    )
+                                    .route(
+                                        "",
+                                        post().to(appv2::features::comment::controllers::create),
+                                    )
+                                    .route(
+                                        "/{comment_id}",
+                                        delete().to(appv2::features::comment::controllers::delete),
+                                    ),
                             ),
                     ),
             ),

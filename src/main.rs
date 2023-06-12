@@ -6,7 +6,6 @@ extern crate log;
 
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
-mod app;
 mod appv2;
 mod constants;
 mod error;

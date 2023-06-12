@@ -1,4 +1,4 @@
-use super::model::{Comment, CreateComment, DeleteComment};
+use super::entities::{Comment, CreateComment, DeleteComment};
 use crate::appv2::features::article::entities::{Article, FetchBySlugAndAuthorId};
 use crate::appv2::features::profile::entities::Profile;
 use crate::appv2::features::profile::services::{conver_user_to_profile, ConverUserToProfile};
