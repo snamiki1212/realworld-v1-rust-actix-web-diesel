@@ -2,6 +2,7 @@ use super::entities::Article;
 use super::presenters::ArticlePresenter;
 use super::repositories::{
     ArticleRepository, CreateArticleRepositoryInput, DeleteArticleRepositoryInput,
+    UpdateArticleRepositoryInput,
 };
 use super::services;
 use crate::appv2::features::user::entities::User;
@@ -68,13 +69,33 @@ impl ArticleUsecase {
         Ok(res)
     }
 
-    pub fn delete(&self, input: DeleteArticleUsercaseInput) -> Result<HttpResponse, AppError> {
+    pub fn delete(&self, input: DeleteArticleUsecaseInput) -> Result<HttpResponse, AppError> {
         self.article_repository
             .delete(DeleteArticleRepositoryInput {
                 slug: input.slug,
                 author_id: input.author_id,
             })?;
         let res = self.article_presenter.toHttpRes();
+        Ok(res)
+    }
+
+    pub fn update(&self, input: UpdateArticleUsecaseInput) -> Result<HttpResponse, AppError> {
+        let article_slug = &input
+            .title
+            .as_ref()
+            .map(|_title| Article::convert_title_to_slug(_title));
+        let slug = article_slug.to_owned();
+        let result = self
+            .article_repository
+            .update(UpdateArticleRepositoryInput {
+                current_user: input.current_user,
+                article_title_slug: input.article_title_slug,
+                slug,
+                title: input.title,
+                description: input.description,
+                body: input.body,
+            })?;
+        let res = self.article_presenter.from_item(result);
         Ok(res)
     }
 }
@@ -87,7 +108,15 @@ pub struct CreateArticleUsecaseInput {
     pub current_user: User,
 }
 
-pub struct DeleteArticleUsercaseInput {
+pub struct DeleteArticleUsecaseInput {
     pub slug: String,
     pub author_id: Uuid,
+}
+
+pub struct UpdateArticleUsecaseInput {
+    pub current_user: User,
+    pub article_title_slug: String,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub body: Option<String>,
 }

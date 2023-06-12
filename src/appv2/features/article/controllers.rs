@@ -2,7 +2,7 @@ use super::{
     entities::{Article, DeleteArticle},
     presenters::{MultipleArticlesResponse, SingleArticleResponse},
     requests, services,
-    usecases::{CreateArticleUsecaseInput, DeleteArticleUsercaseInput},
+    usecases::{CreateArticleUsecaseInput, DeleteArticleUsecaseInput, UpdateArticleUsecaseInput},
 };
 use crate::appv2::drivers::middlewares::auth;
 use crate::appv2::drivers::middlewares::state::AppState;
@@ -99,29 +99,21 @@ pub async fn update(
     path: web::Path<ArticleTitleSlug>,
     form: web::Json<requests::UpdateArticleRequest>,
 ) -> ApiResponse {
-    let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
     let article_title_slug = path.into_inner();
-    let article_slug = &form
-        .article
-        .title
-        .as_ref()
-        .map(|_title| Article::convert_title_to_slug(_title));
-
-    let (article, profile, favorite_info, tag_list) = services::update_article(
-        conn,
-        &services::UpdateArticleService {
+    let title = form.article.title.clone();
+    let description = form.article.description.clone();
+    let body = form.article.body.clone();
+    state
+        .di_container
+        .article_usecase
+        .update(UpdateArticleUsecaseInput {
             current_user,
             article_title_slug,
-            slug: article_slug.to_owned(),
-            title: form.article.title.clone(),
-            description: form.article.description.clone(),
-            body: form.article.body.clone(),
-        },
-    )?;
-
-    let res = SingleArticleResponse::from((article, profile, favorite_info, tag_list));
-    Ok(HttpResponse::Ok().json(res))
+            title,
+            description,
+            body,
+        })
 }
 
 pub async fn delete(
@@ -134,7 +126,7 @@ pub async fn delete(
     state
         .di_container
         .article_usecase
-        .delete(DeleteArticleUsercaseInput {
+        .delete(DeleteArticleUsecaseInput {
             author_id: current_user.id,
             slug: article_title_slug,
         })

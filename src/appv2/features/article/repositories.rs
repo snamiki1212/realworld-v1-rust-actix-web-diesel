@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use super::entities::{Article, CreateArticle, DeleteArticle};
+use super::entities::{Article, CreateArticle, DeleteArticle, UpdateArticle};
 use super::services::{self, FetchArticlesListResult};
 use crate::appv2::features::favorite::entities::FavoriteInfo;
 use crate::appv2::features::profile::entities::Profile;
@@ -90,6 +90,40 @@ impl ArticleRepository {
             },
         )
     }
+
+    pub fn update(
+        &self,
+        input: UpdateArticleRepositoryInput,
+    ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
+        let conn = &mut self.pool.get()?;
+
+        let article = Article::update(
+            conn,
+            &input.article_title_slug,
+            &input.current_user.id,
+            &UpdateArticle {
+                slug: input.slug.to_owned(),
+                title: input.title.to_owned(),
+                description: input.description.to_owned(),
+                body: input.body.to_owned(),
+            },
+        )?;
+
+        let tag_list = Tag::fetch_by_article_id(conn, &article.id)?;
+
+        let profile = input.current_user.fetch_profile(conn, &article.author_id)?;
+
+        let favorite_info = {
+            let is_favorited = article.is_favorited_by_user_id(conn, &input.current_user.id)?;
+            let favorites_count = article.fetch_favorites_count(conn)?;
+            FavoriteInfo {
+                is_favorited,
+                favorites_count,
+            }
+        };
+
+        Ok((article, profile, favorite_info, tag_list))
+    }
 }
 
 pub struct CreateArticleRepositoryInput {
@@ -104,4 +138,13 @@ pub struct CreateArticleRepositoryInput {
 pub struct DeleteArticleRepositoryInput {
     pub slug: String,
     pub author_id: Uuid,
+}
+
+pub struct UpdateArticleRepositoryInput {
+    pub current_user: User,
+    pub article_title_slug: String,
+    pub slug: Option<String>,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub body: Option<String>,
 }
