@@ -2,6 +2,7 @@ use super::{
     entities::{Article, DeleteArticle},
     presenters::{MultipleArticlesResponse, SingleArticleResponse},
     requests, services,
+    usecases::CreateArticleUsecaseInput,
 };
 use crate::appv2::drivers::middlewares::auth;
 use crate::appv2::drivers::middlewares::state::AppState;
@@ -79,21 +80,17 @@ pub async fn create(
     req: HttpRequest,
     form: web::Json<requests::CreateArticleRequest>,
 ) -> ApiResponse {
-    let conn = &mut state.get_conn()?;
     let current_user = auth::get_current_user(&req)?;
-    let (article, profile, favorite_info, tag_list) = services::create(
-        conn,
-        &services::CreateArticleSerivce {
+    state
+        .di_container
+        .article_usecase
+        .create(CreateArticleUsecaseInput {
             title: form.article.title.clone(),
-            slug: Article::convert_title_to_slug(&form.article.title),
             description: form.article.description.clone(),
             body: form.article.body.clone(),
             tag_name_list: form.article.tag_list.to_owned(),
             current_user,
-        },
-    )?;
-    let res = SingleArticleResponse::from((article, profile, favorite_info, tag_list));
-    Ok(HttpResponse::Ok().json(res))
+        })
 }
 
 pub async fn update(

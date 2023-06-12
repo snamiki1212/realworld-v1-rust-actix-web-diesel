@@ -1,4 +1,4 @@
-use crate::appv2::features::article::entities::{Article, CreateArticle, UpdateArticle};
+use crate::appv2::features::article::entities::{Article, UpdateArticle};
 use crate::appv2::features::favorite::entities::{Favorite, FavoriteInfo};
 use crate::appv2::features::follow::entities::Follow;
 use crate::appv2::features::profile::entities::Profile;
@@ -11,47 +11,7 @@ use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use uuid::Uuid;
 
-pub struct CreateArticleSerivce {
-    pub slug: String,
-    pub title: String,
-    pub description: String,
-    pub body: String,
-    pub tag_name_list: Option<Vec<String>>,
-    pub current_user: User,
-}
-pub fn create(
-    conn: &mut PgConnection,
-    params: &CreateArticleSerivce,
-) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
-    let article = Article::create(
-        conn,
-        &CreateArticle {
-            author_id: params.current_user.id,
-            slug: params.slug.clone(),
-            title: params.title.clone(),
-            description: params.description.clone(),
-            body: params.body.clone(),
-        },
-    )?;
-    let tag_list = create_tag_list(conn, &params.tag_name_list, &article.id)?;
-
-    let profile = params
-        .current_user
-        .fetch_profile(conn, &article.author_id)?;
-
-    let favorite_info = {
-        let is_favorited = article.is_favorited_by_user_id(conn, &params.current_user.id)?;
-        let favorites_count = article.fetch_favorites_count(conn)?;
-        FavoriteInfo {
-            is_favorited,
-            favorites_count,
-        }
-    };
-
-    Ok((article, profile, favorite_info, tag_list))
-}
-
-fn create_tag_list(
+pub fn create_tag_list(
     conn: &mut PgConnection,
     tag_name_list: &Option<Vec<String>>,
     article_id: &Uuid,

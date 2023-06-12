@@ -1,6 +1,8 @@
+use super::entities::Article;
 use super::presenters::ArticlePresenter;
-use super::repositories::ArticleRepository;
+use super::repositories::{ArticleRepository, CreateArticleRepositoryInput};
 use super::services;
+use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use actix_web::HttpResponse;
 
@@ -46,4 +48,28 @@ impl ArticleUsecase {
         let res = self.article_presenter.from_item(result);
         Ok(res)
     }
+
+    pub fn create(&self, params: CreateArticleUsecaseInput) -> Result<HttpResponse, AppError> {
+        let slug = Article::convert_title_to_slug(&params.title);
+        let result = self
+            .article_repository
+            .create(CreateArticleRepositoryInput {
+                body: params.body,
+                current_user: params.current_user,
+                description: params.description,
+                tag_name_list: params.tag_name_list,
+                title: params.title,
+                slug,
+            })?;
+        let res = self.article_presenter.from_item(result);
+        Ok(res)
+    }
+}
+
+pub struct CreateArticleUsecaseInput {
+    pub title: String,
+    pub description: String,
+    pub body: String,
+    pub tag_name_list: Option<Vec<String>>,
+    pub current_user: User,
 }
