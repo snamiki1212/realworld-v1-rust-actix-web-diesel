@@ -28,13 +28,19 @@ impl From<ProfileModel> for ProfileResponse {
     }
 }
 
+pub trait ProfilePresenter: Send + Sync + 'static {
+    fn from_profile(&self, model: ProfileModel) -> HttpResponse;
+}
+
 #[derive(Clone)]
-pub struct ProfilePresenter {}
-impl ProfilePresenter {
+pub struct ProfilePresenterImpl {}
+impl ProfilePresenterImpl {
     pub fn new() -> Self {
         Self {}
     }
-    pub fn from_profile(&self, model: ProfileModel) -> HttpResponse {
+}
+impl ProfilePresenter for ProfilePresenterImpl {
+    fn from_profile(&self, model: ProfileModel) -> HttpResponse {
         let res_model = ProfileResponse::from(model);
         HttpResponse::Ok().json(res_model)
     }

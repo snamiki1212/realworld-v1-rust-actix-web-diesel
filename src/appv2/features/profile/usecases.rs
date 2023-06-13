@@ -10,14 +10,14 @@ use std::sync::Arc;
 pub struct ProfileUsecase {
     user_repository: Arc<dyn UserRepository>,
     profile_repository: Arc<dyn ProfileRepository>,
-    presenter: ProfilePresenter,
+    presenter: Arc<dyn ProfilePresenter>,
 }
 
 impl ProfileUsecase {
     pub fn new(
         profile_repository: Arc<dyn ProfileRepository>,
         user_repository: Arc<dyn UserRepository>,
-        presenter: ProfilePresenter,
+        presenter: Arc<dyn ProfilePresenter>,
     ) -> Self {
         Self {
             profile_repository,
