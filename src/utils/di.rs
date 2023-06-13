@@ -4,7 +4,7 @@ use crate::appv2::features::article::usecases::ArticleUsecase;
 use crate::appv2::features::comment::presenters::CommentPresenter;
 use crate::appv2::features::comment::repositories::CommentRepositoryImpl;
 use crate::appv2::features::comment::usecases::CommentUsecase;
-use crate::appv2::features::favorite::presenters::FavoritePresenter;
+use crate::appv2::features::favorite::presenters::FavoritePresenterImpl;
 use crate::appv2::features::favorite::repositories::FavoriteRepositoryImpl;
 use crate::appv2::features::favorite::usecases::FavoriteUsecase;
 use crate::appv2::features::profile::presenters::ProfilePresenterImpl;
@@ -40,7 +40,7 @@ pub struct DiContainer {
      * Favorite
      */
     pub favorite_repository: FavoriteRepositoryImpl,
-    pub favorite_presenter: FavoritePresenter,
+    pub favorite_presenter: FavoritePresenterImpl,
     pub favorite_usecase: FavoriteUsecase,
 
     /**
@@ -78,7 +78,7 @@ impl DiContainer {
         // Presenter
         let user_presenter = UserPresenterImpl::new();
         let profile_presenter = ProfilePresenterImpl::new();
-        let favorite_presenter = FavoritePresenter::new();
+        let favorite_presenter = FavoritePresenterImpl::new();
         let article_presenter = ArticlePresenter::new();
         let tag_presenter = TagPresenter::new();
         let comment_presenter = CommentPresenter::new();
@@ -95,7 +95,7 @@ impl DiContainer {
         );
         let favorite_usecase = FavoriteUsecase::new(
             Arc::new(favorite_repository.clone()),
-            favorite_presenter.clone(),
+            Arc::new(favorite_presenter.clone()),
             Arc::new(article_repository.clone()),
         );
         let article_usecase = ArticleUsecase::new(

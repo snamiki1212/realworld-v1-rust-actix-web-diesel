@@ -11,14 +11,14 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct FavoriteUsecase {
     favorite_repository: Arc<dyn FavoriteRepository>,
-    favorite_presenter: FavoritePresenter,
+    favorite_presenter: Arc<dyn FavoritePresenter>,
     article_repository: Arc<dyn ArticleRepository>,
 }
 
 impl FavoriteUsecase {
     pub fn new(
         favorite_repository: Arc<dyn FavoriteRepository>,
-        favorite_presenter: FavoritePresenter,
+        favorite_presenter: Arc<dyn FavoritePresenter>,
         article_repository: Arc<dyn ArticleRepository>,
     ) -> Self {
         Self {
