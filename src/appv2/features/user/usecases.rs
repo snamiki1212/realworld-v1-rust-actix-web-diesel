@@ -3,16 +3,17 @@ use super::presenters::UserPresenter;
 use super::repositories::UserRepository;
 use crate::error::AppError;
 use actix_web::HttpResponse;
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct UserUsecase {
-    user_repository: UserRepository,
+    user_repository: Arc<dyn UserRepository>,
     user_presenter: UserPresenter,
 }
 
 impl UserUsecase {
-    pub fn new(user_repository: UserRepository, user_presenter: UserPresenter) -> Self {
+    pub fn new(user_repository: Arc<dyn UserRepository>, user_presenter: UserPresenter) -> Self {
         Self {
             user_repository,
             user_presenter,

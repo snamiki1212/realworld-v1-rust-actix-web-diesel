@@ -4,17 +4,18 @@ use crate::appv2::features::user::entities::User;
 use crate::appv2::features::user::repositories::UserRepository;
 use crate::error::AppError;
 use actix_web::HttpResponse;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct ProfileUsecase {
-    user_repository: UserRepository,
+    user_repository: Arc<dyn UserRepository>,
     profile_repository: ProfileRepository,
     presenter: ProfilePresenter,
 }
 
 impl ProfileUsecase {
     pub fn new(
-        (profile_repository, user_repository): (ProfileRepository, UserRepository),
+        (profile_repository, user_repository): (ProfileRepository, Arc<dyn UserRepository>),
         presenter: ProfilePresenter,
     ) -> Self {
         Self {

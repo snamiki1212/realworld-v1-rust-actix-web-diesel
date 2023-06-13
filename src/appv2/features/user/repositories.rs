@@ -1,36 +1,50 @@
-use uuid::Uuid;
-
+use super::entities::UpdateUser;
 use crate::appv2::features::follow::entities::{CreateFollow, DeleteFollow, Follow};
 use crate::appv2::features::profile::entities::Profile;
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use crate::utils::db::DbPool;
-
-use super::entities::UpdateUser;
+use uuid::Uuid;
 
 type Token = String;
 
+pub trait UserRepository: Send + Sync + 'static {
+    fn me<'a>(&self, user: &'a User) -> Result<(&'a User, Token), AppError>;
+    fn signin(&self, email: &str, naive_password: &str) -> Result<(User, Token), AppError>;
+    fn signup(
+        &self,
+        email: &str,
+        username: &str,
+        naive_password: &str,
+    ) -> Result<(User, Token), AppError>;
+    fn follow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError>;
+    fn unfollow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError>;
+    fn update(&self, user_id: Uuid, changeset: UpdateUser) -> Result<(User, Token), AppError>;
+}
+
 #[derive(Clone)]
-pub struct UserRepository {
+pub struct UserRepositoryImpl {
     pool: DbPool,
 }
 
-impl UserRepository {
+impl UserRepositoryImpl {
     pub fn new(pool: DbPool) -> Self {
         Self { pool }
     }
+}
 
-    pub fn me<'a>(&self, current_user: &'a User) -> Result<(&'a User, Token), AppError> {
+impl UserRepository for UserRepositoryImpl {
+    fn me<'a>(&self, current_user: &'a User) -> Result<(&'a User, Token), AppError> {
         let token = current_user.generate_token()?;
         Ok((current_user, token))
     }
 
-    pub fn signin(&self, email: &str, naive_password: &str) -> Result<(User, Token), AppError> {
+    fn signin(&self, email: &str, naive_password: &str) -> Result<(User, Token), AppError> {
         let conn = &mut self.pool.get()?;
         User::signin(conn, email, naive_password)
     }
 
-    pub fn signup(
+    fn signup(
         &self,
         email: &str,
         username: &str,
@@ -40,7 +54,7 @@ impl UserRepository {
         User::signup(conn, email, username, naive_password)
     }
 
-    pub fn follow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError> {
+    fn follow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError> {
         let conn = &mut self.pool.get()?;
         let t = User::by_username(target_username);
 
@@ -65,11 +79,7 @@ impl UserRepository {
         })
     }
 
-    pub fn unfollow(
-        &self,
-        current_user: &User,
-        target_username: &str,
-    ) -> Result<Profile, AppError> {
+    fn unfollow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError> {
         let conn = &mut self.pool.get()?;
         let t = User::by_username(target_username);
         let followee = {
@@ -93,7 +103,7 @@ impl UserRepository {
         })
     }
 
-    pub fn update(&self, user_id: Uuid, changeset: UpdateUser) -> Result<(User, Token), AppError> {
+    fn update(&self, user_id: Uuid, changeset: UpdateUser) -> Result<(User, Token), AppError> {
         let conn = &mut self.pool.get()?;
         let new_user = User::update(conn, user_id, changeset)?;
         let token = &new_user.generate_token()?;

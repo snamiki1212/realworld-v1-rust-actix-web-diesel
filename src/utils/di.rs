@@ -4,18 +4,19 @@ use crate::appv2::features::article::usecases::ArticleUsecase;
 use crate::appv2::features::comment::presenters::CommentPresenter;
 use crate::appv2::features::comment::repositories::CommentRepository;
 use crate::appv2::features::comment::usecases::CommentUsecase;
-use crate::appv2::features::favorite::{
-    presenters::FavoritePresenter, repositories::FavoriteRepository, usecases::FavoriteUsecase,
-};
-use crate::appv2::features::profile::{
-    presenters::ProfilePresenter, repositories::ProfileRepository, usecases::ProfileUsecase,
-};
+use crate::appv2::features::favorite::presenters::FavoritePresenter;
+use crate::appv2::features::favorite::repositories::FavoriteRepository;
+use crate::appv2::features::favorite::usecases::FavoriteUsecase;
+use crate::appv2::features::profile::presenters::ProfilePresenter;
+use crate::appv2::features::profile::repositories::ProfileRepository;
+use crate::appv2::features::profile::usecases::ProfileUsecase;
 use crate::appv2::features::tag::presenters::TagPresenter;
 use crate::appv2::features::tag::repositories::TagRepository;
 use crate::appv2::features::tag::usecases::TagUsecase;
-use crate::appv2::features::user::{
-    presenters::UserPresenter, repositories::UserRepository, usecases::UserUsecase,
-};
+use crate::appv2::features::user::presenters::UserPresenter;
+use crate::appv2::features::user::repositories::UserRepositoryImpl;
+use crate::appv2::features::user::usecases::UserUsecase;
+use std::sync::Arc;
 
 use crate::utils::db::DbPool;
 
@@ -24,7 +25,7 @@ pub struct DiContainer {
     /**
      * User
      */
-    pub user_repository: UserRepository,
+    pub user_repository: UserRepositoryImpl,
     pub user_usecase: UserUsecase,
     pub user_presenter: UserPresenter,
 
@@ -67,7 +68,7 @@ pub struct DiContainer {
 impl DiContainer {
     pub fn new(pool: &DbPool) -> Self {
         // Repository
-        let user_repository = UserRepository::new(pool.clone());
+        let user_repository = UserRepositoryImpl::new(pool.clone());
         let profile_repository = ProfileRepository::new(pool.clone());
         let favorite_repository = FavoriteRepository::new(pool.clone());
         let article_repository = ArticleRepository::new(pool.clone());
@@ -83,9 +84,13 @@ impl DiContainer {
         let comment_presenter = CommentPresenter::new();
 
         // Usecase
-        let user_usecase = UserUsecase::new(user_repository.clone(), user_presenter.clone());
+        let user_usecase =
+            UserUsecase::new(Arc::new(user_repository.clone()), user_presenter.clone());
         let profile_usecase = ProfileUsecase::new(
-            (profile_repository.clone(), user_repository.clone()),
+            (
+                profile_repository.clone(),
+                Arc::new(user_repository.clone()),
+            ),
             profile_presenter.clone(),
         );
         let favorite_usecase = FavoriteUsecase::new(
