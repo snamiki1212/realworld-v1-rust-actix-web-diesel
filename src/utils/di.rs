@@ -8,7 +8,7 @@ use crate::appv2::features::favorite::presenters::FavoritePresenter;
 use crate::appv2::features::favorite::repositories::FavoriteRepository;
 use crate::appv2::features::favorite::usecases::FavoriteUsecase;
 use crate::appv2::features::profile::presenters::ProfilePresenter;
-use crate::appv2::features::profile::repositories::ProfileRepository;
+use crate::appv2::features::profile::repositories::ProfileRepositoryImpl;
 use crate::appv2::features::profile::usecases::ProfileUsecase;
 use crate::appv2::features::tag::presenters::TagPresenter;
 use crate::appv2::features::tag::repositories::TagRepository;
@@ -32,7 +32,7 @@ pub struct DiContainer {
     /**
      * Profile
      */
-    pub profile_repository: ProfileRepository,
+    pub profile_repository: ProfileRepositoryImpl,
     pub profile_presenter: ProfilePresenter,
     pub profile_usecase: ProfileUsecase,
 
@@ -69,7 +69,7 @@ impl DiContainer {
     pub fn new(pool: &DbPool) -> Self {
         // Repository
         let user_repository = UserRepositoryImpl::new(pool.clone());
-        let profile_repository = ProfileRepository::new(pool.clone());
+        let profile_repository = ProfileRepositoryImpl::new(pool.clone());
         let favorite_repository = FavoriteRepository::new(pool.clone());
         let article_repository = ArticleRepository::new(pool.clone());
         let tag_repository = TagRepository::new(pool.clone());
@@ -87,10 +87,8 @@ impl DiContainer {
         let user_usecase =
             UserUsecase::new(Arc::new(user_repository.clone()), user_presenter.clone());
         let profile_usecase = ProfileUsecase::new(
-            (
-                profile_repository.clone(),
-                Arc::new(user_repository.clone()),
-            ),
+            Arc::new(profile_repository.clone()),
+            Arc::new(user_repository.clone()),
             profile_presenter.clone(),
         );
         let favorite_usecase = FavoriteUsecase::new(

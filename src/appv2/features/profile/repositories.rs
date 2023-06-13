@@ -3,21 +3,23 @@ use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use crate::utils::db::DbPool;
 
-pub trait IProfileRepository {
+pub trait ProfileRepository: Send + Sync + 'static {
     fn fetch_by_name(&self, current_user: &User, username: &str) -> Result<Profile, AppError>;
 }
 
 #[derive(Clone)]
-pub struct ProfileRepository {
+pub struct ProfileRepositoryImpl {
     pool: DbPool,
 }
 
-impl ProfileRepository {
+impl ProfileRepositoryImpl {
     pub fn new(pool: DbPool) -> Self {
         Self { pool }
     }
+}
 
-    pub fn fetch_by_name(&self, current_user: &User, username: &str) -> Result<Profile, AppError> {
+impl ProfileRepository for ProfileRepositoryImpl {
+    fn fetch_by_name(&self, current_user: &User, username: &str) -> Result<Profile, AppError> {
         let conn = &mut self.pool.get()?;
         let profile = {
             let followee = User::find_by_username(conn, username)?;
