@@ -1,0 +1,54 @@
+use super::entities::{UpdateUser, User};
+use super::presenters::UserPresenter;
+use super::repositories::UserRepository;
+use crate::error::AppError;
+use actix_web::HttpResponse;
+use std::sync::Arc;
+use uuid::Uuid;
+
+#[derive(Clone)]
+pub struct UserUsecase {
+    user_repository: Arc<dyn UserRepository>,
+    user_presenter: Arc<dyn UserPresenter>,
+}
+
+impl UserUsecase {
+    pub fn new(
+        user_repository: Arc<dyn UserRepository>,
+        user_presenter: Arc<dyn UserPresenter>,
+    ) -> Self {
+        Self {
+            user_repository,
+            user_presenter,
+        }
+    }
+
+    pub fn signin(&self, email: &str, password: &str) -> Result<HttpResponse, AppError> {
+        let (user, token) = self.user_repository.signin(email, password)?;
+        let res = self.user_presenter.from_user_and_token(user, token);
+        Ok(res)
+    }
+
+    pub fn signup(
+        &self,
+        email: &str,
+        username: &str,
+        password: &str,
+    ) -> Result<HttpResponse, AppError> {
+        let (user, token) = self.user_repository.signup(email, username, password)?;
+        let res = self.user_presenter.from_user_and_token(user, token);
+        Ok(res)
+    }
+
+    pub fn me(&self, current_user: &User) -> Result<HttpResponse, AppError> {
+        let (user, token) = self.user_repository.me(current_user)?;
+        let res = self.user_presenter.from_user_and_token(user.clone(), token);
+        Ok(res)
+    }
+
+    pub fn update(&self, user_id: Uuid, changeset: UpdateUser) -> Result<HttpResponse, AppError> {
+        let (new_user, token) = self.user_repository.update(user_id, changeset)?;
+        let res = self.user_presenter.from_user_and_token(new_user, token);
+        Ok(res)
+    }
+}

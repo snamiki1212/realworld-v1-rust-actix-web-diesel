@@ -68,26 +68,35 @@ $ APIURL=http://localhost:8080/api zsh e2e/run-api-tests.sh
 
 ## Architecture
 
-### Flow from Request to Response
+- Clean Architecture
+- DI container using Constructor Injection with dynamic dispatch (`/src/di.rs`)
 
 ```mermaid
 sequenceDiagram
   actor Client
-  participant Middleware as Middleware<br>/middleware/*
-  participant Controller as Controller<br>/[feature]/api.rs
-  participant Service as Service<br>/[feature]/service.rs
+  autonumber
+  participant Route as Middleware + Route <br><br>/src/app/drivers/{middlewares, routes}
+  participant Controller as Controller<br><br>/src/app/features/[feature]/controllers.rs
+  participant Presenter as Presenter<br><br>/src/app/features/[feature]/presenters.rs
+  participant Usecase as Usecase<br><br>/src/app/features/[feature]/usecases.rs
+  participant Repository as Repository<br><br>/src/app/features/[feature]/repositories.rs
+  participant Entity as Entity<br><br>/src/app/features/[feature]/entities.rs
   participant DB
 
-  Client ->> Middleware: request
-  Middleware ->> Controller: -
-  Controller ->> Controller: Assign to Request Object<br>(/[feature]/request.rs)
-  Controller ->> Service: -
-  Service ->> DB: -
+  %% left to right
+  Client -->> Route: Request
+  Route ->> Controller: <br>
+  Controller ->> Usecase: <br>
+  Usecase ->> Repository: <br>
+  Repository ->> Entity: <br>
+  Entity ->> DB: <br>
 
-  DB ->> Service: -
-  Service ->> Controller: -
-  Controller ->> Controller: Convert into Response Object<br>(/[feature]/response.rs)
-  Controller ->> Client: response
+  %% right to left
+  DB ->> Entity: <br>
+  Entity ->> Repository: <br>
+  Repository ->> Usecase: <br>
+  Usecase ->> Presenter: <br>
+  Presenter -->> Client: Response
 ```
 
 ## LICENSE

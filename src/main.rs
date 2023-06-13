@@ -9,8 +9,6 @@ use actix_web::{App, HttpServer};
 mod app;
 mod constants;
 mod error;
-mod middleware;
-mod routes;
 mod schema;
 mod utils;
 
@@ -22,16 +20,17 @@ async fn main() -> std::io::Result<()> {
 
     let state = {
         let pool = utils::db::establish_connection();
-        middleware::state::AppState { pool }
+        use app::drivers::middlewares::state::AppState;
+        AppState::new(pool)
     };
 
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .app_data(actix_web::web::Data::new(state.clone()))
-            .wrap(middleware::cors::cors())
-            .wrap(middleware::auth::Authentication)
-            .configure(routes::api)
+            .wrap(app::drivers::middlewares::cors::cors())
+            .wrap(app::drivers::middlewares::auth::Authentication)
+            .configure(app::drivers::routes::api)
     })
     .bind(constants::BIND)?
     .run()
