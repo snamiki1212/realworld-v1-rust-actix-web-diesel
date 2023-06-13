@@ -6,7 +6,7 @@ extern crate log;
 
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
-mod appv2;
+mod app;
 mod constants;
 mod error;
 mod schema;
@@ -20,7 +20,7 @@ async fn main() -> std::io::Result<()> {
 
     let state = {
         let pool = utils::db::establish_connection();
-        use appv2::drivers::middlewares::state::AppState;
+        use app::drivers::middlewares::state::AppState;
         AppState::new(pool)
     };
 
@@ -28,9 +28,9 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .app_data(actix_web::web::Data::new(state.clone()))
-            .wrap(appv2::drivers::middlewares::cors::cors())
-            .wrap(appv2::drivers::middlewares::auth::Authentication)
-            .configure(appv2::drivers::routes::api)
+            .wrap(app::drivers::middlewares::cors::cors())
+            .wrap(app::drivers::middlewares::auth::Authentication)
+            .configure(app::drivers::routes::api)
     })
     .bind(constants::BIND)?
     .run()
