@@ -72,31 +72,30 @@ $ APIURL=http://localhost:8080/api zsh e2e/run-api-tests.sh
 - DI container using Constructor Injection with dynamic dispatch (`/src/di.rs`)
 
 ```mermaid
-sequenceDiagram
-  actor Client
-  autonumber
-  participant Route as Middleware + Route <br><br>/src/app/drivers/{middlewares, routes}
-  participant Controller as Controller<br><br>/src/app/features/[feature]/controllers.rs
-  participant Presenter as Presenter<br><br>/src/app/features/[feature]/presenters.rs
-  participant Usecase as Usecase<br><br>/src/app/features/[feature]/usecases.rs
-  participant Repository as Repository<br><br>/src/app/features/[feature]/repositories.rs
-  participant Entity as Entity<br><br>/src/app/features/[feature]/entities.rs
-  participant DB
+flowchart TD
+    Client(("Client"))
+    Route["Middleware + Route <br><br>/src/app/drivers/{middlewares, route}"]
+    Controller["Controller<br><br>/src/app/features/[feature]/controllers.rs"]
+    Presenter["Presenter<br><br>/src/app/features/[feature]/presenters.rs"]
+    Usecase["Usecase<br><br>/src/app/features/[feature]/usecases.rs"]
+    Repository["Repository<br><br>/src/app/features/[feature]/repositories.rs"]
+    Entity["Entity<br><br>/src/app/features/[feature]/entities.rs"]
+    DB[(Database)]
 
-  %% left to right
-  Client -->> Route: Request
-  Route ->> Controller: <br>
-  Controller ->> Usecase: <br>
-  Usecase ->> Repository: <br>
-  Repository ->> Entity: <br>
-  Entity ->> DB: <br>
+    %% Top to Bottom
+    Client --Request--> Route
+    Route --> Controller
+    Controller --> Usecase
+    Usecase --> Repository
+    Repository --> Entity
+    Entity --> DB
 
-  %% right to left
-  DB ->> Entity: <br>
-  Entity ->> Repository: <br>
-  Repository ->> Usecase: <br>
-  Usecase ->> Presenter: <br>
-  Presenter -->> Client: Response
+    %% Bottom to Top
+    DB -.-> Entity
+    Entity -.-> Repository
+    Repository -.-> Usecase
+    Usecase -.-> Presenter
+    Presenter -.Response.-> Client
 ```
 
 ## LICENSE
