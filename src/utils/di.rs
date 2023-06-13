@@ -1,7 +1,7 @@
 use crate::appv2::features::article::presenters::ArticlePresenterImpl;
 use crate::appv2::features::article::repositories::ArticleRepositoryImpl;
 use crate::appv2::features::article::usecases::ArticleUsecase;
-use crate::appv2::features::comment::presenters::CommentPresenter;
+use crate::appv2::features::comment::presenters::CommentPresenterImpl;
 use crate::appv2::features::comment::repositories::CommentRepositoryImpl;
 use crate::appv2::features::comment::usecases::CommentUsecase;
 use crate::appv2::features::favorite::presenters::FavoritePresenterImpl;
@@ -61,7 +61,7 @@ pub struct DiContainer {
      * Comment
      */
     pub comment_repository: CommentRepositoryImpl,
-    pub comment_presenter: CommentPresenter,
+    pub comment_presenter: CommentPresenterImpl,
     pub comment_usecase: CommentUsecase,
 }
 
@@ -81,7 +81,7 @@ impl DiContainer {
         let favorite_presenter = FavoritePresenterImpl::new();
         let article_presenter = ArticlePresenterImpl::new();
         let tag_presenter = TagPresenterImpl::new();
-        let comment_presenter = CommentPresenter::new();
+        let comment_presenter = CommentPresenterImpl::new();
 
         // Usecase
         let user_usecase = UserUsecase::new(
@@ -108,7 +108,7 @@ impl DiContainer {
         );
         let comment_usecase = CommentUsecase::new(
             Arc::new(comment_repository.clone()),
-            comment_presenter.clone(),
+            Arc::new(comment_presenter.clone()),
         );
 
         Self {

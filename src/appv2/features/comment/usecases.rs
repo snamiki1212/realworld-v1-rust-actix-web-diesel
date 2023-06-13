@@ -9,13 +9,13 @@ use uuid::Uuid;
 #[derive(Clone)]
 pub struct CommentUsecase {
     comment_repository: Arc<dyn CommentRepository>,
-    comment_presenter: CommentPresenter,
+    comment_presenter: Arc<dyn CommentPresenter>,
 }
 
 impl CommentUsecase {
     pub fn new(
         comment_repository: Arc<dyn CommentRepository>,
-        comment_presenter: CommentPresenter,
+        comment_presenter: Arc<dyn CommentPresenter>,
     ) -> Self {
         Self {
             comment_repository,

@@ -78,30 +78,30 @@ pub struct InnerAuthor {
     pub following: bool,
 }
 
+pub trait CommentPresenter: Send + Sync + 'static {
+    fn toHttpRes(&self) -> HttpResponse;
+    fn from_comment_and_profile(&self, item: (Comment, Profile)) -> HttpResponse;
+    fn from_comment_and_profile_list(&self, list: Vec<(Comment, Profile)>) -> HttpResponse;
+}
+
 #[derive(Clone)]
-pub struct CommentPresenter {}
-impl CommentPresenter {
+pub struct CommentPresenterImpl {}
+impl CommentPresenterImpl {
     pub fn new() -> Self {
         Self {}
     }
-
-    // pub fn complete(
-    //     &self,
-    //     (article, profile, favorite_info, tags_list): (Article, Profile, FavoriteInfo, Vec<Tag>),
-    // ) -> HttpResponse {
-    //     let res_model = SingleArticleResponse::from((article, profile, favorite_info, tags_list));
-    //     HttpResponse::Ok().json(res_model)
-    // }
-    pub fn toHttpRes(&self) -> HttpResponse {
+}
+impl CommentPresenter for CommentPresenterImpl {
+    fn toHttpRes(&self) -> HttpResponse {
         HttpResponse::Ok().json("OK")
     }
 
-    pub fn from_comment_and_profile_list(&self, list: Vec<(Comment, Profile)>) -> HttpResponse {
+    fn from_comment_and_profile_list(&self, list: Vec<(Comment, Profile)>) -> HttpResponse {
         let res = MultipleCommentsResponse::from(list);
         HttpResponse::Ok().json(res)
     }
 
-    pub fn from_comment_and_profile(&self, item: (Comment, Profile)) -> HttpResponse {
+    fn from_comment_and_profile(&self, item: (Comment, Profile)) -> HttpResponse {
         let res = SingleCommentResponse::from(item);
         HttpResponse::Ok().json(res)
     }
