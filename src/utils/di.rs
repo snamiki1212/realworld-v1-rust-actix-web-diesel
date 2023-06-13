@@ -13,7 +13,7 @@ use crate::appv2::features::profile::usecases::ProfileUsecase;
 use crate::appv2::features::tag::presenters::TagPresenter;
 use crate::appv2::features::tag::repositories::TagRepositoryImpl;
 use crate::appv2::features::tag::usecases::TagUsecase;
-use crate::appv2::features::user::presenters::UserPresenter;
+use crate::appv2::features::user::presenters::UserPresenterImpl;
 use crate::appv2::features::user::repositories::UserRepositoryImpl;
 use crate::appv2::features::user::usecases::UserUsecase;
 use std::sync::Arc;
@@ -27,7 +27,7 @@ pub struct DiContainer {
      */
     pub user_repository: UserRepositoryImpl,
     pub user_usecase: UserUsecase,
-    pub user_presenter: UserPresenter,
+    pub user_presenter: UserPresenterImpl,
 
     /**
      * Profile
@@ -76,7 +76,7 @@ impl DiContainer {
         let comment_repository = CommentRepositoryImpl::new(pool.clone());
 
         // Presenter
-        let user_presenter = UserPresenter::new();
+        let user_presenter = UserPresenterImpl::new();
         let profile_presenter = ProfilePresenter::new();
         let favorite_presenter = FavoritePresenter::new();
         let article_presenter = ArticlePresenter::new();
@@ -84,8 +84,10 @@ impl DiContainer {
         let comment_presenter = CommentPresenter::new();
 
         // Usecase
-        let user_usecase =
-            UserUsecase::new(Arc::new(user_repository.clone()), user_presenter.clone());
+        let user_usecase = UserUsecase::new(
+            Arc::new(user_repository.clone()),
+            Arc::new(user_presenter.clone()),
+        );
         let profile_usecase = ProfileUsecase::new(
             Arc::new(profile_repository.clone()),
             Arc::new(user_repository.clone()),

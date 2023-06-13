@@ -9,11 +9,14 @@ use uuid::Uuid;
 #[derive(Clone)]
 pub struct UserUsecase {
     user_repository: Arc<dyn UserRepository>,
-    user_presenter: UserPresenter,
+    user_presenter: Arc<dyn UserPresenter>,
 }
 
 impl UserUsecase {
-    pub fn new(user_repository: Arc<dyn UserRepository>, user_presenter: UserPresenter) -> Self {
+    pub fn new(
+        user_repository: Arc<dyn UserRepository>,
+        user_presenter: Arc<dyn UserPresenter>,
+    ) -> Self {
         Self {
             user_repository,
             user_presenter,

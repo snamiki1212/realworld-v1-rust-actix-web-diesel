@@ -32,13 +32,18 @@ pub struct AuthUser {
     pub image: Option<String>,
 }
 
+pub trait UserPresenter: Send + Sync + 'static {
+    fn from_user_and_token(&self, user: User, token: String) -> HttpResponse;
+}
 #[derive(Clone)]
-pub struct UserPresenter {}
-impl UserPresenter {
+pub struct UserPresenterImpl {}
+impl UserPresenterImpl {
     pub fn new() -> Self {
         Self {}
     }
-    pub fn from_user_and_token(&self, user: User, token: String) -> HttpResponse {
+}
+impl UserPresenter for UserPresenterImpl {
+    fn from_user_and_token(&self, user: User, token: String) -> HttpResponse {
         let res_model = UserResponse::from((user, token));
         HttpResponse::Ok().json(res_model)
     }
