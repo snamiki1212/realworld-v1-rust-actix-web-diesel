@@ -2,19 +2,23 @@ use super::entities::Tag;
 use crate::error::AppError;
 use crate::utils::db::DbPool;
 
-type Token = String;
+pub trait TagRepository: Send + Sync + 'static {
+    fn list(&self) -> Result<Vec<Tag>, AppError>;
+}
 
 #[derive(Clone)]
-pub struct TagRepository {
+pub struct TagRepositoryImpl {
     pool: DbPool,
 }
 
-impl TagRepository {
+impl TagRepositoryImpl {
     pub fn new(pool: DbPool) -> Self {
         Self { pool }
     }
+}
 
-    pub fn list(&self) -> Result<Vec<Tag>, AppError> {
+impl TagRepository for TagRepositoryImpl {
+    fn list(&self) -> Result<Vec<Tag>, AppError> {
         let conn = &mut self.pool.get()?;
         Tag::fetch(conn)
     }

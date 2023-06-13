@@ -11,7 +11,7 @@ use crate::appv2::features::profile::presenters::ProfilePresenter;
 use crate::appv2::features::profile::repositories::ProfileRepositoryImpl;
 use crate::appv2::features::profile::usecases::ProfileUsecase;
 use crate::appv2::features::tag::presenters::TagPresenter;
-use crate::appv2::features::tag::repositories::TagRepository;
+use crate::appv2::features::tag::repositories::TagRepositoryImpl;
 use crate::appv2::features::tag::usecases::TagUsecase;
 use crate::appv2::features::user::presenters::UserPresenter;
 use crate::appv2::features::user::repositories::UserRepositoryImpl;
@@ -53,7 +53,7 @@ pub struct DiContainer {
     /**
      * Tag
      */
-    pub tag_repository: TagRepository,
+    pub tag_repository: TagRepositoryImpl,
     pub tag_presenter: TagPresenter,
     pub tag_usecase: TagUsecase,
 
@@ -72,7 +72,7 @@ impl DiContainer {
         let profile_repository = ProfileRepositoryImpl::new(pool.clone());
         let favorite_repository = FavoriteRepositoryImpl::new(pool.clone());
         let article_repository = ArticleRepositoryImpl::new(pool.clone());
-        let tag_repository = TagRepository::new(pool.clone());
+        let tag_repository = TagRepositoryImpl::new(pool.clone());
         let comment_repository = CommentRepository::new(pool.clone());
 
         // Presenter
@@ -100,7 +100,7 @@ impl DiContainer {
             Arc::new(article_repository.clone()),
             article_presenter.clone(),
         );
-        let tag_usecase = TagUsecase::new(tag_repository.clone(), tag_presenter.clone());
+        let tag_usecase = TagUsecase::new(Arc::new(tag_repository.clone()), tag_presenter.clone());
         let comment_usecase =
             CommentUsecase::new(comment_repository.clone(), comment_presenter.clone());
 
