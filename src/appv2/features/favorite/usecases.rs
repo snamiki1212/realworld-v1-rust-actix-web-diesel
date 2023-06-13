@@ -1,4 +1,3 @@
-// use super::entities::{UpdateUser, User};
 use super::presenters::FavoritePresenter;
 use super::repositories::FavoriteRepository;
 use crate::appv2::features::article::repositories::{
@@ -7,18 +6,18 @@ use crate::appv2::features::article::repositories::{
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use actix_web::HttpResponse;
-use uuid::Uuid;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct FavoriteUsecase {
-    favorite_repository: FavoriteRepository,
+    favorite_repository: Arc<dyn FavoriteRepository>,
     favorite_presenter: FavoritePresenter,
     article_repository: ArticleRepository,
 }
 
 impl FavoriteUsecase {
     pub fn new(
-        favorite_repository: FavoriteRepository,
+        favorite_repository: Arc<dyn FavoriteRepository>,
         favorite_presenter: FavoritePresenter,
         article_repository: ArticleRepository,
     ) -> Self {

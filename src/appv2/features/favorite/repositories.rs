@@ -4,17 +4,23 @@ use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use crate::utils::db::DbPool;
 
+pub trait FavoriteRepository: Send + Sync + 'static {
+    fn favorite(&self, user: User, article_title_slug: String) -> Result<Article, AppError>;
+    fn unfavorite(&self, user: User, article_title_slug: String) -> Result<Article, AppError>;
+}
+
 #[derive(Clone)]
-pub struct FavoriteRepository {
+pub struct FavoriteRepositoryImpl {
     pool: DbPool,
 }
 
-impl FavoriteRepository {
+impl FavoriteRepositoryImpl {
     pub fn new(pool: DbPool) -> Self {
         Self { pool }
     }
-
-    pub fn favorite(&self, user: User, article_title_slug: String) -> Result<Article, AppError> {
+}
+impl FavoriteRepository for FavoriteRepositoryImpl {
+    fn favorite(&self, user: User, article_title_slug: String) -> Result<Article, AppError> {
         let conn = &mut self.pool.get()?;
 
         let article = Article::fetch_by_slug_and_author_id(
@@ -35,7 +41,7 @@ impl FavoriteRepository {
         Ok(article)
     }
 
-    pub fn unfavorite(&self, user: User, article_title_slug: String) -> Result<Article, AppError> {
+    fn unfavorite(&self, user: User, article_title_slug: String) -> Result<Article, AppError> {
         let conn = &mut self.pool.get()?;
         let article = Article::fetch_by_slug_and_author_id(
             conn,
