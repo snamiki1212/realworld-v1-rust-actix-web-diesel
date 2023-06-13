@@ -15,13 +15,19 @@ impl std::convert::From<Vec<Tag>> for TagsResponse {
     }
 }
 
+pub trait TagPresenter: Send + Sync + 'static {
+    fn from_list(&self, list: Vec<Tag>) -> HttpResponse;
+}
+
 #[derive(Clone)]
-pub struct TagPresenter {}
-impl TagPresenter {
+pub struct TagPresenterImpl {}
+impl TagPresenterImpl {
     pub fn new() -> Self {
         Self {}
     }
-    pub fn from_list(&self, list: Vec<Tag>) -> HttpResponse {
+}
+impl TagPresenter for TagPresenterImpl {
+    fn from_list(&self, list: Vec<Tag>) -> HttpResponse {
         let res = TagsResponse::from(list);
         HttpResponse::Ok().json(res)
     }

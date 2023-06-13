@@ -7,11 +7,14 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct TagUsecase {
     tag_repository: Arc<dyn TagRepository>,
-    tag_presenter: TagPresenter,
+    tag_presenter: Arc<dyn TagPresenter>,
 }
 
 impl TagUsecase {
-    pub fn new(tag_repository: Arc<dyn TagRepository>, tag_presenter: TagPresenter) -> Self {
+    pub fn new(
+        tag_repository: Arc<dyn TagRepository>,
+        tag_presenter: Arc<dyn TagPresenter>,
+    ) -> Self {
         Self {
             tag_repository,
             tag_presenter,
