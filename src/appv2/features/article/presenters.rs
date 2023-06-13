@@ -120,21 +120,29 @@ pub struct AuthorContent {
     pub following: bool,
 }
 
+pub trait ArticlePresenter: Send + Sync + 'static {
+    fn from_list_and_count(&self, list: ArticlesList, count: i64) -> HttpResponse;
+    fn from_item(&self, item: (Article, Profile, FavoriteInfo, Vec<Tag>)) -> HttpResponse;
+    fn toHttpRes(&self) -> HttpResponse;
+}
+
 #[derive(Clone)]
-pub struct ArticlePresenter {}
-impl ArticlePresenter {
+pub struct ArticlePresenterImpl {}
+impl ArticlePresenterImpl {
     pub fn new() -> Self {
         Self {}
     }
-    pub fn from_list_and_count(&self, list: ArticlesList, count: i64) -> HttpResponse {
+}
+impl ArticlePresenter for ArticlePresenterImpl {
+    fn from_list_and_count(&self, list: ArticlesList, count: i64) -> HttpResponse {
         let res = MultipleArticlesResponse::from((list, count));
         HttpResponse::Ok().json(res)
     }
-    pub fn from_item(&self, item: (Article, Profile, FavoriteInfo, Vec<Tag>)) -> HttpResponse {
+    fn from_item(&self, item: (Article, Profile, FavoriteInfo, Vec<Tag>)) -> HttpResponse {
         let res = SingleArticleResponse::from(item);
         HttpResponse::Ok().json(res)
     }
-    pub fn toHttpRes(&self) -> HttpResponse {
+    fn toHttpRes(&self) -> HttpResponse {
         let res = ();
         HttpResponse::Ok().json(res)
     }

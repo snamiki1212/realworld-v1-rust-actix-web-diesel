@@ -1,4 +1,4 @@
-use crate::appv2::features::article::presenters::ArticlePresenter;
+use crate::appv2::features::article::presenters::ArticlePresenterImpl;
 use crate::appv2::features::article::repositories::ArticleRepositoryImpl;
 use crate::appv2::features::article::usecases::ArticleUsecase;
 use crate::appv2::features::comment::presenters::CommentPresenter;
@@ -47,7 +47,7 @@ pub struct DiContainer {
      * Article
      */
     pub article_repository: ArticleRepositoryImpl,
-    pub article_presenter: ArticlePresenter,
+    pub article_presenter: ArticlePresenterImpl,
     pub article_usecase: ArticleUsecase,
 
     /**
@@ -79,7 +79,7 @@ impl DiContainer {
         let user_presenter = UserPresenterImpl::new();
         let profile_presenter = ProfilePresenterImpl::new();
         let favorite_presenter = FavoritePresenterImpl::new();
-        let article_presenter = ArticlePresenter::new();
+        let article_presenter = ArticlePresenterImpl::new();
         let tag_presenter = TagPresenter::new();
         let comment_presenter = CommentPresenter::new();
 
@@ -100,7 +100,7 @@ impl DiContainer {
         );
         let article_usecase = ArticleUsecase::new(
             Arc::new(article_repository.clone()),
-            article_presenter.clone(),
+            Arc::new(article_presenter.clone()),
         );
         let tag_usecase = TagUsecase::new(Arc::new(tag_repository.clone()), tag_presenter.clone());
         let comment_usecase = CommentUsecase::new(

@@ -14,13 +14,13 @@ use uuid::Uuid;
 #[derive(Clone)]
 pub struct ArticleUsecase {
     article_repository: Arc<dyn ArticleRepository>,
-    article_presenter: ArticlePresenter,
+    article_presenter: Arc<dyn ArticlePresenter>,
 }
 
 impl ArticleUsecase {
     pub fn new(
         article_repository: Arc<dyn ArticleRepository>,
-        article_presenter: ArticlePresenter,
+        article_presenter: Arc<dyn ArticlePresenter>,
     ) -> Self {
         Self {
             article_repository,
