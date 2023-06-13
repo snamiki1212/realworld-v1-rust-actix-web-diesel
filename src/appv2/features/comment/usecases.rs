@@ -1,5 +1,5 @@
 use crate::appv2::features::article::repositories::{
-    ArticleRepository, FetchArticleRepositoryInput,
+    ArticleRepositoryImpl, FetchArticleRepositoryInput,
 };
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;

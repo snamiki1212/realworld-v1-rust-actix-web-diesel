@@ -8,16 +8,20 @@ use super::repositories::{
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use actix_web::HttpResponse;
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct ArticleUsecase {
-    article_repository: ArticleRepository,
+    article_repository: Arc<dyn ArticleRepository>,
     article_presenter: ArticlePresenter,
 }
 
 impl ArticleUsecase {
-    pub fn new(article_repository: ArticleRepository, article_presenter: ArticlePresenter) -> Self {
+    pub fn new(
+        article_repository: Arc<dyn ArticleRepository>,
+        article_presenter: ArticlePresenter,
+    ) -> Self {
         Self {
             article_repository,
             article_presenter,

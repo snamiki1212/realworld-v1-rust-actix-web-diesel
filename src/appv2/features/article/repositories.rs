@@ -8,17 +8,70 @@ use crate::utils::db::DbPool;
 use diesel::PgConnection;
 use uuid::Uuid;
 
+pub trait ArticleRepository: Send + Sync + 'static {
+    fn fetch_articles_list(
+        &self,
+        params: FetchArticlesListRepositoryInput,
+    ) -> Result<(ArticlesList, ArticlesCount), AppError>;
+
+    fn fetch_article_by_slug(
+        &self,
+        article_title_slug: String,
+    ) -> Result<FetchArticleBySlugOutput, AppError>;
+
+    fn create(
+        &self,
+        params: CreateArticleRepositoryInput,
+    ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError>;
+
+    fn delete(&self, input: DeleteArticleRepositoryInput) -> Result<(), AppError>;
+
+    fn update(
+        &self,
+        input: UpdateArticleRepositoryInput,
+    ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError>;
+
+    fn fetch_article_item(
+        &self,
+        input: &FetchArticleRepositoryInput,
+    ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError>;
+
+    fn fetch_following_articles(
+        &self,
+        params: &FetchFollowingArticlesRepositoryInput,
+    ) -> Result<(ArticlesList, ArticlesCount), AppError>;
+}
 #[derive(Clone)]
-pub struct ArticleRepository {
+pub struct ArticleRepositoryImpl {
     pool: DbPool,
 }
 
-impl ArticleRepository {
+impl ArticleRepositoryImpl {
     pub fn new(pool: DbPool) -> Self {
         Self { pool }
     }
 
-    pub fn fetch_articles_list(
+    fn create_tag_list(
+        conn: &mut PgConnection,
+        tag_name_list: &Option<Vec<String>>,
+        article_id: &Uuid,
+    ) -> Result<Vec<Tag>, AppError> {
+        let list = tag_name_list
+            .as_ref()
+            .map(|tag_name_list| {
+                let records = tag_name_list
+                    .iter()
+                    .map(|name| CreateTag { name, article_id })
+                    .collect();
+                Tag::create_list(conn, records)
+            })
+            .unwrap_or_else(|| Ok(vec![]));
+        list
+    }
+}
+
+impl ArticleRepository for ArticleRepositoryImpl {
+    fn fetch_articles_list(
         &self,
         params: FetchArticlesListRepositoryInput,
     ) -> Result<(ArticlesList, ArticlesCount), AppError> {
@@ -144,7 +197,7 @@ impl ArticleRepository {
         Ok((result, articles_count))
     }
 
-    pub fn fetch_article_by_slug(
+    fn fetch_article_by_slug(
         &self,
         article_title_slug: String,
     ) -> Result<FetchArticleBySlugOutput, AppError> {
@@ -171,7 +224,7 @@ impl ArticleRepository {
         Ok((article, profile, favorite_info, tags_list))
     }
 
-    pub fn create(
+    fn create(
         &self,
         params: CreateArticleRepositoryInput,
     ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
@@ -206,7 +259,7 @@ impl ArticleRepository {
         Ok((article, profile, favorite_info, tag_list))
     }
 
-    pub fn delete(&self, input: DeleteArticleRepositoryInput) -> Result<(), AppError> {
+    fn delete(&self, input: DeleteArticleRepositoryInput) -> Result<(), AppError> {
         let conn = &mut self.pool.get()?;
         Article::delete(
             conn,
@@ -217,7 +270,7 @@ impl ArticleRepository {
         )
     }
 
-    pub fn update(
+    fn update(
         &self,
         input: UpdateArticleRepositoryInput,
     ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
@@ -251,25 +304,7 @@ impl ArticleRepository {
         Ok((article, profile, favorite_info, tag_list))
     }
 
-    fn create_tag_list(
-        conn: &mut PgConnection,
-        tag_name_list: &Option<Vec<String>>,
-        article_id: &Uuid,
-    ) -> Result<Vec<Tag>, AppError> {
-        let list = tag_name_list
-            .as_ref()
-            .map(|tag_name_list| {
-                let records = tag_name_list
-                    .iter()
-                    .map(|name| CreateTag { name, article_id })
-                    .collect();
-                Tag::create_list(conn, records)
-            })
-            .unwrap_or_else(|| Ok(vec![]));
-        list
-    }
-
-    pub fn fetch_article_item(
+    fn fetch_article_item(
         &self,
         input: &FetchArticleRepositoryInput,
     ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
@@ -295,7 +330,7 @@ impl ArticleRepository {
         Ok((article, profile, favorite_info, tags_list))
     }
 
-    pub fn fetch_following_articles(
+    fn fetch_following_articles(
         &self,
         params: &FetchFollowingArticlesRepositoryInput,
     ) -> Result<(ArticlesList, ArticlesCount), AppError> {
@@ -442,8 +477,6 @@ pub struct FetchArticleRepositoryInput {
     pub article_id: Uuid,
     pub current_user: User,
 }
-
-// pub struct FetchArticleRepositoryOutput();
 
 pub struct FetchFollowingArticlesRepositoryInput {
     pub current_user: User,
