@@ -1,5 +1,4 @@
-use uuid::Uuid;
-
+use super::entities::{Comment, CreateComment, DeleteComment};
 use crate::{
     appv2::features::{
         article::entities::{Article, FetchBySlugAndAuthorId},
@@ -9,20 +8,41 @@ use crate::{
     error::AppError,
     utils::db::DbPool,
 };
+use uuid::Uuid;
 
-use super::entities::{Comment, CreateComment, DeleteComment};
+pub trait CommentRepository: Send + Sync + 'static {
+    fn fetch_comments_list(
+        &self,
+        current_user: &Option<User>,
+    ) -> Result<Vec<(Comment, Profile)>, AppError>;
+
+    fn create(
+        &self,
+        body: String,
+        article_title_slug: String,
+        author: User,
+    ) -> Result<(Comment, Profile), AppError>;
+
+    fn delete(
+        &self,
+        article_title_slug: &str,
+        comment_id: Uuid,
+        author_id: Uuid,
+    ) -> Result<(), AppError>;
+}
 
 #[derive(Clone)]
-pub struct CommentRepository {
+pub struct CommentRepositoryImpl {
     pool: DbPool,
 }
 
-impl CommentRepository {
+impl CommentRepositoryImpl {
     pub fn new(pool: DbPool) -> Self {
         Self { pool }
     }
-
-    pub fn fetch_comments_list(
+}
+impl CommentRepository for CommentRepositoryImpl {
+    fn fetch_comments_list(
         &self,
         current_user: &Option<User>,
     ) -> Result<Vec<(Comment, Profile)>, AppError> {
@@ -54,7 +74,7 @@ impl CommentRepository {
         Ok(comments)
     }
 
-    pub fn create(
+    fn create(
         &self,
         body: String,
         article_title_slug: String,
@@ -81,7 +101,7 @@ impl CommentRepository {
         Ok((comment, profile))
     }
 
-    pub fn delete(
+    fn delete(
         &self,
         article_title_slug: &str,
         comment_id: Uuid,

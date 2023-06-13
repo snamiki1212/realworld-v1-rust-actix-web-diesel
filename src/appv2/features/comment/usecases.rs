@@ -1,22 +1,22 @@
-use crate::appv2::features::article::repositories::{
-    ArticleRepositoryImpl, FetchArticleRepositoryInput,
-};
+use super::presenters::CommentPresenter;
+use super::repositories::CommentRepository;
 use crate::appv2::features::user::entities::User;
 use crate::error::AppError;
 use actix_web::HttpResponse;
+use std::sync::Arc;
 use uuid::Uuid;
-
-use super::presenters::CommentPresenter;
-use super::repositories::CommentRepository;
 
 #[derive(Clone)]
 pub struct CommentUsecase {
-    comment_repository: CommentRepository,
+    comment_repository: Arc<dyn CommentRepository>,
     comment_presenter: CommentPresenter,
 }
 
 impl CommentUsecase {
-    pub fn new(comment_repository: CommentRepository, comment_presenter: CommentPresenter) -> Self {
+    pub fn new(
+        comment_repository: Arc<dyn CommentRepository>,
+        comment_presenter: CommentPresenter,
+    ) -> Self {
         Self {
             comment_repository,
             comment_presenter,

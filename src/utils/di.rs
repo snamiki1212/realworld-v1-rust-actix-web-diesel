@@ -2,7 +2,7 @@ use crate::appv2::features::article::presenters::ArticlePresenter;
 use crate::appv2::features::article::repositories::ArticleRepositoryImpl;
 use crate::appv2::features::article::usecases::ArticleUsecase;
 use crate::appv2::features::comment::presenters::CommentPresenter;
-use crate::appv2::features::comment::repositories::CommentRepository;
+use crate::appv2::features::comment::repositories::CommentRepositoryImpl;
 use crate::appv2::features::comment::usecases::CommentUsecase;
 use crate::appv2::features::favorite::presenters::FavoritePresenter;
 use crate::appv2::features::favorite::repositories::FavoriteRepositoryImpl;
@@ -60,7 +60,7 @@ pub struct DiContainer {
     /**
      * Comment
      */
-    pub comment_repository: CommentRepository,
+    pub comment_repository: CommentRepositoryImpl,
     pub comment_presenter: CommentPresenter,
     pub comment_usecase: CommentUsecase,
 }
@@ -73,7 +73,7 @@ impl DiContainer {
         let favorite_repository = FavoriteRepositoryImpl::new(pool.clone());
         let article_repository = ArticleRepositoryImpl::new(pool.clone());
         let tag_repository = TagRepositoryImpl::new(pool.clone());
-        let comment_repository = CommentRepository::new(pool.clone());
+        let comment_repository = CommentRepositoryImpl::new(pool.clone());
 
         // Presenter
         let user_presenter = UserPresenter::new();
@@ -101,8 +101,10 @@ impl DiContainer {
             article_presenter.clone(),
         );
         let tag_usecase = TagUsecase::new(Arc::new(tag_repository.clone()), tag_presenter.clone());
-        let comment_usecase =
-            CommentUsecase::new(comment_repository.clone(), comment_presenter.clone());
+        let comment_usecase = CommentUsecase::new(
+            Arc::new(comment_repository.clone()),
+            comment_presenter.clone(),
+        );
 
         Self {
             // User
