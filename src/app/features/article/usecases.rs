@@ -49,7 +49,6 @@ impl ArticleUsecase {
         &self,
         article_title_slug: String,
     ) -> Result<HttpResponse, AppError> {
-        let article_title_slug = article_title_slug.clone();
         let result = self
             .article_repository
             .fetch_article_by_slug(article_title_slug)?;
@@ -96,7 +95,7 @@ impl ArticleUsecase {
                 slug: input.slug,
                 author_id: input.author_id,
             })?;
-        let res = self.article_presenter.toHttpRes();
+        let res = self.article_presenter.to_http_res();
         Ok(res)
     }
 

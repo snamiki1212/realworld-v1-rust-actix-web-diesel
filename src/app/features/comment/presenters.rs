@@ -79,7 +79,7 @@ pub struct InnerAuthor {
 }
 
 pub trait CommentPresenter: Send + Sync + 'static {
-    fn toHttpRes(&self) -> HttpResponse;
+    fn to_http_res(&self) -> HttpResponse;
     fn from_comment_and_profile(&self, item: (Comment, Profile)) -> HttpResponse;
     fn from_comment_and_profile_list(&self, list: Vec<(Comment, Profile)>) -> HttpResponse;
 }
@@ -92,7 +92,7 @@ impl CommentPresenterImpl {
     }
 }
 impl CommentPresenter for CommentPresenterImpl {
-    fn toHttpRes(&self) -> HttpResponse {
+    fn to_http_res(&self) -> HttpResponse {
         HttpResponse::Ok().json("OK")
     }
 

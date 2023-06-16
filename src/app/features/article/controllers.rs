@@ -1,7 +1,4 @@
 use super::{
-    entities::{Article, DeleteArticle},
-    presenters::{MultipleArticlesResponse, SingleArticleResponse},
-    repositories::FetchFollowingArticlesRepositoryInput,
     requests,
     usecases::{
         CreateArticleUsecaseInput, DeleteArticleUsecaseInput, FetchArticlesListUsecaseInput,
@@ -11,7 +8,7 @@ use super::{
 use crate::app::drivers::middlewares::auth;
 use crate::app::drivers::middlewares::state::AppState;
 use crate::utils::api::ApiResponse;
-use actix_web::{web, HttpRequest, HttpResponse};
+use actix_web::{web, HttpRequest};
 use serde::Deserialize;
 
 type ArticleTitleSlug = String;

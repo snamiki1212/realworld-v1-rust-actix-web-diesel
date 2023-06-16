@@ -48,9 +48,10 @@ impl CommentUsecase {
         comment_id: Uuid,
         author_id: Uuid,
     ) -> Result<HttpResponse, AppError> {
-        self.comment_repository
-            .delete(&article_title_slug, comment_id, author_id);
-        let res = self.comment_presenter.toHttpRes();
+        let _ = self
+            .comment_repository
+            .delete(article_title_slug, comment_id, author_id);
+        let res = self.comment_presenter.to_http_res();
         Ok(res)
     }
 }
