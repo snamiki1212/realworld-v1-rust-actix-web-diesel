@@ -25,8 +25,7 @@ jobs:
       # - name: Rust format
       #   run: cargo fmt --all -- --check
       - name: Run lint
-        # run: cargo clippy -- -D warnings
-        run: cargo clippy
+        run: cargo clippy -- -D warnings
 
   test_unit:
     runs-on: ubuntu-latest
