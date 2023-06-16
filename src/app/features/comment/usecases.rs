@@ -25,7 +25,7 @@ impl CommentUsecase {
 
     pub fn fetch_comments_list(&self, user: &Option<User>) -> Result<HttpResponse, AppError> {
         let result = self.comment_repository.fetch_comments_list(user)?;
-        let res = self.comment_presenter.from_comment_and_profile_list(result);
+        let res = self.comment_presenter.to_multi_json(result);
         Ok(res)
     }
 
@@ -38,7 +38,7 @@ impl CommentUsecase {
         let result = self
             .comment_repository
             .create(body, article_title_slug, author)?;
-        let res = self.comment_presenter.from_comment_and_profile(result);
+        let res = self.comment_presenter.to_single_json(result);
         Ok(res)
     }
 

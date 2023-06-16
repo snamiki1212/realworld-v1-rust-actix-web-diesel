@@ -121,8 +121,8 @@ pub struct AuthorContent {
 }
 
 pub trait ArticlePresenter: Send + Sync + 'static {
-    fn from_list_and_count(&self, list: ArticlesList, count: i64) -> HttpResponse;
-    fn from_item(&self, item: (Article, Profile, FavoriteInfo, Vec<Tag>)) -> HttpResponse;
+    fn to_multi_json(&self, list: ArticlesList, count: i64) -> HttpResponse;
+    fn to_single_json(&self, item: (Article, Profile, FavoriteInfo, Vec<Tag>)) -> HttpResponse;
     fn to_http_res(&self) -> HttpResponse;
 }
 
@@ -134,11 +134,11 @@ impl ArticlePresenterImpl {
     }
 }
 impl ArticlePresenter for ArticlePresenterImpl {
-    fn from_list_and_count(&self, list: ArticlesList, count: i64) -> HttpResponse {
+    fn to_multi_json(&self, list: ArticlesList, count: i64) -> HttpResponse {
         let res = MultipleArticlesResponse::from((list, count));
         HttpResponse::Ok().json(res)
     }
-    fn from_item(&self, item: (Article, Profile, FavoriteInfo, Vec<Tag>)) -> HttpResponse {
+    fn to_single_json(&self, item: (Article, Profile, FavoriteInfo, Vec<Tag>)) -> HttpResponse {
         let res = SingleArticleResponse::from(item);
         HttpResponse::Ok().json(res)
     }

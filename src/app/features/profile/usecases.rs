@@ -30,7 +30,7 @@ impl ProfileUsecase {
         let profile = self
             .profile_repository
             .fetch_by_name(current_user, username)?;
-        Ok(self.presenter.from_profile(profile))
+        Ok(self.presenter.to_json(profile))
     }
 
     pub fn follow(
@@ -39,7 +39,7 @@ impl ProfileUsecase {
         target_username: &str,
     ) -> Result<HttpResponse, AppError> {
         let profile = self.user_repository.follow(current_user, target_username)?;
-        Ok(self.presenter.from_profile(profile))
+        Ok(self.presenter.to_json(profile))
     }
 
     pub fn unfollow(
@@ -50,6 +50,6 @@ impl ProfileUsecase {
         let profile = self
             .user_repository
             .unfollow(current_user, target_username)?;
-        Ok(self.presenter.from_profile(profile))
+        Ok(self.presenter.to_json(profile))
     }
 }

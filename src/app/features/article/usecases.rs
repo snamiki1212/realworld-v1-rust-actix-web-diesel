@@ -41,7 +41,7 @@ impl ArticleUsecase {
                     offset: params.offset,
                     limit: params.limit,
                 })?;
-        let res = self.article_presenter.from_list_and_count(list, count);
+        let res = self.article_presenter.to_multi_json(list, count);
         Ok(res)
     }
 
@@ -52,7 +52,7 @@ impl ArticleUsecase {
         let result = self
             .article_repository
             .fetch_article_by_slug(article_title_slug)?;
-        let res = self.article_presenter.from_item(result);
+        let res = self.article_presenter.to_single_json(result);
         Ok(res)
     }
 
@@ -69,7 +69,7 @@ impl ArticleUsecase {
                 limit,
             },
         )?;
-        let res = self.article_presenter.from_list_and_count(list, count);
+        let res = self.article_presenter.to_multi_json(list, count);
         Ok(res)
     }
 
@@ -85,7 +85,7 @@ impl ArticleUsecase {
                 title: params.title,
                 slug,
             })?;
-        let res = self.article_presenter.from_item(result);
+        let res = self.article_presenter.to_single_json(result);
         Ok(res)
     }
 
@@ -115,7 +115,7 @@ impl ArticleUsecase {
                 description: input.description,
                 body: input.body,
             })?;
-        let res = self.article_presenter.from_item(result);
+        let res = self.article_presenter.to_single_json(result);
         Ok(res)
     }
 }
