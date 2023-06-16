@@ -1,4 +1,4 @@
-use crate::app::features::user::entities::User;
+use crate::{app::features::user::entities::User, error::AppError};
 use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
@@ -34,7 +34,9 @@ pub struct AuthUser {
 
 pub trait UserPresenter: Send + Sync + 'static {
     fn from_user_and_token(&self, user: User, token: String) -> HttpResponse;
+    fn to_auth_middleware(&self, maybe_uesr: Result<User, AppError>) -> Result<User, &str>;
 }
+
 #[derive(Clone)]
 pub struct UserPresenterImpl {}
 impl UserPresenterImpl {
@@ -46,5 +48,9 @@ impl UserPresenter for UserPresenterImpl {
     fn from_user_and_token(&self, user: User, token: String) -> HttpResponse {
         let res_model = UserResponse::from((user, token));
         HttpResponse::Ok().json(res_model)
+    }
+
+    fn to_auth_middleware(&self, maybe_user: Result<User, AppError>) -> Result<User, &str> {
+        maybe_user.map_err(|_err| "Cannot find auth user")
     }
 }
