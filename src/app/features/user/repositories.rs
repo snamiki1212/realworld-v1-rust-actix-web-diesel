@@ -20,6 +20,7 @@ pub trait UserRepository: Send + Sync + 'static {
     fn follow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError>;
     fn unfollow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError>;
     fn update(&self, user_id: Uuid, changeset: UpdateUser) -> Result<(User, Token), AppError>;
+    fn find(&self, user_id: Uuid) -> Result<User, AppError>;
 }
 
 #[derive(Clone)]
@@ -108,5 +109,11 @@ impl UserRepository for UserRepositoryImpl {
         let new_user = User::update(conn, user_id, changeset)?;
         let token = &new_user.generate_token()?;
         Ok((new_user, token.clone()))
+    }
+
+    fn find(&self, user_id: Uuid) -> Result<User, AppError> {
+        let conn = &mut self.pool.get()?;
+        let user = User::find(conn, user_id)?;
+        Ok(user)
     }
 }
