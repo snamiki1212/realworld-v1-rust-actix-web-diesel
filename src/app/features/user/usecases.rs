@@ -51,4 +51,9 @@ impl UserUsecase {
         let res = self.user_presenter.from_user_and_token(new_user, token);
         Ok(res)
     }
+
+    pub fn find_auth_user(&self, user_id: Uuid) -> Result<User, &str> {
+        let maybe_user = self.user_repository.find(user_id);
+        self.user_presenter.to_auth_middleware(maybe_user)
+    }
 }
