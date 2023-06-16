@@ -16,7 +16,7 @@ impl std::convert::From<Vec<Tag>> for TagsResponse {
 }
 
 pub trait TagPresenter: Send + Sync + 'static {
-    fn from_list(&self, list: Vec<Tag>) -> HttpResponse;
+    fn to_json(&self, list: Vec<Tag>) -> HttpResponse;
 }
 
 #[derive(Clone)]
@@ -27,7 +27,7 @@ impl TagPresenterImpl {
     }
 }
 impl TagPresenter for TagPresenterImpl {
-    fn from_list(&self, list: Vec<Tag>) -> HttpResponse {
+    fn to_json(&self, list: Vec<Tag>) -> HttpResponse {
         let res = TagsResponse::from(list);
         HttpResponse::Ok().json(res)
     }

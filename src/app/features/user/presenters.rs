@@ -33,7 +33,7 @@ pub struct AuthUser {
 }
 
 pub trait UserPresenter: Send + Sync + 'static {
-    fn from_user_and_token(&self, user: User, token: String) -> HttpResponse;
+    fn to_json(&self, user: User, token: String) -> HttpResponse;
     fn to_auth_middleware(&self, maybe_uesr: Result<User, AppError>) -> Result<User, &str>;
 }
 
@@ -45,7 +45,7 @@ impl UserPresenterImpl {
     }
 }
 impl UserPresenter for UserPresenterImpl {
-    fn from_user_and_token(&self, user: User, token: String) -> HttpResponse {
+    fn to_json(&self, user: User, token: String) -> HttpResponse {
         let res_model = UserResponse::from((user, token));
         HttpResponse::Ok().json(res_model)
     }

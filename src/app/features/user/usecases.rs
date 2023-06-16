@@ -25,7 +25,7 @@ impl UserUsecase {
 
     pub fn signin(&self, email: &str, password: &str) -> Result<HttpResponse, AppError> {
         let (user, token) = self.user_repository.signin(email, password)?;
-        let res = self.user_presenter.from_user_and_token(user, token);
+        let res = self.user_presenter.to_json(user, token);
         Ok(res)
     }
 
@@ -36,19 +36,19 @@ impl UserUsecase {
         password: &str,
     ) -> Result<HttpResponse, AppError> {
         let (user, token) = self.user_repository.signup(email, username, password)?;
-        let res = self.user_presenter.from_user_and_token(user, token);
+        let res = self.user_presenter.to_json(user, token);
         Ok(res)
     }
 
     pub fn me(&self, current_user: &User) -> Result<HttpResponse, AppError> {
         let (user, token) = self.user_repository.me(current_user)?;
-        let res = self.user_presenter.from_user_and_token(user.clone(), token);
+        let res = self.user_presenter.to_json(user.clone(), token);
         Ok(res)
     }
 
     pub fn update(&self, user_id: Uuid, changeset: UpdateUser) -> Result<HttpResponse, AppError> {
         let (new_user, token) = self.user_repository.update(user_id, changeset)?;
-        let res = self.user_presenter.from_user_and_token(new_user, token);
+        let res = self.user_presenter.to_json(new_user, token);
         Ok(res)
     }
 

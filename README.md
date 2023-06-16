@@ -69,7 +69,7 @@ $ APIURL=http://localhost:8080/api zsh e2e/run-api-tests.sh
 ## Architecture
 
 - Clean Architecture
-- DI container using Constructor Injection with dynamic dispatch (`/src/di.rs`)
+- DI container using Constructor Injection with dynamic dispatch ([src/utils/di.rs](https://github.com/snamiki1212/realworld-v1-rust-actix-web-diesel/blob/main/src/utils/di.rs))
 
 ```mermaid
 flowchart TD

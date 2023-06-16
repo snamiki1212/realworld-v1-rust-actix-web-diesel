@@ -85,14 +85,14 @@ impl CommentRepository for CommentRepositoryImpl {
         let article = Article::fetch_by_slug_and_author_id(
             conn,
             &FetchBySlugAndAuthorId {
-                slug: article_title_slug.to_owned(),
+                slug: article_title_slug,
                 author_id: author.id,
             },
         )?;
         let comment = Comment::create(
             conn,
             &CreateComment {
-                body: body.to_string(),
+                body,
                 author_id: author.id,
                 article_id: article.id.to_owned(),
             },

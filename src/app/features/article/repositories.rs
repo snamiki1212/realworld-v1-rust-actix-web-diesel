@@ -75,17 +75,8 @@ impl ArticleRepository for ArticleRepositoryImpl {
         &self,
         params: FetchArticlesListRepositoryInput,
     ) -> Result<(ArticlesList, ArticlesCount), AppError> {
-        use crate::app::features::article::entities::Article;
-        use crate::app::features::favorite::entities::{Favorite, FavoriteInfo};
-        use crate::app::features::follow::entities::Follow;
-        use crate::app::features::profile::entities::Profile;
-        use crate::app::features::tag::entities::Tag;
-        use crate::app::features::user::entities::User;
-        use crate::error::AppError;
-        use crate::schema::articles::dsl::*;
+        use crate::app::features::favorite::entities::Favorite;
         use crate::schema::{articles, tags, users};
-        use diesel::pg::PgConnection;
-        use diesel::prelude::*;
         use diesel::prelude::*;
         // ====
         let conn = &mut self.pool.get()?;
@@ -334,19 +325,12 @@ impl ArticleRepository for ArticleRepositoryImpl {
         &self,
         params: &FetchFollowingArticlesRepositoryInput,
     ) -> Result<(ArticlesList, ArticlesCount), AppError> {
-        use crate::app::features::article::entities::Article;
-        use crate::app::features::favorite::entities::{Favorite, FavoriteInfo};
         use crate::app::features::follow::entities::Follow;
-        use crate::app::features::profile::entities::Profile;
-        use crate::app::features::tag::entities::Tag;
-        use crate::app::features::user::entities::User;
-        use crate::error::AppError;
         use crate::schema::articles::dsl::*;
         use crate::schema::follows;
-        use crate::schema::{articles, tags, users};
-        use diesel::pg::PgConnection;
+        use crate::schema::{articles, users};
         use diesel::prelude::*;
-        // ==
+
         let conn = &mut self.pool.get()?;
 
         let create_query = {

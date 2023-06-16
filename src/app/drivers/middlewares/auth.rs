@@ -11,7 +11,6 @@ use actix_web::{
     web::Data,
     Error, HttpRequest, HttpResponse,
 };
-use diesel::pg::PgConnection;
 use futures::future::{ok, Ready};
 use futures::Future;
 use serde_json::json;
@@ -229,10 +228,3 @@ const SKIP_AUTH_ROUTES: [SkipAuthRoute; 6] = [
         method: Method::GET,
     },
 ];
-
-// ================
-// TODO: should inject this func
-fn find_auth_user(conn: &mut PgConnection, user_id: Uuid) -> Result<User, AppError> {
-    let user = User::find(conn, user_id)?;
-    Ok(user)
-}

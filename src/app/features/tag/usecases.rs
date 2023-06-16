@@ -23,7 +23,7 @@ impl TagUsecase {
 
     pub fn list(&self) -> Result<HttpResponse, AppError> {
         let list = self.tag_repository.list()?;
-        let res = self.tag_presenter.from_list(list);
+        let res = self.tag_presenter.to_json(list);
         Ok(res)
     }
 }
