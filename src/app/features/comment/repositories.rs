@@ -1,4 +1,4 @@
-use super::entities::{Comment, CreateComment, DeleteComment};
+use super::entities::{Comment, CreateComment};
 use crate::{
     app::features::{
         article::entities::{Article, FetchBySlugAndAuthorId},
@@ -50,12 +50,10 @@ impl CommentRepository for CommentRepositoryImpl {
 
         let comments = {
             use crate::schema::comments;
-            // use crate::schema::comments::dsl::*;
             use crate::schema::users;
             use diesel::prelude::*;
             comments::table
                 .inner_join(users::table)
-                // .filter(comments::article_id.eq(article_id))
                 .get_results::<(Comment, User)>(conn)?
         };
 
@@ -64,7 +62,6 @@ impl CommentRepository for CommentRepositoryImpl {
             .map(|(comment, user)| {
                 // TODO: avoid N+1. Write one query to fetch all data somehow.
                 let profile = user.to_profile(conn, current_user);
-                // Self::conver_user_to_profile(&ConverUserToProfile { user, current_user });
 
                 // TODO: avoid copy
                 (comment.to_owned(), profile)
@@ -108,21 +105,7 @@ impl CommentRepository for CommentRepositoryImpl {
         author_id: Uuid,
     ) -> Result<(), AppError> {
         let conn = &mut self.pool.get()?;
-        let article = Article::fetch_by_slug_and_author_id(
-            conn,
-            &FetchBySlugAndAuthorId {
-                slug: article_title_slug.to_owned(),
-                author_id,
-            },
-        )?;
-        Comment::delete(
-            conn,
-            &DeleteComment {
-                comment_id,
-                article_id: article.id,
-                author_id,
-            },
-        )?;
+        let _ = Comment::delete(conn, (&comment_id, &author_id, article_title_slug));
         Ok(())
     }
 }
