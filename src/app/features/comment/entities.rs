@@ -24,7 +24,6 @@ pub struct Comment {
 
 type WithId<T> = Eq<comments::id, T>;
 type WithAuthor<T> = Eq<comments::author_id, T>;
-type WithArticle<T> = Eq<comments::article_id, T>;
 
 impl Comment {
     fn with_id(id: &Uuid) -> WithId<&Uuid> {
@@ -32,9 +31,6 @@ impl Comment {
     }
     fn with_author(author_id: &Uuid) -> WithAuthor<&Uuid> {
         comments::author_id.eq(author_id)
-    }
-    fn with_article(article_id: &Uuid) -> WithArticle<&Uuid> {
-        comments::article_id.eq(article_id)
     }
 }
 
@@ -46,20 +42,26 @@ impl Comment {
         Ok(new_comment)
     }
 
-    pub fn delete(conn: &mut PgConnection, params: &DeleteComment) -> Result<(), AppError> {
-        let t = comments::table
-            .filter(Self::with_id(&params.comment_id))
-            .filter(Self::with_author(&params.author_id))
-            .filter(Self::with_article(&params.article_id));
-        diesel::delete(t).execute(conn)?;
+    pub fn delete(
+        conn: &mut PgConnection,
+        (comment_id, author_id, slug): (&Uuid, &Uuid, &str),
+    ) -> Result<(), AppError> {
+        let subquery = {
+            use crate::schema::articles;
+            articles::table
+                .filter(articles::slug.eq(slug))
+                .filter(articles::author_id.eq(author_id))
+                .select(articles::id)
+        };
+
+        let query = comments::table
+            .filter(Self::with_id(comment_id))
+            .filter(Self::with_author(author_id))
+            .filter(comments::article_id.eq_any(subquery));
+
+        diesel::delete(query).execute(conn)?;
         Ok(())
     }
-}
-
-pub struct DeleteComment {
-    pub comment_id: Uuid,
-    pub article_id: Uuid,
-    pub author_id: Uuid,
 }
 
 #[derive(Insertable, Clone)]

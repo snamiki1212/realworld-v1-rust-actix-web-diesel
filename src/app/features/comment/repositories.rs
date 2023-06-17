@@ -105,23 +105,7 @@ impl CommentRepository for CommentRepositoryImpl {
         author_id: Uuid,
     ) -> Result<(), AppError> {
         let conn = &mut self.pool.get()?;
-
-        {
-            use crate::schema::articles;
-            use diesel::prelude::*;
-
-            let subquery = articles::table
-                .filter(articles::slug.eq(article_title_slug))
-                .filter(articles::author_id.eq(author_id))
-                .select(articles::id);
-
-            use crate::schema::comments;
-            let query = comments::table
-                .filter(comments::id.eq(comment_id))
-                .filter(comments::author_id.eq(author_id))
-                .filter(comments::article_id.eq_any(subquery));
-            diesel::delete(query).execute(conn)?;
-        }
+        let _ = Comment::delete(conn, (&comment_id, &author_id, article_title_slug));
         Ok(())
     }
 }
