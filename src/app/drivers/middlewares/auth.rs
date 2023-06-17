@@ -55,8 +55,6 @@ where
 {
     type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
-
-    #[allow(clippy::type_complexity)] // TODO: want to remove allowness to skip and refactor somehow
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
 
     actix_web::dev::forward_ready!(service);
