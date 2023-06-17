@@ -1,4 +1,4 @@
-use super::entities::{Comment, CreateComment, DeleteComment};
+use super::entities::{Comment, CreateComment};
 use crate::{
     app::features::{
         article::entities::{Article, FetchBySlugAndAuthorId},
