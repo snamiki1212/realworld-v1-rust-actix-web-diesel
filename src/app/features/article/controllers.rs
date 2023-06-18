@@ -1,7 +1,7 @@
 use super::{
     requests,
     usecases::{
-        CreateArticleUsecaseInput, DeleteArticleUsecaseInput, FetchArticlesListUsecaseInput,
+        CreateArticleUsecaseInput, DeleteArticleUsecaseInput, FetchArticlesUsecaseInput,
         UpdateArticleUsecaseInput,
     },
 };
@@ -31,7 +31,7 @@ pub async fn index(
     state
         .di_container
         .article_usecase
-        .fetch_articles_list(FetchArticlesListUsecaseInput {
+        .fetch_articles(FetchArticlesUsecaseInput {
             tag: params.tag.clone(),
             author: params.author.clone(),
             favorited: params.favorited.clone(),
@@ -77,7 +77,7 @@ pub async fn create(
     state
         .di_container
         .article_usecase
-        .create(CreateArticleUsecaseInput {
+        .create_article(CreateArticleUsecaseInput {
             title: form.article.title.clone(),
             description: form.article.description.clone(),
             body: form.article.body.clone(),
@@ -100,7 +100,7 @@ pub async fn update(
     state
         .di_container
         .article_usecase
-        .update(UpdateArticleUsecaseInput {
+        .update_article(UpdateArticleUsecaseInput {
             current_user,
             article_title_slug,
             title,
@@ -119,7 +119,7 @@ pub async fn delete(
     state
         .di_container
         .article_usecase
-        .delete(DeleteArticleUsecaseInput {
+        .delete_article(DeleteArticleUsecaseInput {
             author_id: current_user.id,
             slug: article_title_slug,
         })

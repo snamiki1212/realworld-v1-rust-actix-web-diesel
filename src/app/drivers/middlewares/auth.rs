@@ -55,8 +55,6 @@ where
 {
     type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
-
-    #[allow(clippy::type_complexity)] // TODO: want to remove allowness to skip and refactor somehow
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
 
     actix_web::dev::forward_ready!(service);
@@ -137,7 +135,7 @@ fn get_user_id_from_header(req: &ServiceRequest) -> Result<Uuid, &str> {
 pub fn get_current_user(req: &HttpRequest) -> Result<User, AppError> {
     req.extensions()
         .get::<User>()
-        .map(|user| user.to_owned()) // TODO: avoid copy
+        .map(|user| user.to_owned())
         .ok_or_else(|| {
             AppError::Unauthorized(json!({"error": "Unauthrized user. Need auth token on header."}))
         })

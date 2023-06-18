@@ -3,7 +3,7 @@ use crate::error::AppError;
 use crate::utils::db::DbPool;
 
 pub trait TagRepository: Send + Sync + 'static {
-    fn list(&self) -> Result<Vec<Tag>, AppError>;
+    fn fetch_tags(&self) -> Result<Vec<Tag>, AppError>;
 }
 
 #[derive(Clone)]
@@ -18,7 +18,7 @@ impl TagRepositoryImpl {
 }
 
 impl TagRepository for TagRepositoryImpl {
-    fn list(&self) -> Result<Vec<Tag>, AppError> {
+    fn fetch_tags(&self) -> Result<Vec<Tag>, AppError> {
         let conn = &mut self.pool.get()?;
         Tag::fetch(conn)
     }

@@ -22,7 +22,7 @@ pub async fn signup(state: web::Data<AppState>, form: web::Json<requests::Signup
 
 pub async fn me(state: web::Data<AppState>, req: HttpRequest) -> ApiResponse {
     let current_user = auth::get_current_user(&req)?;
-    state.di_container.user_usecase.me(&current_user)
+    state.di_container.user_usecase.get_token(&current_user)
 }
 
 pub async fn update(
@@ -31,7 +31,7 @@ pub async fn update(
     form: web::Json<requests::Update>,
 ) -> ApiResponse {
     let current_user = auth::get_current_user(&req)?;
-    state.di_container.user_usecase.update(
+    state.di_container.user_usecase.update_user(
         current_user.id,
         UpdateUser {
             email: form.user.email.clone(),

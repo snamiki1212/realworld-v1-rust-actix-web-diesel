@@ -14,7 +14,7 @@ pub async fn show(
     state
         .di_container
         .profile_usecase
-        .show(&current_user, &username)
+        .fetch_profile_by_name(&current_user, &username)
 }
 
 pub async fn follow(
@@ -27,7 +27,7 @@ pub async fn follow(
     state
         .di_container
         .profile_usecase
-        .follow(&current_user, &target_username)
+        .follow_user(&current_user, &target_username)
 }
 
 pub async fn unfollow(
@@ -40,5 +40,5 @@ pub async fn unfollow(
     state
         .di_container
         .profile_usecase
-        .unfollow(&current_user, &target_username)
+        .unfollow_user(&current_user, &target_username)
 }

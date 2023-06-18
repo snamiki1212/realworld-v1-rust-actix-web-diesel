@@ -26,30 +26,36 @@ impl ProfileUsecase {
         }
     }
 
-    pub fn show(&self, current_user: &User, username: &str) -> Result<HttpResponse, AppError> {
-        let profile = self
-            .profile_repository
-            .fetch_by_name(current_user, username)?;
-        Ok(self.presenter.to_json(profile))
-    }
-
-    pub fn follow(
+    pub fn fetch_profile_by_name(
         &self,
         current_user: &User,
-        target_username: &str,
+        username: &str,
     ) -> Result<HttpResponse, AppError> {
-        let profile = self.user_repository.follow(current_user, target_username)?;
+        let profile = self
+            .profile_repository
+            .fetch_profile_by_name(current_user, username)?;
         Ok(self.presenter.to_json(profile))
     }
 
-    pub fn unfollow(
+    pub fn follow_user(
         &self,
         current_user: &User,
         target_username: &str,
     ) -> Result<HttpResponse, AppError> {
         let profile = self
             .user_repository
-            .unfollow(current_user, target_username)?;
+            .follow_user(current_user, target_username)?;
+        Ok(self.presenter.to_json(profile))
+    }
+
+    pub fn unfollow_user(
+        &self,
+        current_user: &User,
+        target_username: &str,
+    ) -> Result<HttpResponse, AppError> {
+        let profile = self
+            .user_repository
+            .unfollow_user(current_user, target_username)?;
         Ok(self.presenter.to_json(profile))
     }
 }

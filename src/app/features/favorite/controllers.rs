@@ -15,7 +15,7 @@ pub async fn favorite(
     state
         .di_container
         .favorite_usecase
-        .favorite(current_user, article_title_slug)
+        .favorite_article(current_user, article_title_slug)
 }
 
 pub async fn unfavorite(
@@ -28,5 +28,5 @@ pub async fn unfavorite(
     state
         .di_container
         .favorite_usecase
-        .unfavorite(current_user, article_title_slug)
+        .unfavorite_article(current_user, article_title_slug)
 }

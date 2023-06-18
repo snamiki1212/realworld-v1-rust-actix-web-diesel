@@ -4,7 +4,11 @@ use crate::error::AppError;
 use crate::utils::db::DbPool;
 
 pub trait ProfileRepository: Send + Sync + 'static {
-    fn fetch_by_name(&self, current_user: &User, username: &str) -> Result<Profile, AppError>;
+    fn fetch_profile_by_name(
+        &self,
+        current_user: &User,
+        username: &str,
+    ) -> Result<Profile, AppError>;
 }
 
 #[derive(Clone)]
@@ -19,7 +23,11 @@ impl ProfileRepositoryImpl {
 }
 
 impl ProfileRepository for ProfileRepositoryImpl {
-    fn fetch_by_name(&self, current_user: &User, username: &str) -> Result<Profile, AppError> {
+    fn fetch_profile_by_name(
+        &self,
+        current_user: &User,
+        username: &str,
+    ) -> Result<Profile, AppError> {
         let conn = &mut self.pool.get()?;
         let profile = {
             let followee = User::find_by_username(conn, username)?;

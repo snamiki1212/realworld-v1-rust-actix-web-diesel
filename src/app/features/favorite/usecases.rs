@@ -26,42 +26,42 @@ impl FavoriteUsecase {
         }
     }
 
-    pub fn favorite(
+    pub fn favorite_article(
         &self,
         user: User,
         article_title_slug: String,
     ) -> Result<HttpResponse, AppError> {
         let article = self
             .favorite_repository
-            .favorite(user.clone(), article_title_slug)?;
+            .favorite_article(user.clone(), article_title_slug)?;
 
         let result = self
             .article_repository
-            .fetch_article_item(&FetchArticleRepositoryInput {
+            .fetch_article(&FetchArticleRepositoryInput {
                 article_id: article.id,
                 current_user: user,
             })?;
-        let res = self.favorite_presenter.complete(result);
+        let res = self.favorite_presenter.to_single_json(result);
         Ok(res)
     }
 
-    pub fn unfavorite(
+    pub fn unfavorite_article(
         &self,
         user: User,
         article_title_slug: String,
     ) -> Result<HttpResponse, AppError> {
         let article = self
             .favorite_repository
-            .unfavorite(user.clone(), article_title_slug)?;
+            .unfavorite_article(user.clone(), article_title_slug)?;
 
         let result = self
             .article_repository
-            .fetch_article_item(&FetchArticleRepositoryInput {
+            .fetch_article(&FetchArticleRepositoryInput {
                 article_id: article.id,
                 current_user: user,
             })?;
 
-        let res = self.favorite_presenter.complete(result);
+        let res = self.favorite_presenter.to_single_json(result);
         Ok(res)
     }
 }

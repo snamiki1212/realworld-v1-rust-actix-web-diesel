@@ -23,13 +23,13 @@ impl CommentUsecase {
         }
     }
 
-    pub fn fetch_comments_list(&self, user: &Option<User>) -> Result<HttpResponse, AppError> {
-        let result = self.comment_repository.fetch_comments_list(user)?;
+    pub fn fetch_comments(&self, user: &Option<User>) -> Result<HttpResponse, AppError> {
+        let result = self.comment_repository.fetch_comments(user)?;
         let res = self.comment_presenter.to_multi_json(result);
         Ok(res)
     }
 
-    pub fn create(
+    pub fn create_comment(
         &self,
         body: String,
         article_title_slug: String,
@@ -37,12 +37,12 @@ impl CommentUsecase {
     ) -> Result<HttpResponse, AppError> {
         let result = self
             .comment_repository
-            .create(body, article_title_slug, author)?;
+            .create_comment(body, article_title_slug, author)?;
         let res = self.comment_presenter.to_single_json(result);
         Ok(res)
     }
 
-    pub fn delete(
+    pub fn delete_comment(
         &self,
         article_title_slug: &str,
         comment_id: Uuid,
@@ -50,7 +50,7 @@ impl CommentUsecase {
     ) -> Result<HttpResponse, AppError> {
         let _ = self
             .comment_repository
-            .delete(article_title_slug, comment_id, author_id);
+            .delete_comment(article_title_slug, comment_id, author_id);
         let res = self.comment_presenter.to_http_res();
         Ok(res)
     }
