@@ -86,7 +86,7 @@ impl ArticleRepository for ArticleRepositoryImpl {
 
             if let Some(tag_name) = &params.tag {
                 let ids = Tag::fetch_article_ids_by_name(conn, tag_name)
-                    .expect("could not fetch tagged article ids."); // TODO: use ? or error handling
+                    .expect("could not fetch tagged article ids."); // TODO: us e ? or error handling
                 query = query.filter(articles::id.eq_any(ids));
             }
 
