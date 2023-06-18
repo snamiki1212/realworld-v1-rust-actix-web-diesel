@@ -40,9 +40,9 @@ impl UserUsecase {
         Ok(res)
     }
 
-    pub fn me(&self, current_user: &User) -> Result<HttpResponse, AppError> {
-        let (user, token) = self.user_repository.me(current_user)?;
-        let res = self.user_presenter.to_json(user.clone(), token);
+    pub fn get_token(&self, current_user: &User) -> Result<HttpResponse, AppError> {
+        let token = current_user.generate_token()?;
+        let res = self.user_presenter.to_json(current_user.clone(), token);
         Ok(res)
     }
 

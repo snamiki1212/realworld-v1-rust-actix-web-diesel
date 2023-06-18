@@ -9,7 +9,6 @@ use uuid::Uuid;
 type Token = String;
 
 pub trait UserRepository: Send + Sync + 'static {
-    fn me<'a>(&self, user: &'a User) -> Result<(&'a User, Token), AppError>;
     fn signin(&self, email: &str, naive_password: &str) -> Result<(User, Token), AppError>;
     fn signup(
         &self,
@@ -35,11 +34,6 @@ impl UserRepositoryImpl {
 }
 
 impl UserRepository for UserRepositoryImpl {
-    fn me<'a>(&self, current_user: &'a User) -> Result<(&'a User, Token), AppError> {
-        let token = current_user.generate_token()?;
-        Ok((current_user, token))
-    }
-
     fn signin(&self, email: &str, naive_password: &str) -> Result<(User, Token), AppError> {
         let conn = &mut self.pool.get()?;
         User::signin(conn, email, naive_password)
