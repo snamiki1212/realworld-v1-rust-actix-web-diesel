@@ -31,7 +31,7 @@ pub async fn update(
     form: web::Json<requests::Update>,
 ) -> ApiResponse {
     let current_user = auth::get_current_user(&req)?;
-    state.di_container.user_usecase.update(
+    state.di_container.user_usecase.update_user(
         current_user.id,
         UpdateUser {
             email: form.user.email.clone(),

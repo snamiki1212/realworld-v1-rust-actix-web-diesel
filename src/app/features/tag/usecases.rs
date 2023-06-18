@@ -21,8 +21,8 @@ impl TagUsecase {
         }
     }
 
-    pub fn list(&self) -> Result<HttpResponse, AppError> {
-        let list = self.tag_repository.list()?;
+    pub fn fetch_tags(&self) -> Result<HttpResponse, AppError> {
+        let list = self.tag_repository.fetch_tags()?;
         let res = self.tag_presenter.to_json(list);
         Ok(res)
     }

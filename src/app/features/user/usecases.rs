@@ -46,7 +46,11 @@ impl UserUsecase {
         Ok(res)
     }
 
-    pub fn update(&self, user_id: Uuid, changeset: UpdateUser) -> Result<HttpResponse, AppError> {
+    pub fn update_user(
+        &self,
+        user_id: Uuid,
+        changeset: UpdateUser,
+    ) -> Result<HttpResponse, AppError> {
         let (new_user, token) = self.user_repository.update(user_id, changeset)?;
         let res = self.user_presenter.to_json(new_user, token);
         Ok(res)

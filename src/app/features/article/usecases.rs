@@ -2,7 +2,7 @@ use super::entities::Article;
 use super::presenters::ArticlePresenter;
 use super::repositories::{
     ArticleRepository, CreateArticleRepositoryInput, DeleteArticleRepositoryInput,
-    FetchArticlesListRepositoryInput, FetchFollowingArticlesRepositoryInput,
+    FetchArticlesRepositoryInput, FetchFollowingArticlesRepositoryInput,
     UpdateArticleRepositoryInput,
 };
 use crate::app::features::user::entities::User;
@@ -28,13 +28,13 @@ impl ArticleUsecase {
         }
     }
 
-    pub fn fetch_articles_list(
+    pub fn fetch_articles(
         &self,
-        params: FetchArticlesListUsecaseInput,
+        params: FetchArticlesUsecaseInput,
     ) -> Result<HttpResponse, AppError> {
         let (list, count) =
             self.article_repository
-                .fetch_articles_list(FetchArticlesListRepositoryInput {
+                .fetch_articles(FetchArticlesRepositoryInput {
                     tag: params.tag.clone(),
                     author: params.author.clone(),
                     favorited: params.favorited.clone(),
@@ -73,11 +73,14 @@ impl ArticleUsecase {
         Ok(res)
     }
 
-    pub fn create(&self, params: CreateArticleUsecaseInput) -> Result<HttpResponse, AppError> {
+    pub fn create_article(
+        &self,
+        params: CreateArticleUsecaseInput,
+    ) -> Result<HttpResponse, AppError> {
         let slug = Article::convert_title_to_slug(&params.title);
         let result = self
             .article_repository
-            .create(CreateArticleRepositoryInput {
+            .create_article(CreateArticleRepositoryInput {
                 body: params.body,
                 current_user: params.current_user,
                 description: params.description,
@@ -89,9 +92,12 @@ impl ArticleUsecase {
         Ok(res)
     }
 
-    pub fn delete(&self, input: DeleteArticleUsecaseInput) -> Result<HttpResponse, AppError> {
+    pub fn delete_article(
+        &self,
+        input: DeleteArticleUsecaseInput,
+    ) -> Result<HttpResponse, AppError> {
         self.article_repository
-            .delete(DeleteArticleRepositoryInput {
+            .delete_article(DeleteArticleRepositoryInput {
                 slug: input.slug,
                 author_id: input.author_id,
             })?;
@@ -99,7 +105,10 @@ impl ArticleUsecase {
         Ok(res)
     }
 
-    pub fn update(&self, input: UpdateArticleUsecaseInput) -> Result<HttpResponse, AppError> {
+    pub fn update_article(
+        &self,
+        input: UpdateArticleUsecaseInput,
+    ) -> Result<HttpResponse, AppError> {
         let article_slug = &input
             .title
             .as_ref()
@@ -107,7 +116,7 @@ impl ArticleUsecase {
         let slug = article_slug.to_owned();
         let result = self
             .article_repository
-            .update(UpdateArticleRepositoryInput {
+            .update_article(UpdateArticleRepositoryInput {
                 current_user: input.current_user,
                 article_title_slug: input.article_title_slug,
                 slug,
@@ -141,7 +150,7 @@ pub struct UpdateArticleUsecaseInput {
     pub body: Option<String>,
 }
 
-pub struct FetchArticlesListUsecaseInput {
+pub struct FetchArticlesUsecaseInput {
     pub tag: Option<String>,
     pub author: Option<String>,
     pub favorited: Option<String>,

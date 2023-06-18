@@ -6,7 +6,7 @@ use crate::app::features::tag::entities::Tag;
 use actix_web::HttpResponse;
 
 pub trait FavoritePresenter: Send + Sync + 'static {
-    fn complete(&self, item: (Article, Profile, FavoriteInfo, Vec<Tag>)) -> HttpResponse;
+    fn to_single_json(&self, item: (Article, Profile, FavoriteInfo, Vec<Tag>)) -> HttpResponse;
 }
 
 #[derive(Clone)]
@@ -17,7 +17,7 @@ impl FavoritePresenterImpl {
     }
 }
 impl FavoritePresenter for FavoritePresenterImpl {
-    fn complete(
+    fn to_single_json(
         &self,
         (article, profile, favorite_info, tags_list): (Article, Profile, FavoriteInfo, Vec<Tag>),
     ) -> HttpResponse {

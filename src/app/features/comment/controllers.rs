@@ -13,7 +13,7 @@ pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> ApiResponse 
     state
         .di_container
         .comment_usecase
-        .fetch_comments_list(&current_user)
+        .fetch_comments(&current_user)
 }
 
 pub async fn create(
@@ -28,7 +28,7 @@ pub async fn create(
     state
         .di_container
         .comment_usecase
-        .create(body, article_title_slug, current_user)
+        .create_comment(body, article_title_slug, current_user)
 }
 
 pub async fn delete(
@@ -39,8 +39,9 @@ pub async fn delete(
     let current_user = auth::get_current_user(&req)?;
     let (article_title_slug, comment_id) = path.into_inner();
     let comment_id = uuid::parse(&comment_id)?;
-    state
-        .di_container
-        .comment_usecase
-        .delete(&article_title_slug, comment_id, current_user.id)
+    state.di_container.comment_usecase.delete_comment(
+        &article_title_slug,
+        comment_id,
+        current_user.id,
+    )
 }

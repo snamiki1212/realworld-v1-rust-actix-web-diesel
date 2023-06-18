@@ -11,19 +11,19 @@ use crate::{
 use uuid::Uuid;
 
 pub trait CommentRepository: Send + Sync + 'static {
-    fn fetch_comments_list(
+    fn fetch_comments(
         &self,
         current_user: &Option<User>,
     ) -> Result<Vec<(Comment, Profile)>, AppError>;
 
-    fn create(
+    fn create_comment(
         &self,
         body: String,
         article_title_slug: String,
         author: User,
     ) -> Result<(Comment, Profile), AppError>;
 
-    fn delete(
+    fn delete_comment(
         &self,
         article_title_slug: &str,
         comment_id: Uuid,
@@ -42,7 +42,7 @@ impl CommentRepositoryImpl {
     }
 }
 impl CommentRepository for CommentRepositoryImpl {
-    fn fetch_comments_list(
+    fn fetch_comments(
         &self,
         current_user: &Option<User>,
     ) -> Result<Vec<(Comment, Profile)>, AppError> {
@@ -71,7 +71,7 @@ impl CommentRepository for CommentRepositoryImpl {
         Ok(comments)
     }
 
-    fn create(
+    fn create_comment(
         &self,
         body: String,
         article_title_slug: String,
@@ -98,7 +98,7 @@ impl CommentRepository for CommentRepositoryImpl {
         Ok((comment, profile))
     }
 
-    fn delete(
+    fn delete_comment(
         &self,
         article_title_slug: &str,
         comment_id: Uuid,

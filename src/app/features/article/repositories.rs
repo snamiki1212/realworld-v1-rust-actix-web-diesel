@@ -9,9 +9,9 @@ use diesel::PgConnection;
 use uuid::Uuid;
 
 pub trait ArticleRepository: Send + Sync + 'static {
-    fn fetch_articles_list(
+    fn fetch_articles(
         &self,
-        params: FetchArticlesListRepositoryInput,
+        params: FetchArticlesRepositoryInput,
     ) -> Result<(ArticlesList, ArticlesCount), AppError>;
 
     fn fetch_article_by_slug(
@@ -19,19 +19,19 @@ pub trait ArticleRepository: Send + Sync + 'static {
         article_title_slug: String,
     ) -> Result<FetchArticleBySlugOutput, AppError>;
 
-    fn create(
+    fn create_article(
         &self,
         params: CreateArticleRepositoryInput,
     ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError>;
 
-    fn delete(&self, input: DeleteArticleRepositoryInput) -> Result<(), AppError>;
+    fn delete_article(&self, input: DeleteArticleRepositoryInput) -> Result<(), AppError>;
 
-    fn update(
+    fn update_article(
         &self,
         input: UpdateArticleRepositoryInput,
     ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError>;
 
-    fn fetch_article_item(
+    fn fetch_article(
         &self,
         input: &FetchArticleRepositoryInput,
     ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError>;
@@ -71,9 +71,9 @@ impl ArticleRepositoryImpl {
 }
 
 impl ArticleRepository for ArticleRepositoryImpl {
-    fn fetch_articles_list(
+    fn fetch_articles(
         &self,
-        params: FetchArticlesListRepositoryInput,
+        params: FetchArticlesRepositoryInput,
     ) -> Result<(ArticlesList, ArticlesCount), AppError> {
         use crate::app::features::favorite::entities::Favorite;
         use crate::schema::{articles, tags, users};
@@ -215,7 +215,7 @@ impl ArticleRepository for ArticleRepositoryImpl {
         Ok((article, profile, favorite_info, tags_list))
     }
 
-    fn create(
+    fn create_article(
         &self,
         params: CreateArticleRepositoryInput,
     ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
@@ -250,7 +250,7 @@ impl ArticleRepository for ArticleRepositoryImpl {
         Ok((article, profile, favorite_info, tag_list))
     }
 
-    fn delete(&self, input: DeleteArticleRepositoryInput) -> Result<(), AppError> {
+    fn delete_article(&self, input: DeleteArticleRepositoryInput) -> Result<(), AppError> {
         let conn = &mut self.pool.get()?;
         Article::delete(
             conn,
@@ -261,7 +261,7 @@ impl ArticleRepository for ArticleRepositoryImpl {
         )
     }
 
-    fn update(
+    fn update_article(
         &self,
         input: UpdateArticleRepositoryInput,
     ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
@@ -295,7 +295,7 @@ impl ArticleRepository for ArticleRepositoryImpl {
         Ok((article, profile, favorite_info, tag_list))
     }
 
-    fn fetch_article_item(
+    fn fetch_article(
         &self,
         input: &FetchArticleRepositoryInput,
     ) -> Result<(Article, Profile, FavoriteInfo, Vec<Tag>), AppError> {
@@ -449,7 +449,7 @@ pub struct UpdateArticleRepositoryInput {
 
 pub type FetchArticleBySlugOutput = (Article, Profile, FavoriteInfo, Vec<Tag>);
 
-pub struct FetchArticlesListRepositoryInput {
+pub struct FetchArticlesRepositoryInput {
     pub tag: Option<String>,
     pub author: Option<String>,
     pub favorited: Option<String>,

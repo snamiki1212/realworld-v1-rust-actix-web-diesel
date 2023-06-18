@@ -16,8 +16,12 @@ pub trait UserRepository: Send + Sync + 'static {
         username: &str,
         naive_password: &str,
     ) -> Result<(User, Token), AppError>;
-    fn follow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError>;
-    fn unfollow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError>;
+    fn follow_user(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError>;
+    fn unfollow_user(
+        &self,
+        current_user: &User,
+        target_username: &str,
+    ) -> Result<Profile, AppError>;
     fn update(&self, user_id: Uuid, changeset: UpdateUser) -> Result<(User, Token), AppError>;
     fn find(&self, user_id: Uuid) -> Result<User, AppError>;
 }
@@ -49,7 +53,7 @@ impl UserRepository for UserRepositoryImpl {
         User::signup(conn, email, username, naive_password)
     }
 
-    fn follow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError> {
+    fn follow_user(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError> {
         let conn = &mut self.pool.get()?;
         let t = User::by_username(target_username);
 
@@ -74,7 +78,11 @@ impl UserRepository for UserRepositoryImpl {
         })
     }
 
-    fn unfollow(&self, current_user: &User, target_username: &str) -> Result<Profile, AppError> {
+    fn unfollow_user(
+        &self,
+        current_user: &User,
+        target_username: &str,
+    ) -> Result<Profile, AppError> {
         let conn = &mut self.pool.get()?;
         let t = User::by_username(target_username);
         let followee = {
