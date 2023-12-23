@@ -1,21 +1,23 @@
 services:
-  app:
-    container_name: app
-    build: .
+  app2:
+    container_name: app2
+    build: 
+      context: "." # Dockerfile_appが存在するディレクトリへのパス
+      dockerfile: "Dockerfile_app" # Dockerfileの名前
     command: 'bash -c "diesel setup && cargo watch --exec run"'
     volumes:
-      - .:/app
+      - ../:/app
     depends_on:
-      db:
+      db2:
         condition: service_healthy
     ports:
       - "8080:8080"
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/realworld-rust-actix-web
+      DATABASE_URL: postgres://postgres:postgres@db2:5432/realworld-rust-actix-web
     networks:
       - networkForTest
-  db:
-    container_name: db
+  db2:
+    container_name: db2
     image: "postgres:14.0-alpine"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
@@ -25,6 +27,19 @@ services:
       POSTGRES_DB: realworld-rust-actix-web
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    networks:
+      - networkForTest
+  tester:
+    container_name: tester
+    build: .
+    environment:
+      - APIURL=http://networkForTest:8080/api
+    command: sh ./run-api-tests.sh
+    volumes:
+      - .:/tester
+    depends_on:
+      app2:
+        condition: service_healthy
     networks:
       - networkForTest
 networks:
