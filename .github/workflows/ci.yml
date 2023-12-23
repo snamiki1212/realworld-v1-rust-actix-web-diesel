@@ -41,15 +41,15 @@ jobs:
 
   test_e2e:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_DB: realworld-rust-actix-web
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-        ports:
-          - 5432:5432
+    # services:
+    # postgres:
+    #   image: postgres:latest
+    #   env:
+    #     POSTGRES_DB: realworld-rust-actix-web
+    #     POSTGRES_PASSWORD: postgres
+    #     POSTGRES_USER: postgres
+    #   ports:
+    #     - 5432:5432
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
@@ -58,6 +58,10 @@ jobs:
           cd e2e
           docker compose down
           docker ps -a
+      - name: check port
+        run: |
+          cd e2e
+          lsof -i
       - name: TODO
         run: |
           cd e2e
