@@ -57,7 +57,7 @@ jobs:
         run: |
           cd e2e
           docker compose down
-          docker compose ps -a
+          docker ps -a
       - name: TODO
         run: |
           cd e2e
