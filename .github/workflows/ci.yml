@@ -57,6 +57,8 @@ jobs:
         run: cd e2e
       - name: Clear compose
         run: docker compose down && docker compose ps -a
+      - name: TODO
+        run: ls -l
       - name: Run Test
         run: docker compose run tester
       # - name: Ready env file
