@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -x
 
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+# SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 APIURL=${APIURL:-https://api.realworld.io/api}
 USERNAME=${USERNAME:-u`date +%s`}
@@ -18,7 +18,7 @@ PASSWORD=${PASSWORD:-password}
 
 # run E2E test
 echo "running e2e..."
-npx newman run $SCRIPTDIR/Conduit.postman_collection.json \
+npx newman run ./Conduit.postman_collection.json \
   --delay-request 500 \
   --global-var "APIURL=$APIURL" \
   --global-var "USERNAME=$USERNAME" \

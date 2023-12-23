@@ -2,8 +2,8 @@ services:
   app2:
     container_name: app2
     build: 
-      context: "." # Dockerfile_appが存在するディレクトリへのパス
-      dockerfile: "Dockerfile_app" # Dockerfileの名前
+      context: "." # directory path for Dockerfile_app
+      dockerfile: "Dockerfile_app"
     command: 'bash -c "diesel setup && cargo watch --exec run"'
     volumes:
       - ../:/app
@@ -31,7 +31,9 @@ services:
       - networkForTest
   tester:
     container_name: tester
-    build: .
+    build: 
+      context: "." # directory path for dockerfile
+      dockerfile: "Dockerfile_tester"
     environment:
       - APIURL=http://networkForTest:8080/api
     command: sh ./run-api-tests.sh
