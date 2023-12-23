@@ -69,6 +69,9 @@ jobs:
       - name: Run Test
         run: |
           cd e2e
+          echo "building..."
+          docker compose build
+          echo "test running..."
           docker compose run tester
       # - name: Ready env file
       #   run: sh ./scripts/copy-env.sh
