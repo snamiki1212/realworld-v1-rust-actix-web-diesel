@@ -53,8 +53,12 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
+      - name: dir
+        run: cd e2e
+      - name: Clear compose
+        run: docker compose down && docker compose ps -a
       - name: Run Test
-        run: cd e2e && docker compose run tester
+        run: docker compose run tester
       # - name: Ready env file
       #   run: sh ./scripts/copy-env.sh
       # - name: Build
