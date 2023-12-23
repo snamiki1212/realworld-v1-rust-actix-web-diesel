@@ -9,7 +9,7 @@ EMAIL=${EMAIL:-$USERNAME@mail.com}
 PASSWORD=${PASSWORD:-password}
 
 # Ready for E2E
-npm install -g newman
+# npm install -g newman
 
 # run E2E test
 echo "running e2e..."

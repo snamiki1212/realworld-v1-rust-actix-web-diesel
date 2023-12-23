@@ -1,6 +1,6 @@
 services:
-  app2:
-    container_name: app2
+  e2e_app:
+    container_name: e2e_app
     build: 
       context: "." # directory path for Dockerfile_app
       dockerfile: "Dockerfile_app"
@@ -8,16 +8,16 @@ services:
     volumes:
       - ../:/app
     depends_on:
-      db2:
+      e2e_db:
         condition: service_healthy
     ports:
       - "8080:8080"
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db2:5432/realworld-rust-actix-web
+      DATABASE_URL: postgres://postgres:postgres@e2e_db:5432/realworld-rust-actix-web
     networks:
       - networkForTest
-  db2:
-    container_name: db2
+  e2e_db:
+    container_name: e2e_db
     image: "postgres:14.0-alpine"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
@@ -29,8 +29,8 @@ services:
       POSTGRES_PASSWORD: postgres
     networks:
       - networkForTest
-  tester:
-    container_name: tester
+  e2e_tester:
+    container_name: e2e_tester
     build: 
       context: "." # directory path for dockerfile
       dockerfile: "Dockerfile_tester"
@@ -40,7 +40,7 @@ services:
     volumes:
       - .:/tester
     depends_on:
-      app2:
+      e2e_app:
         condition: service_healthy
     networks:
       - networkForTest

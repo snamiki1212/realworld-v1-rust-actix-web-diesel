@@ -12,6 +12,9 @@ RUN apt-get update && \
   postgresql-client libpq-dev \
   nodejs npm 
 
+# Install newman
+RUN npm install -g newman
+
 # Install cargo-watch
 RUN cargo install cargo-watch
 
