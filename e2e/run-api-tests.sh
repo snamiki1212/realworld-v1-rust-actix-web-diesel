@@ -8,13 +8,8 @@ USERNAME=${USERNAME:-u`date +%s`}
 EMAIL=${EMAIL:-$USERNAME@mail.com}
 PASSWORD=${PASSWORD:-password}
 
-# Run Healthcehck
-# curl http://0.0.0.0:8080/api/healthcheck \
-#             --max-time 60 \
-#             --verbose \
-#             --retry 5 \
-#             --retry-delay 0 \
-#             --retry-connrefused 
+# Ready for E2E
+npm install -g newman
 
 # run E2E test
 echo "running e2e..."
