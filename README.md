@@ -8,48 +8,26 @@ Realworld App using `Rust`, `actix-web`, and `diesel`.
 
 ## Getting Started
 
-<details>
-  <summary>Docker</summary>
-  
 ```zsh
 # ready
 $ sh ./scripts/copy-env.sh
-```
 
-```zsh
+# start
 $ docker compose up -d
-```
 
-```zsh
+# healthcheck
 $ curl http://localhost:8080/api/healthcheck
 # => OK
 ```
 
-</details>
+```sh
+# Check app can connect to DB
+$ curl http://localhost:8080/api/tags
+# => {"tags":[]}
 
-<details>
-  <summary>Local</summary>
-  
-```zsh
-# ready
-$ sh ./scripts/copy-env.sh
+# Check app can insert data into DB
+curl -X POST http://localhost:8080/api/users -d '{"user": {"email": "a@a.a", "username": "a", "password": "a" }}' -H "Content-Type: application/json"
 ```
-
-```zsh
-# start postgres
-$ brew services start postgresql
-
-# start app
-$ diesel setup
-$ cargo run
-```
-
-```zsh
-$ curl http://localhost:8080/api/healthcheck
-# => OK
-```
-
-  </details>
 
 ## E2E Test
 
