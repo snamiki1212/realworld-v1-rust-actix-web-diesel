@@ -68,11 +68,10 @@ jobs:
           ls -l
       - name: Run Test
         run: |
-          cd e2e
           echo "building..."
-          docker compose build
+          docker compose --profile test build
           echo "test running..."
-          docker compose run tester
+          docker compose --profile test run tester
       # - name: Ready env file
       #   run: sh ./scripts/copy-env.sh
       # - name: Build

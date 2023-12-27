@@ -27,8 +27,25 @@ services:
       POSTGRES_PASSWORD: postgres
     networks:
       - networkForTest
+  tester:
+    container_name: tester
+    build: 
+      context: "." # directory path for dockerfile
+      dockerfile: "Dockerfile_tester"
+    environment:
+      - APIURL=http://networkForTest:8080/api
+    command: sh ./e2e/run-api-tests.sh
+    volumes:
+      - .:/app
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - networkForTest
+    profiles: ["test_profile"]
 networks:
   networkForTest:
+    # TODO: rename to network_for_test
     driver: bridge
 volumes:
   .:
