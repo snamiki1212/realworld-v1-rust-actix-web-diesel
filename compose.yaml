@@ -13,7 +13,7 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/realworld-rust-actix-web
     networks:
-      - networkForTest
+      - network_for_test
   db:
     container_name: db
     image: "postgres:14.0-alpine"
@@ -26,14 +26,14 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     networks:
-      - networkForTest
+      - network_for_test
   tester:
     container_name: tester
     build: 
       context: "." # directory path for dockerfile
       dockerfile: "Dockerfile_tester"
     environment:
-      - APIURL=http://networkForTest:8080/api
+      - APIURL=http://network_for_test:8080/api
     command: sh ./e2e/run-api-tests.sh
     volumes:
       - .:/app
@@ -41,11 +41,10 @@ services:
       app:
         condition: service_healthy
     networks:
-      - networkForTest
+      - network_for_test
     profiles: ["test_profile"]
 networks:
-  networkForTest:
-    # TODO: rename to network_for_test
+  network_for_test:
     driver: bridge
 volumes:
   .:
