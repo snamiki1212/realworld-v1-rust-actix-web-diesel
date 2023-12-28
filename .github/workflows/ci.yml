@@ -69,9 +69,9 @@ jobs:
       - name: Run Test
         run: |
           echo "building..."
-          docker compose --profile test build
+          docker compose --profile test_e2e build
           echo "test running..."
-          docker compose --profile test run tester
+          docker compose --profile test_e2e run tester
       # - name: Ready env file
       #   run: sh ./scripts/copy-env.sh
       # - name: Build

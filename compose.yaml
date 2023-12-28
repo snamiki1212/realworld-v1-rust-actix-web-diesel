@@ -3,6 +3,12 @@ services:
     container_name: app
     build: .
     command: 'bash -c "diesel setup && cargo watch --exec run"'
+    healthcheck:
+      test: ["CMD", "curl", "http://network_for_test/api/healthcheck"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
     volumes:
       - .:/app
     depends_on:
@@ -42,7 +48,7 @@ services:
         condition: service_healthy
     networks:
       - network_for_test
-    profiles: ["test_profile"]
+    profiles: ["test_e2e"]
 networks:
   network_for_test:
     driver: bridge
