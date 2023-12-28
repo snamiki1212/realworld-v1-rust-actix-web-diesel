@@ -7,7 +7,7 @@ services:
       test: ["CMD", "curl", "http://app:8080/api/healthcheck"]
       interval: 5s
       timeout: 5s
-      retries: 20
+      retries: 100
       start_period: 30s
     volumes:
       - .:/app
