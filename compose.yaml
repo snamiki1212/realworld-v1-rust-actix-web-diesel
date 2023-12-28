@@ -4,7 +4,7 @@ services:
     build: .
     command: 'bash -c "diesel setup && cargo watch --exec run"'
     healthcheck:
-      test: ["CMD", "curl", "http://0.0.0.0:8080/api/healthcheck"]
+      test: ["CMD", "curl", "http://app:8080/api/healthcheck"]
       interval: 5s
       timeout: 5s
       retries: 20
