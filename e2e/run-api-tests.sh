@@ -8,10 +8,17 @@ USERNAME=${USERNAME:-u`date +%s`}
 EMAIL=${EMAIL:-$USERNAME@mail.com}
 PASSWORD=${PASSWORD:-password}
 
+# Show env
+echo "showing env..."
+echo "APIURL=$APIURL"
+echo "USERNAME=$USERNAME"
+echo "EMAIL=$EMAIL"
+echo "PASSWORD=$PASSWORD" 
+
 # Ready for E2E
 npm install -g newman
 
-# run E2E test
+# Run E2E test
 echo "running e2e..."
 npx newman run ./e2e/Conduit.postman_collection.json \
   --delay-request 500 \
