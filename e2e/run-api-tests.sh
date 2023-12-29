@@ -18,6 +18,9 @@ echo "PASSWORD=$PASSWORD"
 # Ready for E2E
 npm install -g newman
 
+# healthcheck
+sh ../x.sh
+
 # Run E2E test
 echo "running e2e..."
 npx newman run ./e2e/Conduit.postman_collection.json \
