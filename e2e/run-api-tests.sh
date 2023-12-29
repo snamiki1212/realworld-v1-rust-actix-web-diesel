@@ -19,7 +19,7 @@ echo "PASSWORD=$PASSWORD"
 npm install -g newman
 
 # healthcheck
-sh ../x.sh
+sh ./x.sh
 
 # Run E2E test
 echo "running e2e..."
