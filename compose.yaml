@@ -3,12 +3,12 @@ services:
     container_name: app
     build: .
     command: 'bash -c "diesel setup && cargo watch --exec run"'
-    healthcheck:
-      test: ["CMD", "curl", "http://app:8080/api/healthcheck"]
-      interval: 5s
-      timeout: 5s
-      retries: 100
-      start_period: 30s
+    # healthcheck:
+    #   test: ["CMD", "curl", "http://app:8080/api/healthcheck"]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 100
+    #   start_period: 30s
     volumes:
       - .:/app
     depends_on:
@@ -43,9 +43,9 @@ services:
     command: sh ./e2e/run-api-tests.sh
     volumes:
       - .:/app
-    depends_on:
-      app:
-        condition: service_healthy
+    # depends_on:
+    #   app:
+    #     condition: service_healthy
     networks:
       - network_for_test
     profiles: ["test_e2e"]
