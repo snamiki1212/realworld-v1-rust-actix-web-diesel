@@ -14,7 +14,7 @@ for i in {1..10}; do
   RESULT=`curl --max-time $CURL_TIMEOUT http://${HOST}/api/healthcheck`
 
   # check
-  if [ "$RESULT" == "OK" ]; then
+  if [ "$RESULT" = "OK" ]; then
     echo "API is ready"
     break
   fi
