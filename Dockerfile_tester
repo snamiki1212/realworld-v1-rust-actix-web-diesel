@@ -1,0 +1,15 @@
+FROM node:20.5.1-buster-slim
+
+WORKDIR /tester
+
+COPY . .
+
+# Upgrade the system and install dependencies for PostgreSQL
+RUN apt-get update; \
+  apt-get install -y \
+  curl \
+  zsh \
+  npm;
+
+# Install newman
+RUN npm install -g newman

@@ -41,40 +41,57 @@ jobs:
 
   test_e2e:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_DB: realworld-rust-actix-web
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-        ports:
-          - 5432:5432
+    # services:
+    # postgres:
+    #   image: postgres:latest
+    #   env:
+    #     POSTGRES_DB: realworld-rust-actix-web
+    #     POSTGRES_PASSWORD: postgres
+    #     POSTGRES_USER: postgres
+    #   ports:
+    #     - 5432:5432
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
-      - name: Ready env file
-        run: sh ./scripts/copy-env.sh
-      - name: Build
-        run: cargo build --verbose
-      - name: Install diesel CLI
-        run: cargo install diesel_cli
-      - name: Run server on background
+      - name: Clear compose
         run: |
-          cargo run &
-          echo "waiting for server..."
-          ./scripts/wait-for-it.sh 0.0.0.0:8080 --timeout=300 --strict -- echo "Waked up container"
-          echo "setup diesel..."
-          diesel setup
-          echo "check health check..."
-          curl http://0.0.0.0:8080/api/healthcheck \
-            --max-time 60 \
-            --verbose \
-            --retry 5 \
-            --retry-delay 0 \
-            --retry-connrefused
-          echo "running e2e..."
-          APIURL=http://localhost:8080/api sh ./e2e/run-api-tests.sh
+          cd e2e
+          docker compose down
+          docker ps -a
+      - name: check port
+        run: |
+          cd e2e
+          lsof -i
+      - name: TODO
+        run: |
+          cd e2e
+          ls -l
+      - name: Run Test
+        run: |
+          echo "test running..."
+          docker compose --profile test_e2e run tester
+      # - name: Ready env file
+      #   run: sh ./scripts/copy-env.sh
+      # - name: Build
+      #   run: cargo build --verbose
+      # - name: Install diesel CLI
+      #   run: cargo install diesel_cli
+      # - name: Run server on background
+      #   run: |
+      #     cargo run &
+      #     echo "waiting for server..."
+      #     ./scripts/wait-for-it.sh 0.0.0.0:8080 --timeout=300 --strict -- echo "Waked up container"
+      #     echo "setup diesel..."
+      #     diesel setup
+      #     echo "check health check..."
+      #     curl http://0.0.0.0:8080/api/healthcheck \
+      #       --max-time 60 \
+      #       --verbose \
+      #       --retry 5 \
+      #       --retry-delay 0 \
+      #       --retry-connrefused
+      #     echo "running e2e..."
+      #     APIURL=http://localhost:8080/api sh ./e2e/run-api-tests.sh
       # - name: Wait for waking server
       #   run: ./wait-for-it.sh localhost:8080 --timeout=300 --strict -- echo "Waked up container"
       # - name: Health check

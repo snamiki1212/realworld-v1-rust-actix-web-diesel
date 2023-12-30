@@ -3,6 +3,12 @@ services:
     container_name: app
     build: .
     command: 'bash -c "diesel setup && cargo watch --exec run"'
+    # healthcheck:
+    #   test: ["CMD", "curl", "http://app:8080/api/healthcheck"]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 100
+    #   start_period: 30s
     volumes:
       - .:/app
     depends_on:
@@ -12,6 +18,8 @@ services:
       - "8080:8080"
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/realworld-rust-actix-web
+    networks:
+      - network_for_test
   db:
     container_name: db
     image: "postgres:14.0-alpine"
@@ -23,5 +31,27 @@ services:
       POSTGRES_DB: realworld-rust-actix-web
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    networks:
+      - network_for_test
+  tester:
+    container_name: tester
+    build: 
+      context: "." # directory path for dockerfile
+      dockerfile: "Dockerfile_tester"
+    environment:
+      - APIURL=http://app:8080/api
+    command: /bin/zsh ./e2e/run-api-tests.sh
+    volumes:
+      - .:/app
+    depends_on:
+      app:
+        # condition: service_healthy
+        condition: service_started
+    networks:
+      - network_for_test
+    profiles: ["test_e2e"]
+networks:
+  network_for_test:
+    driver: bridge
 volumes:
   .:
