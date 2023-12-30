@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-HOST="10.0.0.0:8080"
+HOST="app:8080"
 RETRY=10
 SLEEP=1
 CURL_TIMEOUT=3 #sec
