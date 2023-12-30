@@ -43,9 +43,10 @@ services:
     command: sh ./e2e/run-api-tests.sh
     volumes:
       - .:/app
-    # depends_on:
-    #   app:
-    #     condition: service_healthy
+    depends_on:
+      app:
+        # condition: service_healthy
+        condition: service_started
     networks:
       - network_for_test
     profiles: ["test_e2e"]
