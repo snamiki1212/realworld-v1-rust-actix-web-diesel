@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 HOST="10.0.0.0:8080"
 RETRY=10
 SLEEP=1
@@ -18,7 +20,7 @@ for i in {1..10}; do
   fi
   echo "API is not ready, retrying..."
 
-  docker compose logs
+  # docker compose logs
 
   # sleep
   sleep $SLEEP
