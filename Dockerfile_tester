@@ -7,7 +7,9 @@ COPY . .
 # Upgrade the system and install dependencies for PostgreSQL
 RUN apt-get update; \
   apt-get install -y \
-  curl npm;
+  curl \
+  zsh \
+  npm;
 
 # Install newman
 RUN npm install -g newman

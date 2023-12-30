@@ -40,7 +40,7 @@ services:
       dockerfile: "Dockerfile_tester"
     environment:
       - APIURL=http://app:8080/api
-    command: sh ./e2e/run-api-tests.sh
+    command: /bin/zsh ./e2e/run-api-tests.sh
     volumes:
       - .:/app
     depends_on:
